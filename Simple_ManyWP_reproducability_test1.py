@@ -26,7 +26,7 @@ no = 3.39
 ne = 3.07
 bf = no-ne
 
-n = 25
+n = 20
 d = np.ones(n)*204
 delta = pi * bf * outer(1 / wls, d)  # delta/2
 
