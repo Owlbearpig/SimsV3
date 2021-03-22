@@ -1,0 +1,102 @@
+20 wp
+
+np.random.seed(1234):
+save_1. 1k iterations, no bounds -> minimum rather quickly found first ~100iterations ?
+save_2. 100 iterations, no bounds -> minimum at second iteration...
+
+#np.random.seed(1234) (no seed)
+regarding save_1/2: 
+no more minima are found later because no bounds? Angles just keep decreasing -> ends up at -400rad or something ...
+result save_1: fun: 0.00042350361868140113
+result save_2: fun: 0.00042350361868140113 (equal because same seed)
+
+-> run 3: bounds [0,2pi] on basinhopping only at first. (accept_test) -> problem: all steps fail since out of bounds..
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, accept_test=mybounds)
+
+result: fun: 0.0008704532665482287
+
+run 4:
+    A: inner level: bound-constrained local-search
+    B: outer level: bound-constrained steps
+
+
+With bounds on local min + bounds on step.
+minimizer_kwargs = {"method":"L-BFGS-B", "bounds": bounds}
+
+basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, minimizer_kwargs=minimizer_kwargs)
+RandomDisplacementBounds(bounds)
+
+result: fun: 0.0012333994488337677 (bad) Is it because it fails too many local minimizations ? (reported: 49/100)
+
+run 5:	Only B:
+	B: outer level: bound-constrained steps
+
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step)
+result: fun: 0.0004234993833474462 (almost at end of 100 its)
+
+run 6: Only A:
+	A: inner level: bound-constrained local-search
+
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, minimizer_kwargs=minimizer_kwargs)
+result: fun: 0.0005879000412215824 (around middle)
+
+Seems like 100 iterations is enough to find best minimum? Is ~0.0004235 best min?
+Expection value ... Try run 5 again and see if similar result and when?.
+
+Note: if disp=True shows that local min fails:
+warning: basinhopping: local minimization failure. 
+Is that bad?
+
+run 7:
+trying run 5 again to check above.
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step)
+result: fun: 0.00042350654359653555 (found in ~last 80%)
+	71:
+result: fun: 0.0004235075405131876
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True)
+
+run 8:
+update stepsize more often:
+ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True, interval=5)
+result: fun: 0.00042350092912855593 (found in middle approx.)
+
+So far:
+Seems 0.0004235075405131876 is the best result for 20 wp. But still not equal to paper res...
+Nevertheless this is probably a good place to stop... -> Faster convergence than expected.
+
+Ideas: 
+	Try more waveplates. n can go higher without problem for calc but slower ->
+		n = 20 so far.
+		try: n=1,2,5,10,15,25,30,35,40 (going to take a while)
+
+	Can we add a thickness argument to function? f(d, angle_1, ..., angle_n)
+	
+	ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True)
+save_21, n=1:
+	fun: 18.540776484261556
+save_22, n=2:
+	fun: 8.056832904098515
+save_23, n=5:
+	fun: 1.2631184321158047
+save_24, n=10:
+	fun: 0.10294320989132098
+save_25, n=15:
+	fun: 0.007792094327812766
+(n=20, above)
+save_26, n=25:
+	fun: 4.929394847948327e-05
+save_27, n=30
+	fun: 1.8178257410190752e-05
+save_28, n=35
+	fun: 3.583949152799321e-06
+save_29, n=40
+	
+
+
+
+
+
+
+
+
+

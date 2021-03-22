@@ -45,6 +45,7 @@ wls *= 10**6
 m = len(wls)
 n = m
 
+
 def dn(a, b):
     eps1_p = (outer(eps_mat1, a)+outer(eps_mat2, b)) / (a+b).T
     eps1_s = (outer(eps_mat1*eps_mat2, (a+b)))*(1/(outer(eps_mat1, b)+outer(eps_mat2, a)))

@@ -1,0 +1,228 @@
+E:\CURPROJECT\SimsV3\venv\Scripts\python.exe E:/CURPROJECT/SimsV3/Simple_ManyWP_reproducability_test1.py
+basinhopping step 0: f 8.05683
+[4.19838823 0.45012025] 8.056832904098595 True
+basinhopping step 1: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+found new global minimum on step 1 with function value 8.05683
+[3.76788683 1.23296946] 8.056832904098519 True
+basinhopping step 2: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+found new global minimum on step 2 with function value 8.05683
+[4.5364089  0.78814095] 8.056832904098517 True
+basinhopping step 3: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.80539391 1.05712597] 8.056832904098519 True
+basinhopping step 4: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.81457336 1.27965601] 8.056832904098524 True
+basinhopping step 5: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.98241968 1.44750234] 8.056832904098549 True
+basinhopping step 6: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.06630668 1.53138932] 8.05683290409852 True
+basinhopping step 7: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.80395836 1.269041  ] 8.056832904098522 True
+basinhopping step 8: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.40903518 0.87411781] 8.056832904098524 True
+basinhopping step 9: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.69174805 -0.0565199 ] 8.056832904098519 True
+basinhopping step 10: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.08977073 0.55485336] 8.056832904098519 True
+basinhopping step 11: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.91972199 0.17145405] 8.056832904098517 True
+basinhopping step 12: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.44767554 0.91275816] 8.056832904098533 True
+basinhopping step 13: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.34194796 0.80703062] 8.056832904098552 True
+basinhopping step 14: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.21730207 0.68238471] 8.056832904098517 True
+basinhopping step 15: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.84244764 0.09417971] 8.056832904098547 True
+basinhopping step 16: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.28560102 0.75068366] 8.056832904098519 True
+basinhopping step 17: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.55051035 1.01559299] 8.056832904098517 True
+basinhopping step 18: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.52643055 0.99151319] 8.056832904098517 True
+basinhopping step 19: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.25001937 0.71510201] 8.056832904098519 True
+basinhopping step 20: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.84570933 0.09744139] 8.056832904098517 True
+basinhopping step 21: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.19495901 0.66004166] 8.056832904098519 True
+basinhopping step 22: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[2.97387396 0.43895657] 8.056832904098568 True
+basinhopping step 23: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.75852163 0.01025369] 8.056832904098517 True
+basinhopping step 24: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.52845519 -0.21981276] 8.056832904098519 True
+basinhopping step 25: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.69916669 -0.04910126] 8.056832904098517 True
+basinhopping step 26: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.371957   0.83703964] 8.056832904098517 True
+basinhopping step 27: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.81383555 0.06556766] 8.0568329040987 True
+basinhopping step 28: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+found new global minimum on step 28 with function value 8.05683
+[3.23576929 0.70085193] 8.056832904098515 True
+basinhopping step 29: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.23038906 0.69547169] 8.05683290409853 True
+basinhopping step 30: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.71781982 -0.03044813] 8.056832904098519 True
+basinhopping step 31: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.89238309 0.14411514] 8.056832904098519 True
+basinhopping step 32: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.34802122 0.81310386] 8.056832904098517 True
+basinhopping step 33: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.7080415  1.17312409] 8.056832904098679 True
+basinhopping step 34: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.44059572 0.69232777] 8.056832904098517 True
+basinhopping step 35: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.80634257 1.05807463] 8.056832904098517 True
+basinhopping step 36: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.34453237 1.80961501] 8.056832904098519 True
+basinhopping step 37: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.89766253 1.14939458] 8.056832904098517 True
+basinhopping step 38: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.83932623 1.09105829] 8.056832904098517 True
+basinhopping step 39: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.81795943 1.06969146] 8.056832904098547 True
+basinhopping step 40: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.72310777 0.97483982] 8.056832904098519 True
+basinhopping step 41: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.01741961 1.48250224] 8.056832904098519 True
+basinhopping step 42: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.82898992 1.29407258] 8.056832904098554 True
+basinhopping step 43: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.73295564 1.19803828] 8.056832904098517 True
+basinhopping step 44: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.42738949 0.67912157] 8.05683290409857 True
+basinhopping step 45: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.36107267 0.61280473] 8.056832904098517 True
+basinhopping step 46: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.0741066  0.32583865] 8.056832904098519 True
+basinhopping step 47: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.84613154 0.09786359] 8.056832904098517 True
+basinhopping step 48: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.48407407 0.94915671] 8.056832904098519 True
+basinhopping step 49: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.70947909 -0.03878886] 8.056832904098517 True
+adaptive stepsize: acceptance rate 0.980000 target 0.500000 new stepsize 0.555556 old stepsize 0.5
+basinhopping step 50: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.17225788 0.63734051] 8.056832904098517 True
+basinhopping step 51: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.853802   0.10553405] 8.056832904098519 True
+basinhopping step 52: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.14128086 0.39301291] 8.056832904098517 True
+basinhopping step 53: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.72797105 -0.02029689] 8.056832904098517 True
+basinhopping step 54: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.312627   0.77770963] 8.056832904098517 True
+basinhopping step 55: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.44060518 0.90568782] 8.056832904098519 True
+basinhopping step 56: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.03962816 0.5047108 ] 8.056832904098519 True
+basinhopping step 57: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.51731836 0.982401  ] 8.056832904098519 True
+basinhopping step 58: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.51609059 0.76782265] 8.05683290409852 True
+basinhopping step 59: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.86258661 1.32766924] 8.056832904098519 True
+basinhopping step 60: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.67266515 1.13774779] 8.05683290409852 True
+basinhopping step 61: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.34353181 0.80861444] 8.05683290409852 True
+basinhopping step 62: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.12801242 0.59309508] 8.056832904098552 True
+basinhopping step 63: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.06197063 0.52705327] 8.056832904098519 True
+basinhopping step 64: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[ 3.61752637 -0.13074155] 8.056832904098536 True
+basinhopping step 65: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.81958943 0.07132148] 8.056832904098519 True
+basinhopping step 66: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.29079812 0.75588075] 8.056832904098519 True
+basinhopping step 67: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.4015721  0.86665473] 8.05683290409852 True
+basinhopping step 68: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.80754417 0.05927623] 8.056832904098517 True
+basinhopping step 69: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.10058703 0.56566967] 8.056832904098517 True
+basinhopping step 70: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[2.98978138 0.45486402] 8.056832904098519 True
+basinhopping step 71: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.29195128 0.75703392] 8.05683290409852 True
+basinhopping step 72: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.52294998 0.98803262] 8.056832904098519 True
+basinhopping step 73: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.67324778 1.13833043] 8.056832904098522 True
+basinhopping step 74: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.43358837 0.68532043] 8.056832904098517 True
+basinhopping step 75: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.05640518 0.3081372 ] 8.056832904098615 True
+basinhopping step 76: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.62351166 1.0885943 ] 8.056832904098517 True
+basinhopping step 77: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.04879179 0.30052385] 8.056832904098519 True
+basinhopping step 78: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.21384497 0.46557703] 8.056832904098519 True
+basinhopping step 79: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[3.81866923 1.28375186] 8.056832904098519 True
+basinhopping step 80: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.1379339  1.60301658] 8.056832904098624 True
+basinhopping step 81: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.46622246 1.9313051 ] 8.056832904098517 True
+basinhopping step 82: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.67148311 2.13656574] 8.056832904098517 True
+basinhopping step 83: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.58318187 2.04826453] 8.056832904098549 True
+basinhopping step 84: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.35511589 1.82019853] 8.056832904098519 True
+basinhopping step 85: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[4.86965186 2.3347345 ] 8.056832904098517 True
+basinhopping step 86: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.50787637 1.75960842] 8.056832904098519 True
+basinhopping step 87: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.41140036 1.66313242] 8.056832904098519 True
+basinhopping step 88: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.84764791 2.09937997] 8.056832904098517 True
+basinhopping step 89: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.67734137 1.92907342] 8.056832904098517 True
+basinhopping step 90: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.96718853 2.21892058] 8.056832904098519 True
+basinhopping step 91: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.88365389 2.13538592] 8.056832904098563 True
+basinhopping step 92: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.23532658 2.70040926] 8.056832904098641 True
+basinhopping step 93: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[6.15503469 2.40676674] 8.056832904098519 True
+basinhopping step 94: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.5096549  2.97473753] 8.056832904098519 True
+basinhopping step 95: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.88803664 3.35311928] 8.056832904098519 True
+basinhopping step 96: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.95115912 3.41624176] 8.056832904098519 True
+basinhopping step 97: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[6.76789285 3.01962491] 8.056832904098519 True
+basinhopping step 98: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[6.29598203 2.54771408] 8.056832904098519 True
+basinhopping step 99: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[5.37471817 2.83980081] 8.056832904098517 True
+adaptive stepsize: acceptance rate 0.990000 target 0.500000 new stepsize 0.617284 old stepsize 0.555556
+basinhopping step 100: f 8.05683 trial_f 8.05683 accepted 1  lowest_f 8.05683
+[6.11208952 2.36382158] 8.056832904098519 True
+                        fun: 8.056832904098515
+ lowest_optimization_result:       fun: 8.056832904098515
+ hess_inv: array([[0.50176175, 0.49828852],
+       [0.49828852, 0.50166401]])
+      jac: array([1.19209290e-06, 1.31130219e-06])
+  message: 'Optimization terminated successfully.'
+     nfev: 24
+      nit: 4
+     njev: 8
+   status: 0
+  success: True
+        x: array([3.23576929, 0.70085193])
+                    message: ['requested number of basinhopping iterations completed successfully']
+      minimization_failures: 0
+                       nfev: 2247
+                        nit: 100
+                       njev: 749
+                          x: array([3.23576929, 0.70085193])
+
+Process finished with exit code 0
