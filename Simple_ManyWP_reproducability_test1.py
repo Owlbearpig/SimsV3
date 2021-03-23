@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 THz = 10**12
 m_um = 10**6 # m to um conversion
 
-#np.random.seed(1234)
+#np.random.seed(1000)
 
 f = np.arange(0.2, 2.0, 0.05)*THz
 
@@ -26,7 +26,7 @@ no = 3.39
 ne = 3.07
 bf = no-ne
 
-n = 25
+n = 20
 d = np.ones(n)*204
 delta = pi * bf * outer(1 / wls, d)  # delta/2
 
@@ -83,7 +83,7 @@ def erf(angles, this=False):
     if this:
         return delta_equiv / pi
 
-    return np.sum((delta_equiv-pi/2)**2) #return np.sum((2*delta_equiv/pi-1)**2)
+    return (1/(n*m))*np.sum((delta_equiv-pi/2)**2) #return np.sum((2*delta_equiv/pi-1)**2)
 
 
 def print_fun(x, f, accepted):
@@ -91,7 +91,7 @@ def print_fun(x, f, accepted):
 
 bounds = list(zip([0]*n, [2*pi]*n))
 
-minimizer_kwargs = {"method":"L-BFGS-B", "bounds": bounds}
+minimizer_kwargs = {}
 
 class MyBounds(object):
     def __init__(self):
@@ -133,8 +133,15 @@ x0 = np.random.random(n)*2*pi
 ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True)
 print(ret)
 
+#ret = basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True, minimizer_kwargs=minimizer_kwargs)
+#ret = minimize(erf, x0, method='cg', options={'disp': True, 'maxiter': 300*n})
+#ret = minimize(erf, x0, options={'disp': True, 'maxiter': 300*n})
+
+print(erf(x0))
+
 """
 plt.plot(f, ret)
 plt.ylim((0.46, 0.52))
 plt.show()
 """
+
