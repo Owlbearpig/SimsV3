@@ -1,2 +1,31 @@
 n20_1-3 divide res by 1/m.
 n20_4-6 divide res by 1/mn.
+n25-n40 divide res by 1/mn.
+
+Questions:
+    - Do we get same minimum for multiple runs?
+    - Do we need to increase niter?
+    - Temperature? Acceptance ratio too high 0.98
+    - Can we add a thickness parameter?
+
+n._5 , fun: 0.007017324622872203
+n._10, fun: 0.00028595336563842625
+n._15, fun: 1.4430156083888143e-05
+
+n20_1, fun: 1.1763837935401217e-05
+n20_2, fun: 1.1763861247733743e-05
+n20_3, fun: 1.1763837005023758e-05
+
+n20_4, fun: 1.856977600503098e-06
+n20_5, fun: 3.401063149143477e-06
+n20_6, fun: 2.4141874068807634e-06
+n20_7, fun: 2.8417336110562014e-06
+n._20, fun: 1.861359790873077e-06
+
+n25_1, fun: 9.08261915534606e-07
+n25_2, fun: 1.3705586305618902e-06
+n25_3, fun: 7.395109744021907e-07
+
+n30_1, fun: 6.880338245035075e-07
+
+n40_1, fun: 3.781197519759464e-07
