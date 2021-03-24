@@ -5,6 +5,7 @@ n25-n40 divide res by 1/mn.
 Questions:
     - Do we get same minimum for multiple runs?
     - Do we need to increase niter?
+
     - Temperature? Acceptance ratio too high 0.98
     - Can we add a thickness parameter?
 
@@ -29,3 +30,4 @@ n25_3, fun: 7.395109744021907e-07
 n30_1, fun: 6.880338245035075e-07
 
 n40_1, fun: 3.781197519759464e-07
+n40_2, fun: 4.053002714818266e-07 # f = np.arange(0.2, 2.0, 0.025)*THz
