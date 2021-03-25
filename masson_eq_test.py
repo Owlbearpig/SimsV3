@@ -145,7 +145,7 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = np.arange(0.2, 2.0, 0.005)*THz
+    f = np.arange(0.2, 2.0, 0.05)*THz
 
     wls = (c0/f)*m_um
     m = len(wls)
