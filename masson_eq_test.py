@@ -6,6 +6,7 @@ import scipy
 from scipy.constants import c as c0
 from scipy.optimize import basinhopping
 from py_pol import jones_matrix
+from py_pol.mueller import Mueller
 from py_pol import jones_vector
 from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
@@ -21,6 +22,7 @@ m_um = 10**6 # m to um conversion
 
 def opt(n, res_only=False, x=None, ret_j=False):
     d = np.ones(n)*204#*4080/n
+    d = array([3360, 6730, 6460, 3140, 3330, 8430])
     delta = pi * outer(bf / wls, d)  # delta/2
 
     # setup einsum_str
@@ -137,6 +139,7 @@ array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
        0.67858639, 0.47854223, 1.06206799, 4.40208982, 3.92385128,
        0.89218459, 0.38393526, 3.01364689, 3.41504969, 3.57882995,
        4.2264747 , 3.54250995, 0.30855872, 2.85858943, 0.48572504])
+x6 = np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0]))
 
 def R(v):
     return array([[cos(v), sin(v)],
@@ -150,17 +153,14 @@ if __name__ == '__main__':
     wls = (c0/f)*m_um
     m = len(wls)
 
-    no = 3.39
-    ne = 3.07
+    no = 2.156#3.39
+    ne = 2.108#3.07
     bf = np.ones_like(f)*(no-ne)
 
     #np.random.seed(1000)
-    n = 20
-    angles = [-135*(pi/180)]
-    angles.extend([0.0] * (n-1))
+    n = 6
 
-    x1 = array(angles)
-    j = opt(n=n, ret_j=True, x=x20)
+    j = opt(n=n, ret_j=True, x=x6)
 
     """
     j_rot = np.zeros_like(j)
@@ -172,18 +172,16 @@ if __name__ == '__main__':
 
     J = jones_matrix.create_Jones_matrices()
     J.from_matrix(j)
-    jv = jones_vector.create_Jones_vectors()
-    jv.linear_light()
-
-    print((J*jv).parameters)
-    #J.rotate(40*(pi/180))
-
     retardance = J.parameters.retardance()
+    M = Mueller()
+    M.from_Jones(J)
+    pyp_ = M.parameters.retardance()
     delt = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
 
     plt.plot(delt, label='wu chipman')
     plt.plot(res_mass, label='masson')
     plt.plot(retardance, label='py-pol')
+    plt.plot(pyp_, label='py-pol M')
     plt.legend()
     plt.show()
 
