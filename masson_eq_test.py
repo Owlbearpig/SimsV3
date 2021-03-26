@@ -80,15 +80,16 @@ def opt(n, x=None, ret_j=False):
 
         #delta_equiv = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
 
-        q = j[:, 0, 0] / j[:, 1, 0]
-        res_int = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
+        res_int = sum((1 - j[:, 1, 0] * conj(j[:, 1, 0])) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+
+        #q = j[:, 0, 0] / j[:, 1, 0]
+        #res_int = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
 
         if ret_j:
             return j
 
         return res_int
         #return (1/m)*np.sum((delta_equiv-pi/2)**2) #return np.sum((2*delta_equiv/pi-1)**2)
-
 
     def print_fun(x, f, accepted):
         print(x, f, accepted)
