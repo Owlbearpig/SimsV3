@@ -126,8 +126,8 @@ def opt(n, res_only=False, x=None):
     if res_only:
         return erf(x)
 
-    return minimize(erf, x0)
-    return basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True, T=0.0019)
+    #return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=1.4)
 
 x5 =\
     array([2.18120575, 2.70390048, 2.27125591, 2.71260592, 3.45363271])
