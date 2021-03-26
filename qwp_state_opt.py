@@ -69,7 +69,7 @@ def opt(n, res_only=False, x=None):
         j = j[:, 0]
 
         q = j[:, 0, 0] / j[:, 1, 0]
-        res_int = (1/(n*m))*sum(q.real ** 2 + (q.imag - 1) ** 2)
+        res_int = (1/m)*sum(q.real ** 2 + (q.imag - 1) ** 2)
 
         if res_only:
             A, B = j[:, 0, 0], j[:, 0, 1]
@@ -126,7 +126,8 @@ def opt(n, res_only=False, x=None):
     if res_only:
         return erf(x)
 
-    return basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True)
+    return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True, T=0.0019)
 
 x5 =\
     array([2.18120575, 2.70390048, 2.27125591, 2.71260592, 3.45363271])
@@ -174,13 +175,17 @@ if __name__ == '__main__':
     no = 3.39
     ne = 3.07
     bf = np.ones_like(f)*(no-ne)
+    for _ in range(10):
+        res = opt(n=n, res_only=False)
+        print(res)
 
     #np.random.seed(1000)
-
+    """
     for r in range(0, 10):
         res = opt(n=n, res_only=False, x=np.random.random(n))
         print(res)
         print('Break')
+    """
     """
     plt.plot(f, res1, label=f'n={40_1}')
     plt.plot(f, res2, label=f'n={40_2}')
@@ -188,3 +193,5 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
     """
+
+
