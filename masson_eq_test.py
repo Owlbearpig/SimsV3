@@ -50,7 +50,7 @@ def opt(n, x=None, ret_j=False):
     def matrix_chain_calc(matrix_array):
         return
 
-    s = 8*10**3/(2*pi)
+    s = 16*10**3/(2*pi)
 
     def erf(x):
         #d, angles = x[0:n], x[n:2*n]
@@ -75,21 +75,28 @@ def opt(n, x=None, ret_j=False):
 
         j = j[:, 0]
 
-        #A, B = j[:, 0, 0], j[:, 0, 1]
-        #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-
-        #delta_equiv = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
-
-        res_int = sum((1 - j[:, 1, 0] * conj(j[:, 1, 0])) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
-
-        #q = j[:, 0, 0] / j[:, 1, 0]
-        #res_int = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
-
         if ret_j:
             return j
 
+        #delta_equiv = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
+
+        # hwp 1
+        #res_int = (1 / m) * sum((1 - j[:, 1, 0] * conj(j[:, 1, 0])) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+
+        # hwp 2
+        res_int = (1 / m) * sum((1 - j[:, 1, 0].real)**2 + (j[:, 1, 0].imag) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+
+        # qwp
+        #q = j[:, 0, 0] / j[:, 1, 0]
+        #res_int = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
+
         return res_int
-        #return (1/m)*np.sum((delta_equiv-pi/2)**2) #return np.sum((2*delta_equiv/pi-1)**2)
+
+        # Masson ret. opt.
+        A, B = j[:, 0, 0], j[:, 0, 1]
+        delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+
+        return (1/m)*np.sum((delta_equiv-pi)**2)
 
     def print_fun(x, f, accepted):
         print(x, f, accepted)
@@ -110,7 +117,6 @@ def opt(n, x=None, ret_j=False):
             return (tmax and tmin)
 
     mybounds = MyBounds()
-
 
     """ Custom step-function """
     class RandomDisplacementBounds(object):
@@ -139,8 +145,8 @@ def opt(n, x=None, ret_j=False):
     if ret_j:
         return erf(x)
 
-    #return minimize(erf, x0)
-    return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4)
+    return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
 
 
 x20 =\
@@ -148,13 +154,30 @@ array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
        0.67858639, 0.47854223, 1.06206799, 4.40208982, 3.92385128,
        0.89218459, 0.38393526, 3.01364689, 3.41504969, 3.57882995,
        4.2264747 , 3.54250995, 0.30855872, 2.85858943, 0.48572504])
-x6 = \
-flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0)
 
-x_new =\
-array([ 4.39230369,  1.55917307,  1.74625767,  3.50126772,  4.95370567,
-        6.17280042,  3.420801  ,  3.98600874, -1.85478807, 10.71252011,
-        6.64989419,  0.77434462])
+d_m = array([3360, 6730, 6460, 3140, 3330, 8430])*2*pi/(8*10**3)
+x6 = \
+np.concatenate((flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0), flip(d_m, 0)))
+
+x_qwp_new =\
+array([3.16853242, 5.93776113, 4.31098172, 0.21798808, 4.52800151,
+       4.67036435, 3.36637779, 4.4712363 , 8.96264214, 2.2487925 ,
+       6.73917046, 4.4440271 ])
+
+x_hwp_new =\
+array([2.92436707, 5.09103464, 3.1112668 , 2.38107497, 1.58787361,
+       5.49827598, 9.07022128, 4.53446987, 2.2755494 , 4.53099375,
+       4.52362633, 2.27140076])
+
+x_hwp_int_opt_1 =\
+array([ 2.02527722,  6.15199071,  1.5965492 ,  4.95902561,  3.025551  ,
+        5.55531434,  4.53403689, 11.37146241,  2.26584422, 11.389879  ,
+        4.55894852,  2.25584732])
+
+x_qwp_q_opt_0 =\
+array([ 3.24987415,  4.77269977,  4.40563393,  5.01999253,  3.60394262,
+        0.06547399, 10.01597369,  6.65948829,  4.47663773,  4.46594113,
+        6.70603116,  6.69779776])
 
 def R(v):
     return array([[cos(v), sin(v)],
@@ -183,32 +206,95 @@ if __name__ == '__main__':
     for x in xs:
         print(x)
     """
-    ret = opt(n=n)
-    print(ret)
+    for _ in range(10000):
+        ret = opt(n=n)
+        print(ret.fun)
 
+    exit()
     j = opt(n=n, ret_j=True, x=ret.x)
-
-    A, B = j[:,0,0], j[:,0,1]
-    res_mass = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
 
     J = jones_matrix.create_Jones_matrices()
     J.from_matrix(j)
+    #J.remove_global_phase()
+    #J.set_global_phase(0)
+    #J.analysis.retarder(verbose=True)
+
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    #E1[16].draw_ellipse()
+    #E2[16].draw_ellipse()
+    #plt.show()
+    #J.parameters.global_phase(verbose=True)
+    #Jqwp = jones_matrix.create_Jones_matrices()
+    #Jqwp.retarder_linear()
 
+    #print(J.analysis.retarder(verbose=True))
+    #E1[11].draw_ellipse()
+    #E2[11].draw_ellipse()
+    #plt.show()
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
+
+    #print(360-np.abs(np.angle(v1[0])-np.angle(v2[0]))*180/pi)
+    #E1.parameters.global_phase(verbose=True)
+    #(J*E1).parameters.global_phase(verbose=True)
+    #E2.remove_global_phase()
+    #(J * E2).parameters.global_phase(verbose=True)
+    #J.parameters.retardance(verbose=True)
+    #print(np.angle(j)[:,0,0]-np.angle(j)[:,0,1])
+    #v1, v2, E1, E2 = Jqwp.parameters.eig(as_objects=True)
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
+    #plt.show()
+
+    #Jhi.remove_global_phase()
+    #v1, v2, E1, E2 = Jhi.parameters.eig(as_objects=True)
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
+    #plt.show()
+    #plt.show()
+    #print(Jhi.parameters)
+    #J.remove_global_phase()
+    #print(J[11].parameters)
     Jin = jones_vector.create_Jones_vectors()
-    Jin.linear_light()
-
+    Jin.circular_light(kind='l')
+    #Jin.linear_light()
+    #Jin.draw_ellipse()
     Jout = J * Jin
-    Jout[::2].draw_ellipse()
+    #Jout = Jhi * Jin
+    #Jout[::3].draw_ellipse()
+    #Jout.normalize()
+    #print(Jout.parameters.delay())
+    #print(Jout.parameters)
+    #plt.show()
 
+    Jout.draw_ellipse()
     plt.show()
 
-    retardance = J.parameters.retardance()
-    delt = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
+    #print(Jout.parameters)
 
-    plt.plot(delt/pi, label='wu chipman')
-    plt.plot(2*res_mass/pi, label='masson')
-    plt.plot(2*retardance/pi, label='py-pol')
-    plt.legend()
-    plt.show()
+    A, B = j[:, 0, 0], j[:, 0, 1]
+    res_mass = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+
+    Jlin = jones_vector.create_Jones_vectors()
+    Jlin.linear_light(azimuth=pi/4)
+
+    Jhi = jones_matrix.create_Jones_matrices()
+    Jhi.retarder_linear(R=res_mass)
+
+    Jo = Jhi*Jlin
+
+    #plt.plot(2*pi-Jo.parameters.delay())
+    #plt.plot(res_mass)
+    #plt.show()
+
+    #Jo.draw_ellipse()
+    #plt.show()
+    #plt.plot(res_mass)
+    #plt.show()
+    #plt.plot(2*(Jout.parameters.delay()-pi)/pi)
+    #plt.plot(2*delt_min / pi, label='delt min')
+    #plt.plot(2*delt/pi, label='wu chipman')
+    #plt.plot(2*res_mass/pi, label='masson')
+    #plt.legend()
+    #plt.show()
 
