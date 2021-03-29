@@ -208,7 +208,7 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = (np.arange(0.2, 2.0, 0.3)*THz)[:]
+    f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
 
     wls = (c0/f)*m_um
     m = len(wls)
@@ -229,11 +229,11 @@ if __name__ == '__main__':
         print(x)
     """
 
-    #for _ in range(10000):
-    ret = opt(n=n)
-    print(ret)
+    for _ in range(1000):
+        ret = opt(n=n)
+        print(ret.fun)
 
-    #exit()
+    exit()
 
     j = opt(n=n, ret_j=True, x=ret.x)
 
