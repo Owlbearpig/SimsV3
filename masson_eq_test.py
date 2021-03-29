@@ -50,7 +50,7 @@ def opt(n, x=None, ret_j=False):
     def matrix_chain_calc(matrix_array):
         return
 
-    s = 16*10**3/(2*pi)
+    s = 8*10**3/(2*pi)
 
     def erf(x):
         #d, angles = x[0:n], x[n:2*n]
@@ -80,34 +80,39 @@ def opt(n, x=None, ret_j=False):
 
         #delta_equiv = 2*arccos(0.5*np.abs(j[:, 0, 0]+conjugate(j[:, 0, 0])))
 
-        # hwp 1
-        #res_int = (1 / m) * sum((1 - j[:, 1, 0] * conj(j[:, 1, 0])) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+        # hwp 1 int opt
+        #res = (1 / m) * sum((1 - j[:, 1, 0] * conj(j[:, 1, 0])) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
 
-        # hwp 2
-        res_int = (1 / m) * sum((1 - j[:, 1, 0].real)**2 + (j[:, 1, 0].imag) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+        # hwp 2 int opt
+        #res = (1 / m) * sum((1 - j[:, 1, 0].real)**2 + (j[:, 1, 0].imag) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
 
-        # qwp
+        # hwp 3 mat opt
+        res = (1 / m) * sum(np.absolute(j[:,0,0])+np.absolute(j[:,1,1])+(1-np.absolute(j[:,1,0]))+(1-np.absolute(j[:,0,1]))
+                            +(np.angle(j[:,1,0])-np.angle(j[:,0,1]))**2)
+
+        # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
-        #res_int = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
+        #res = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
 
-        return res_int
+
 
         # Masson ret. opt.
-        A, B = j[:, 0, 0], j[:, 0, 1]
-        delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+        #A, B = j[:, 0, 0], j[:, 0, 1]
+        #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+        #res = (1/m)*np.sum((delta_equiv-pi)**2)
 
-        return (1/m)*np.sum((delta_equiv-pi)**2)
+        return res
 
     def print_fun(x, f, accepted):
         print(x, f, accepted)
 
-    bounds = list(zip([0]*n, [2*pi]*n)) + list(zip([0]*n, [2*pi]*n))
+    bounds = list(zip([0]*n, [4*pi]*n)) + list(zip([0]*n, [4*pi]*n))
 
     minimizer_kwargs = {}
 
     class MyBounds(object):
         def __init__(self):
-            self.xmax = np.ones(2*n)*(2*pi)
+            self.xmax = np.ones(2*n)*(4*pi)
             self.xmin = np.ones(2*n)*(0)
         def __call__(self, **kwargs):
             x = kwargs["x_new"]
@@ -140,7 +145,7 @@ def opt(n, x=None, ret_j=False):
 
     bounded_step = RandomDisplacementBounds(np.array([b[0] for b in bounds]), np.array([b[1] for b in bounds]))
 
-    x0 = np.concatenate((np.random.random(n)*2*pi, np.random.random(n)*2*pi))
+    x0 = np.concatenate((np.random.random(n)*4*pi, np.random.random(n)*4*pi))
 
     if ret_j:
         return erf(x)
@@ -206,22 +211,24 @@ if __name__ == '__main__':
     for x in xs:
         print(x)
     """
+
     for _ in range(10000):
         ret = opt(n=n)
         print(ret.fun)
 
     exit()
-    j = opt(n=n, ret_j=True, x=ret.x)
+
+    j = opt(n=n, ret_j=True, x=x6)
 
     J = jones_matrix.create_Jones_matrices()
-    J.from_matrix(j)
+    J.from_matrix(j[::5])
     #J.remove_global_phase()
     #J.set_global_phase(0)
     #J.analysis.retarder(verbose=True)
 
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    #E1[16].draw_ellipse()
-    #E2[16].draw_ellipse()
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
     #plt.show()
     #J.parameters.global_phase(verbose=True)
     #Jqwp = jones_matrix.create_Jones_matrices()
@@ -256,8 +263,8 @@ if __name__ == '__main__':
     #J.remove_global_phase()
     #print(J[11].parameters)
     Jin = jones_vector.create_Jones_vectors()
-    Jin.circular_light(kind='l')
-    #Jin.linear_light()
+    #Jin.circular_light(kind='l')
+    Jin.linear_light()
     #Jin.draw_ellipse()
     Jout = J * Jin
     #Jout = Jhi * Jin
@@ -266,23 +273,34 @@ if __name__ == '__main__':
     #print(Jout.parameters.delay())
     #print(Jout.parameters)
     #plt.show()
-
+    Jin.draw_ellipse()
+    plt.show()
     Jout.draw_ellipse()
     plt.show()
+    #Jout.draw_ellipse()
+    #plt.show()
 
     #print(Jout.parameters)
 
     A, B = j[:, 0, 0], j[:, 0, 1]
     res_mass = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
 
+    Jhwpi = jones_matrix.create_Jones_matrices()
+    Jhwpi.half_waveplate(azimuth=pi/4)
+
     Jlin = jones_vector.create_Jones_vectors()
-    Jlin.linear_light(azimuth=pi/4)
+    Jlin.linear_light()
+
+    J0 = jones_vector.create_Jones_vectors()
+    J0.from_matrix([-1, 1])
+    #J0.draw_ellipse()
+    #plt.show()
 
     Jhi = jones_matrix.create_Jones_matrices()
     Jhi.retarder_linear(R=res_mass)
-
-    Jo = Jhi*Jlin
-
+    print(Jlin)
+    Jo = Jhwpi*Jlin
+    print(Jo)
     #plt.plot(2*pi-Jo.parameters.delay())
     #plt.plot(res_mass)
     #plt.show()
