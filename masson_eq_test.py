@@ -87,8 +87,16 @@ def opt(n, x=None, ret_j=False):
         #res = (1 / m) * sum((1 - j[:, 1, 0].real)**2 + (j[:, 1, 0].imag) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
 
         # hwp 3 mat opt
-        res = (1 / m) * sum(np.absolute(j[:,0,0])+np.absolute(j[:,1,1])+(1-np.absolute(j[:,1,0]))+(1-np.absolute(j[:,0,1]))
-                            +(np.angle(j[:,1,0])-np.angle(j[:,0,1]))**2)
+        #print((np.absolute(j[:,0,0]))**2)
+        #print((np.absolute(j[:,1,1]))**2)
+        #print((1-np.absolute(j[:,1,0])))
+        #print((1-np.absolute(j[:,0,1])))
+        #print()
+        #print(((np.angle(j[:,1,0])-np.angle(j[:,0,1]))**2))
+        #print((j[:, 1, 0].imag - j[:, 0, 1].imag) ** 2)
+        #print()
+
+        res = (1 / m) * sum(np.absolute(j[:,0,0])**2+np.absolute(j[:,1,1])**2+(1-np.absolute(j[:,1,0]))+(1-np.absolute(j[:,0,1])))
 
         # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
@@ -214,7 +222,7 @@ if __name__ == '__main__':
 
     for _ in range(10000):
         ret = opt(n=n)
-        print(ret.fun)
+        print(ret)
 
     exit()
 
