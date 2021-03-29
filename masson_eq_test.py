@@ -87,16 +87,25 @@ def opt(n, x=None, ret_j=False):
         #res = (1 / m) * sum((1 - j[:, 1, 0].real)**2 + (j[:, 1, 0].imag) ** 2 + (j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
 
         # hwp 3 mat opt
-        #print((np.absolute(j[:,0,0]))**2)
-        #print((np.absolute(j[:,1,1]))**2)
-        #print((1-np.absolute(j[:,1,0])))
-        #print((1-np.absolute(j[:,0,1])))
-        #print()
         #print(((np.angle(j[:,1,0])-np.angle(j[:,0,1]))**2))
         #print((j[:, 1, 0].imag - j[:, 0, 1].imag) ** 2)
         #print()
+        """
+        res = (1 / m) * sum(np.absolute(j[:,0,0])**2+np.absolute(j[:,1,1])**2+
+                            #(1-np.abs(j[:,1,0].real))**2+(1-np.abs(j[:,0,1].real))**2)
+                            (1-j[:,1,0].real)+(1-j[:,0,1].real)+
+                            (j[:,1,0].imag)**2+(j[:,0,1].imag)**2)
+        """
 
-        res = (1 / m) * sum(np.absolute(j[:,0,0])**2+np.absolute(j[:,1,1])**2+(1-np.absolute(j[:,1,0]))+(1-np.absolute(j[:,0,1])))
+        # hwp 4 mat opt back to start
+        #print(np.absolute(j[:, 0, 0]) ** 2)
+        #print(np.absolute(j[:, 1, 1]) ** 2)
+        #print((1-j[:, 0, 1].imag) ** 2)
+        #print((1-j[:, 1, 0].imag) ** 2)
+        #print()
+
+        res = sum(np.absolute(j[:, 0, 0]) ** 2 + np.absolute(j[:, 1, 1]) ** 2) \
+        + sum((1-j[:, 0, 1].imag) ** 2 + (1-j[:, 1, 0].imag) ** 2)
 
         # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
@@ -114,13 +123,13 @@ def opt(n, x=None, ret_j=False):
     def print_fun(x, f, accepted):
         print(x, f, accepted)
 
-    bounds = list(zip([0]*n, [4*pi]*n)) + list(zip([0]*n, [4*pi]*n))
+    bounds = list(zip([0]*n, [4*pi]*n)) + list(zip([0]*n, [16*pi]*n))
 
     minimizer_kwargs = {}
 
     class MyBounds(object):
         def __init__(self):
-            self.xmax = np.ones(2*n)*(4*pi)
+            self.xmax = np.ones(2*n)*(16*pi)
             self.xmin = np.ones(2*n)*(0)
         def __call__(self, **kwargs):
             x = kwargs["x_new"]
@@ -153,7 +162,7 @@ def opt(n, x=None, ret_j=False):
 
     bounded_step = RandomDisplacementBounds(np.array([b[0] for b in bounds]), np.array([b[1] for b in bounds]))
 
-    x0 = np.concatenate((np.random.random(n)*4*pi, np.random.random(n)*4*pi))
+    x0 = np.concatenate((np.random.random(n)*16*pi, np.random.random(n)*16*pi))
 
     if ret_j:
         return erf(x)
@@ -199,7 +208,7 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = np.arange(0.2, 2.0, 0.05)*THz
+    f = (np.arange(0.2, 2.0, 0.3)*THz)[:]
 
     wls = (c0/f)*m_um
     m = len(wls)
@@ -220,20 +229,23 @@ if __name__ == '__main__':
         print(x)
     """
 
-    for _ in range(10000):
-        ret = opt(n=n)
-        print(ret)
+    #for _ in range(10000):
+    ret = opt(n=n)
+    print(ret)
 
-    exit()
+    #exit()
 
-    j = opt(n=n, ret_j=True, x=x6)
+    j = opt(n=n, ret_j=True, x=ret.x)
 
     J = jones_matrix.create_Jones_matrices()
-    J.from_matrix(j[::5])
+    J.from_matrix(j)
     #J.remove_global_phase()
     #J.set_global_phase(0)
     #J.analysis.retarder(verbose=True)
-
+    print(j[:,0,0])
+    print(j[:, 0, 1])
+    print(j[:, 1, 0])
+    print(j[:, 1, 1])
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
     #E1.draw_ellipse()
     #E2.draw_ellipse()
@@ -270,20 +282,25 @@ if __name__ == '__main__':
     #print(Jhi.parameters)
     #J.remove_global_phase()
     #print(J[11].parameters)
-    Jin = jones_vector.create_Jones_vectors()
-    #Jin.circular_light(kind='l')
-    Jin.linear_light()
+    Jin_l = jones_vector.create_Jones_vectors()
+    Jin_l.linear_light()
+
+    Jin_c = jones_vector.create_Jones_vectors()
+    Jin_c.circular_light(kind='l')
+    Jin_c.draw_ellipse()
+    plt.show()
     #Jin.draw_ellipse()
-    Jout = J * Jin
+    Jout_l = J * Jin_l
+    Jout_c = J * Jin_c
     #Jout = Jhi * Jin
     #Jout[::3].draw_ellipse()
     #Jout.normalize()
     #print(Jout.parameters.delay())
     #print(Jout.parameters)
     #plt.show()
-    Jin.draw_ellipse()
+    Jout_l.draw_ellipse()
     plt.show()
-    Jout.draw_ellipse()
+    Jout_c.draw_ellipse()
     plt.show()
     #Jout.draw_ellipse()
     #plt.show()
