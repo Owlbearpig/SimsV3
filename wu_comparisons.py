@@ -54,11 +54,16 @@ def opt(n, x=None, ret_j=False):
         #d, angles = x[0:n], x[n:2*n]
         #d, angles = x[0:n], np.deg2rad(x[n:2*n])
         #angles = np.deg2rad(x[0:n])
+        d = flip(array([566.0, 377.4, 377.4, 377.4, 377.4, 377.4]), 0)
+        angles = flip(np.deg2rad(array([12.3, 56.7, 28.1, 356.5, 302.0, 349.2])), 0)
+
+        #d = flip(array([3360, 6730, 6460, 3140, 3330, 8430]), 0)
+        #angles = flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0)
 
         j = np.zeros((m, n, 2, 2), dtype=complex)
 
-        angles = x[0:n]
-        d = np.ones_like(angles)*x[-1]
+        #angles = x[0:n]
+        #d = np.ones_like(angles)*204#x[-1]
 
         delta = pi * outer(bf / wls, d)  # delta/2
         sd = 1j*sin(delta)
@@ -73,6 +78,11 @@ def opt(n, x=None, ret_j=False):
         np.einsum(einsum_str, *j.transpose((1, 0, 2, 3)), out=j[:, 0], optimize=einsum_path[0])
 
         j = j[:, 0]
+
+        # Masson ret. opt.
+        A, B = j[:, 0, 0], j[:, 0, 1]
+        delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+        res = np.sum((delta_equiv-pi/2)**2)
 
         if ret_j:
             return j
@@ -89,11 +99,6 @@ def opt(n, x=None, ret_j=False):
         # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
         #res = sum(q.real ** 2 + (q.imag - 1) ** 2)
-
-        # Masson ret. opt.
-        A, B = j[:, 0, 0], j[:, 0, 1]
-        delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-        res = np.sum((delta_equiv-pi)**2)
 
         return res
 
@@ -123,7 +128,7 @@ def opt(n, x=None, ret_j=False):
         """random displacement with bounds:  see: https://stackoverflow.com/a/21967888/2320035
             Modified! (dropped acceptance-rejection sampling for a more specialized approach)
         """
-        def __init__(self, xmin, xmax, stepsize=0.25):
+        def __init__(self, xmin, xmax, stepsize=0.5):
             self.xmin = xmin
             self.xmax = xmax
             self.stepsize = stepsize
@@ -146,11 +151,17 @@ def opt(n, x=None, ret_j=False):
     if ret_j:
         return erf(x)
 
-    return minimize(erf, x0)
-    return basinhopping(erf, x0, niter=1, callback=print_fun, take_step=bounded_step, disp=True, T=1)
+    #return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=100, callback=print_fun, take_step=bounded_step, disp=True)
 
 
 x20 =\
+array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
+       0.67858639, 0.47854223, 1.06206799, 4.40208982, 3.92385128,
+       0.89218459, 0.38393526, 3.01364689, 3.41504969, 3.57882995,
+       4.2264747 , 3.54250995, 0.30855872, 2.85858943, 0.48572504])
+
+x20_1 = \
 array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
        0.67858639, 0.47854223, 1.06206799, 4.40208982, 3.92385128,
        0.89218459, 0.38393526, 3.01364689, 3.41504969, 3.57882995,
@@ -162,42 +173,35 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = (np.arange(0.2, 2.0, 0.05)*THz)[::5]
+    f = (np.arange(0.2, 2.0, 0.05)*THz)[::2]
 
     wls = (c0/f)*m_um
     m = len(wls)
 
-    no = 3.39 # 2.108#
-    ne = 3.07 # 2.156#
+    no = 3.07#2.156#
+    ne = 3.39#2.108#
     bf = np.ones_like(f)*(no-ne)
 
     #np.random.seed(1000)
     n = 20
-    """
-    xs = []
-    for _ in range(1000):
-        ret = opt(n=n)
-        print(str(ret.fun)+',')
-        xs.append(list(ret.x))
-    for x in xs:
-        print(x)
-    """
 
-    #for _ in range(1000):
-    ret = opt(n=n)
-    print(ret)
+    #ret = opt(n=n)
+    #print(ret)
 
-    j = opt(n=n, ret_j=True, x=ret.x)
-
+    j = opt(n=6, ret_j=True)
+    #plt.plot(j/pi)
+    #plt.show()
     J = jones_matrix.create_Jones_matrices()
     J.from_matrix(j)
     #J.remove_global_phase()
     #J.set_global_phase(0)
     #J.analysis.retarder(verbose=True)
+    """ 
     print(j[:,0,0])
     print(j[:, 0, 1])
     print(j[:, 1, 0])
     print(j[:, 1, 1])
+    """
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
     #E1.draw_ellipse()
     #E2.draw_ellipse()
@@ -233,13 +237,18 @@ if __name__ == '__main__':
     #print(Jhi.parameters)
     #J.remove_global_phase()
     #print(J[11].parameters)
+    Jqwp=jones_matrix.create_Jones_matrices('qwp_ideal')
+    Jqwp.quarter_waveplate(azimuth=pi/4)
     Jin_l = jones_vector.create_Jones_vectors(name='Jin_l')
     Jin_l.linear_light()
+    J_out = Jqwp*Jqwp*Jqwp*Jqwp*Jin_l
+    #J_out.draw_ellipse()
+    #plt.show()
 
     Jin_c = jones_vector.create_Jones_vectors(name='Jin_c')
     Jin_c.circular_light(kind='l')
-    Jin_c.draw_ellipse()
-    plt.show()
+    #Jin_c.draw_ellipse()
+    #plt.show()
     #Jin.draw_ellipse()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c

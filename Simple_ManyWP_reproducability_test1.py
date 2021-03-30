@@ -68,7 +68,7 @@ def opt(n, res_only=False, x=None):
 
         j = j[:, 0]
         A, B = j[:, 0, 0], j[:, 0, 1]
-
+        return j
         delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
 
         if res_only:
@@ -173,15 +173,31 @@ if __name__ == '__main__':
     bf = np.ones_like(f)*(no-ne)
 
     #np.random.seed(1000)
-
+    """
     for r in range(0, 10):
         res = opt(n=10, res_only=False, x=np.random.random(10))
         print(res)
         print('Break')
-        """
-        plt.plot(f, res1, label=f'n={40_1}')
-        plt.plot(f, res2, label=f'n={40_2}')
-        plt.ylim((0.46, 0.52))
-        plt.legend()
-        plt.show()
-        """
+    """
+    """
+    res = opt(n=20, res_only=True, x=x20)
+    plt.plot(f, res, label=f'n={20_1}')
+    #plt.plot(f, res2, label=f'n={40_2}')
+    #plt.ylim((0.46, 0.52))
+    plt.legend()
+    plt.show()
+    """
+    from py_pol import jones_matrix, jones_vector
+
+    j = opt(n=20, res_only=True, x=x20)
+    J = jones_matrix.create_Jones_matrices()
+    J.from_matrix(j)
+
+    Jlinin = jones_vector.create_Jones_vectors('j_lin')
+    Jlinin.linear_light()
+
+    J_out = J*Jlinin
+    J_out.draw_ellipse()
+    plt.show()
+
+    # bad results ??
