@@ -18,6 +18,7 @@ import sys
 THz = 10**12
 m_um = 10**6 # m to um conversion
 
+s = 500/(2*pi)
 
 def opt(n, x=None, ret_j=False):
     #d = np.ones(n)*204#*4080/n
@@ -51,11 +52,12 @@ def opt(n, x=None, ret_j=False):
         return
 
     def erf(x):
-        #d, angles = x[0:n], x[n:2*n]
+        d, angles = x[0:n]*s, x[n:2*n]
         #d, angles = x[0:n], np.deg2rad(x[n:2*n])
         #angles = np.deg2rad(x[0:n])
-        d = flip(array([566.0, 377.4, 377.4, 377.4, 377.4, 377.4]), 0)
-        angles = flip(np.deg2rad(array([12.3, 56.7, 28.1, 356.5, 302.0, 349.2])), 0)
+
+        #d = flip(array([566.0, 377.4, 377.4, 377.4, 377.4, 377.4]), 0)
+        #angles = flip(np.deg2rad(array([12.3, 56.7, 28.1, 356.5, 302.0, 349.2])), 0)
 
         #d = flip(array([3360, 6730, 6460, 3140, 3330, 8430]), 0)
         #angles = flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0)
@@ -82,7 +84,7 @@ def opt(n, x=None, ret_j=False):
         # Masson ret. opt.
         A, B = j[:, 0, 0], j[:, 0, 1]
         delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-        res = np.sum((delta_equiv-pi/2)**2)
+        res = (1/m)*np.sum((delta_equiv-pi/2)**2)
 
         if ret_j:
             return j
@@ -106,14 +108,14 @@ def opt(n, x=None, ret_j=False):
         print(x, f, accepted)
 
     #bounds = list(zip([0]*n, [2*pi]*n)) + [(0, 1000)]
-    bounds = list(zip([0] * n, [2 * pi] * n))
+    bounds = list(zip([0] * 2*n, [2 * pi] * 2*n))
 
     minimizer_kwargs = {}
 
     class MyBounds(object):
         def __init__(self):
-            self.xmax = np.ones(n)*(2*pi)
-            self.xmin = np.ones(n)*(0)
+            self.xmax = np.ones(2*n)*(2*pi)
+            self.xmin = np.ones(2*n)*(0)
         def __call__(self, **kwargs):
             x = kwargs["x_new"]
             tmax = bool(np.all(x <= self.xmax))
@@ -145,8 +147,8 @@ def opt(n, x=None, ret_j=False):
 
     bounded_step = RandomDisplacementBounds(np.array([b[0] for b in bounds]), np.array([b[1] for b in bounds]))
 
-    x0 = np.random.random(n)*2*pi
-    #x0 = np.concatenate((np.random.random(n) * 2 * pi))
+    x0 = np.random.random(2*n)*2*pi
+    #x0 = np.concatenate((np.random.random(n) * 2 * pi, np.random.random(n)*500))
 
     if ret_j:
         return erf(x)
@@ -173,7 +175,7 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = (np.arange(0.2, 2.0, 0.05)*THz)[::2]
+    f = (np.arange(0.1, 2.0, 0.05)*THz)[::2]
 
     wls = (c0/f)*m_um
     m = len(wls)
@@ -183,12 +185,12 @@ if __name__ == '__main__':
     bf = np.ones_like(f)*(no-ne)
 
     #np.random.seed(1000)
-    n = 20
+    n = 12
 
-    #ret = opt(n=n)
-    #print(ret)
+    ret = opt(n=n)
+    print(ret)
 
-    j = opt(n=6, ret_j=True)
+    j = opt(n=12, ret_j=True, x=ret.x)
     #plt.plot(j/pi)
     #plt.show()
     J = jones_matrix.create_Jones_matrices()
