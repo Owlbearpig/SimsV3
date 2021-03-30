@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 lines = []
-with open('hwp_state_opt_v1_10k_local_opt.txt') as file:
+with open('mat_opt_4_1k_local_min_fun.txt') as file:
     for line in file.readlines():
         lines.append(str(line).replace(r',', ''))
 b = []
