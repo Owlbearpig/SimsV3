@@ -111,8 +111,6 @@ def opt(n, x=None, ret_j=False):
         #q = j[:, 0, 0] / j[:, 1, 0]
         #res = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
 
-
-
         # Masson ret. opt.
         #A, B = j[:, 0, 0], j[:, 0, 1]
         #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
@@ -252,14 +250,90 @@ if __name__ == '__main__':
     #print(j[:, 1, 1])
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
     R = J.parameters.retardance()
-    alpha = E1.parameters.alpha()
-    delta = E1.parameters.delta()
-    print(E1.parameters.azimuth())
-    E1.draw_ellipse()
-    E2.draw_ellipse()
+    alpha = pi/2-E1.parameters.alpha()
+    delta = E1.parameters.delta()+pi
+
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
+    #plt.show()
+    """
+    J_lin = jones_vector.create_Jones_vectors('J_lin')
+    J_lin.linear_light(azimuth=pi/4)
+    J_lin.draw_ellipse()
+    plt.show()
+    J_circ = jones_vector.create_Jones_vectors('J_circ')
+    J_circ.circular_light()
+    J_circ.draw_ellipse()
+    plt.show()
+    """
+    """
+
+    az = J_lin.parameters.azimuth()
+
+    J1 = jones_matrix.create_Jones_matrices('J1')
+    J1.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
+
+    J2 = jones_matrix.create_Jones_matrices('J2')
+    J2.retarder_linear(azimuth=0, R=R)
+
+    J3 = jones_matrix.create_Jones_matrices('J3')
+    J3.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
+
+    (J1*J2*J3*J_lin).draw_ellipse()
     plt.show()
 
+    (J1*J2*J3*J_circ).draw_ellipse()
+    plt.show()
+    """
+    """
+    J = jones_matrix.create_Jones_matrices('J')
+    J.retarder_linear(azimuth=az, R=R)
 
+    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
+    J_lin_t.linear_light()
+
+    (J*J_lin_t).draw_ellipse()
+    plt.show()
+
+    J1 = jones_matrix.create_Jones_matrices('J1')
+    J1.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
+    J2 = jones_matrix.create_Jones_matrices('J2')
+    J2.retarder_linear(azimuth=0, R=R)
+    J3 = jones_matrix.create_Jones_matrices('J3')
+    J3.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * az)
+
+    (J1*J2*J3*J_lin_t).draw_ellipse()
+    plt.show()
+    """
+    """
+    J = jones_matrix.create_Jones_matrices('J')
+    J.retarder_charac_angles(alpha=alpha, delay=delta, R=R)
+
+    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
+    J_lin_t.linear_light()
+
+    (J * J_lin_t).draw_ellipse()
+    plt.show()
+
+    J1 = jones_matrix.create_Jones_matrices('J1')
+    J1.retarder_linear(azimuth=0, R=-delta)
+
+    J2 = jones_matrix.create_Jones_matrices('J2')
+    J2.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * alpha)
+
+    J3 = jones_matrix.create_Jones_matrices('J3')
+    J3.retarder_linear(azimuth=0, R=R)
+
+    J4 = jones_matrix.create_Jones_matrices('J4')
+    J4.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * alpha)
+
+    J5 = jones_matrix.create_Jones_matrices('J5')
+    J5.retarder_linear(azimuth=0, R=delta)
+
+    (J1 * J2 * J3 * J4 * J5 * J_lin_t).draw_ellipse()
+    plt.show()
+    """
+    """
     T1 = jones_matrix.create_Jones_matrices('T1')
     T2 = jones_matrix.create_Jones_matrices('T2')
     T3 = jones_matrix.create_Jones_matrices('T3')
@@ -271,14 +345,14 @@ if __name__ == '__main__':
     T3.retarder_linear(azimuth=0, R=R)
     T4.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * alpha)
     T5.retarder_linear(azimuth=0, R=delta)
-
+    
     J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
     J_lin_t.linear_light()
     T = T1*T2*T3*T4*T5
 
     (T*J_lin_t).draw_ellipse()
     plt.show()
-
+    """
     #E1.draw_ellipse()
     #E2.draw_ellipse()
     #plt.show()
@@ -326,7 +400,7 @@ if __name__ == '__main__':
     plt.show()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
-
+    print(Jout_l.parameters.azimuth())
     Jout_l.draw_ellipse()
     plt.show()
     #Jout_c.draw_ellipse()
@@ -355,9 +429,9 @@ if __name__ == '__main__':
 
     Jhi = jones_matrix.create_Jones_matrices()
     Jhi.retarder_linear(R=res_mass)
-    print(Jlin)
+
     Jo = Jhwpi*Jlin
-    print(Jo)
+
     #plt.plot(2*pi-Jo.parameters.delay())
     #plt.plot(res_mass)
     #plt.show()
