@@ -170,6 +170,10 @@ def opt(n, x=None, ret_j=False):
     return minimize(erf, x0)
     return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
 
+x6_qwp_2500its_q_opt_0 =\
+array([ 3.24987415,  4.77269977,  4.40563393,  5.01999253,  3.60394262,
+        0.06547399, 10.01597369,  6.65948829,  4.47663773,  4.46594113,
+        6.70603116,  6.69779776])
 
 x20 =\
 array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
@@ -208,7 +212,7 @@ def R(v):
 
 if __name__ == '__main__':
 
-    f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
+    f = (np.arange(0.25, 1.6, 0.05)*THz)[:]
 
     wls = (c0/f)*m_um
     m = len(wls)
@@ -235,7 +239,7 @@ if __name__ == '__main__':
 
     exit()
     """
-    j = opt(n=n, ret_j=True, x=x20)
+    j = opt(n=6, ret_j=True, x=x6)
 
     J = jones_matrix.create_Jones_matrices()
     J.from_matrix(j)
@@ -247,6 +251,34 @@ if __name__ == '__main__':
     #print(j[:, 1, 0])
     #print(j[:, 1, 1])
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    R = J.parameters.retardance()
+    alpha = E1.parameters.alpha()
+    delta = E1.parameters.delta()
+    print(E1.parameters.azimuth())
+    E1.draw_ellipse()
+    E2.draw_ellipse()
+    plt.show()
+
+
+    T1 = jones_matrix.create_Jones_matrices('T1')
+    T2 = jones_matrix.create_Jones_matrices('T2')
+    T3 = jones_matrix.create_Jones_matrices('T3')
+    T4 = jones_matrix.create_Jones_matrices('T4')
+    T5 = jones_matrix.create_Jones_matrices('T5')
+
+    T1.retarder_linear(azimuth=0, R=-delta)
+    T2.retarder_charac_angles(alpha=pi/4, delay=pi/2, R=-2*alpha)
+    T3.retarder_linear(azimuth=0, R=R)
+    T4.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * alpha)
+    T5.retarder_linear(azimuth=0, R=delta)
+
+    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
+    J_lin_t.linear_light()
+    T = T1*T2*T3*T4*T5
+
+    (T*J_lin_t).draw_ellipse()
+    plt.show()
+
     #E1.draw_ellipse()
     #E2.draw_ellipse()
     #plt.show()
@@ -282,43 +314,29 @@ if __name__ == '__main__':
     #print(Jhi.parameters)
     #J.remove_global_phase()
     #print(J[11].parameters)
-    J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
-    J_qwp.quarter_waveplate(azimuth=pi/4)
+    #J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
+    #J_qwp.quarter_waveplate(azimuth=pi/4)
 
-    Jin_c = jones_vector.create_Jones_vectors()
+    # INPUT
+    Jin_c = jones_vector.create_Jones_vectors('Jin_c')
     Jin_c.circular_light(kind='l')
-    Jin_c.draw_ellipse()
-    plt.show()
-
-    Jin_l = jones_vector.create_Jones_vectors()
-    Jin_l.linear_light()
+    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
+    Jin_l.linear_light(azimuth=0*pi/2)
     Jin_l.draw_ellipse()
-
-    J_ideal_out = J_qwp*J_qwp*Jin_c
-
-    J_ideal_out.draw_ellipse()
     plt.show()
-    exit('hello : )')
-
-
-    Jin_c.draw_ellipse()
-    plt.show()
-    #Jin.draw_ellipse()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
-    #Jout = Jhi * Jin
-    #Jout[::3].draw_ellipse()
-    #Jout.normalize()
-    #print(Jout.parameters.delay())
-    #print(Jout.parameters)
-    #plt.show()
+
     Jout_l.draw_ellipse()
     plt.show()
-    Jout_c.draw_ellipse()
-    plt.show()
-    #Jout.draw_ellipse()
+    #Jout_c.draw_ellipse()
     #plt.show()
 
+    J_w = (1/sqrt(2))*array([1j*cos(2*pi/4)+1, -1j*sin(2*pi/4)])
+    J_ = jones_vector.create_Jones_vectors('J_w')
+    J_.from_matrix(J_w)
+    J_.draw_ellipse()
+    plt.show()
     #print(Jout.parameters)
 
     A, B = j[:, 0, 0], j[:, 0, 1]

@@ -9,6 +9,7 @@ from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
 from numpy.linalg import solve
+from py_pol import jones_vector, jones_matrix
 import string
 import matplotlib.pyplot as plt
 import sys
@@ -17,7 +18,7 @@ THz = 10**12
 m_um = 10**6 # m to um conversion
 
 
-def opt(n, res_only=False, x=None):
+def opt(n, ret_j=False, x=None):
     d = np.ones(n)*204#*4080/n
     delta = pi * outer(bf / wls, d)  # delta/2
 
@@ -68,13 +69,11 @@ def opt(n, res_only=False, x=None):
 
         j = j[:, 0]
 
+        if ret_j:
+            return j
+
         q = j[:, 0, 0] / j[:, 1, 0]
         res_int = (1/m)*sum(q.real ** 2 + (q.imag - 1) ** 2)
-
-        if res_only:
-            A, B = j[:, 0, 0], j[:, 0, 1]
-            delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-            return delta_equiv / pi
 
         return res_int
 
@@ -123,7 +122,7 @@ def opt(n, res_only=False, x=None):
 
     x0 = np.random.random(n)*2*pi
 
-    if res_only:
+    if ret_j:
         return erf(x)
 
     #return minimize(erf, x0)
@@ -175,9 +174,25 @@ if __name__ == '__main__':
     no = 3.39
     ne = 3.07
     bf = np.ones_like(f)*(no-ne)
+
+    j = opt(20, ret_j=True, x=x20)
+
+
+    J = jones_matrix.create_Jones_matrices('J_R')
+    J.from_matrix(j)
+    Jlin = jones_vector.create_Jones_vectors('J_L')
+    Jlin.linear_light()
+
+    Jout = J*Jlin
+
+    Jout.draw_ellipse()
+    plt.show()
+
+    """
     for _ in range(10):
         res = opt(n=n, res_only=False)
         print(res)
+    """
 
     #np.random.seed(1000)
     """
