@@ -5,8 +5,8 @@ from pathlib import Path, PureWindowsPath
 import scipy
 from scipy.constants import c as c0
 from scipy.optimize import basinhopping
-from py_pol_calcs import jones_matrix
-from py_pol_calcs import jones_vector
+from py_pol import jones_matrix
+from py_pol import jones_vector
 from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
@@ -17,6 +17,67 @@ import sys
 
 THz = 10**12
 m_um = 10**6 # m to um conversion
+
+
+# TODO NOT FINISHED -> result_analysis.py instead
+def load_material_data(mat_name):
+
+    mat_paths = {
+        'ceramic_slow': Path('material_data/Sample1_000deg_1825ps_0m-2Grad_D=3000.csv'),
+        'ceramic_fast': Path('material_data/Sample1_090deg_1825ps_0m88Grad_D=3000.csv'),
+        'HIPS_MUT_1_1': Path('material_data/MUT 1-1.csv'),
+        'Fused_4eck': Path('material_data/4Eck_D=2042.csv'),
+    }
+
+    df = pandas.read_csv(mat_paths[mat_name])
+
+    freq_dict_key = [key for key in df.keys() if "freq" in key][0]
+    eps_mat_r_key = [key for key in df.keys() if "epsilon_r" in key][0]
+    eps_mat_i_key = [key for key in df.keys() if "epsilon_i" in key][0]
+
+    frequencies = np.array(df[freq_dict_key])
+
+    data_slice = np.where((frequencies > f_min) &
+                          (frequencies < f_max))
+    data_slice = data_slice[0][::30]
+
+    eps_mat_r = np.array(df[eps_mat_r_key])[data_slice]
+    eps_mat_i = np.array(df[eps_mat_i_key])[data_slice]
+
+    eps_mat1 = (eps_mat_r + eps_mat_i * 1j).reshape(len(data_slice), 1)
+
+    return eps_mat1, frequencies[data_slice].reshape(len(data_slice), 1)
+
+def form_birefringence(stripes):
+    """
+    :return: array with length of frequency, frequency resolved [ns, np, ks, kp]
+    """
+
+    l_mat1, l_mat2 = stripes
+
+    a = (1 / 3) * power(outer(1 / wls, (l_mat1 * l_mat2 * pi) / (l_mat1 + l_mat2)), 2)
+
+    # first order s and p
+    wp_eps_s_1 = outer((eps_mat2 * eps_mat1), (l_mat2 + l_mat1)) / (
+            outer(eps_mat2, l_mat1) + outer(eps_mat1, l_mat2))
+
+    wp_eps_p_1 = outer(eps_mat1, l_mat1 / (l_mat2 + l_mat1)) + outer(eps_mat2, l_mat2 / (l_mat2 + l_mat1))
+
+    # 2nd order
+    wp_eps_s_2 = wp_eps_s_1 + (a * power(wp_eps_s_1, 3) * wp_eps_p_1 * power((1 / eps_mat1 - 1 / eps_mat2), 2))
+    wp_eps_p_2 = wp_eps_p_1 + (a * power((eps_mat1 - eps_mat2), 2))
+
+    # returns
+    n_p, n_s = (
+        sqrt(abs(wp_eps_p_2) + wp_eps_p_2.real) / sqrt(2),
+        sqrt(abs(wp_eps_s_2) + wp_eps_s_2.real) / sqrt(2)
+    )
+    k_p, k_s = (
+        sqrt(abs(wp_eps_p_2) - wp_eps_p_2.real) / sqrt(2),
+        sqrt(abs(wp_eps_s_2) - wp_eps_s_2.real) / sqrt(2)
+    )
+
+    return np.array([n_s, n_p, k_s, k_p])
 
 
 def opt(n, x=None, ret_j=False):
@@ -50,7 +111,6 @@ def opt(n, x=None, ret_j=False):
     def matrix_chain_calc(matrix_array):
         return
 
-    s = 8*10**3/(2*pi)
 
     def erf(x):
         #d, angles = x[0:n], x[n:2*n]
@@ -59,17 +119,24 @@ def opt(n, x=None, ret_j=False):
 
         j = np.zeros((m, n, 2, 2), dtype=complex)
 
-        angles, d = x[0:n], x[n:2*n]*s
+        angles, d = x[0:n], x[n:2*n]
 
-        delta = pi * outer(bf / wls, d)  # delta/2
-        sd = 1j*sin(delta)
+        phi_s, phi_p = (2 * n_s * pi / wls) * d.T, (2 * n_p * pi / wls) * d.T
+        alpha_s, alpha_p = -(2 * pi * k_s / wls) * d.T, -(2 * pi * k_p / wls) * d.T
 
-        sdca = sd*cos(2 * angles)
+        x, y = 1j * phi_s + alpha_s, 1j * phi_p + alpha_p
+        angles = np.tile(angles, (m, 1))
 
-        j[:, :, 0, 0] = j[:, :, 1, 1] = cos(delta)
-        j[:, :, 0, 1] = j[:, :, 1, 0] = sd*sin(2 * angles)
-        j[:, :, 0, 0] += sdca
-        j[:, :, 1, 1] -= sdca
+        #print(angles, '\n')
+        #print(x, '\n')
+        #print(y, '\n')
+
+        #delta = pi * outer(bf / wls, d)  # delta/2
+
+        j[:, :, 0, 0] = exp(y) * sin(angles) ** 2 + exp(x) * cos(angles) ** 2
+        j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x)-exp(y))
+        j[:, :, 1, 0] = j[:, :, 0, 1]
+        j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
 
         np.einsum(einsum_str, *j.transpose((1, 0, 2, 3)), out=j[:, 0], optimize=einsum_path[0])
 
@@ -110,6 +177,8 @@ def opt(n, x=None, ret_j=False):
         # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
         #res = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
+
+
 
         # Masson ret. opt.
         #A, B = j[:, 0, 0], j[:, 0, 1]
@@ -168,59 +237,29 @@ def opt(n, x=None, ret_j=False):
     return minimize(erf, x0)
     return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
 
-x6_qwp_2500its_q_opt_0 =\
-array([ 3.24987415,  4.77269977,  4.40563393,  5.01999253,  3.60394262,
-        0.06547399, 10.01597369,  6.65948829,  4.47663773,  4.46594113,
-        6.70603116,  6.69779776])
 
-x20 =\
-array([4.83958375, 5.46695672, 2.70029202, 1.59720805, 1.38049486,
-       0.67858639, 0.47854223, 1.06206799, 4.40208982, 3.92385128,
-       0.89218459, 0.38393526, 3.01364689, 3.41504969, 3.57882995,
-       4.2264747 , 3.54250995, 0.30855872, 2.85858943, 0.48572504])
-
-d_m = array([3360, 6730, 6460, 3140, 3330, 8430])*2*pi/(8*10**3)
-x6 = \
-np.concatenate((flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0), flip(d_m, 0)))
-
-x_qwp_new =\
-array([3.16853242, 5.93776113, 4.31098172, 0.21798808, 4.52800151,
-       4.67036435, 3.36637779, 4.4712363 , 8.96264214, 2.2487925 ,
-       6.73917046, 4.4440271 ])
-
-x_hwp_new =\
-array([2.92436707, 5.09103464, 3.1112668 , 2.38107497, 1.58787361,
-       5.49827598, 9.07022128, 4.53446987, 2.2755494 , 4.53099375,
-       4.52362633, 2.27140076])
-
-x_hwp_int_opt_1 =\
-array([ 2.02527722,  6.15199071,  1.5965492 ,  4.95902561,  3.025551  ,
-        5.55531434,  4.53403689, 11.37146241,  2.26584422, 11.389879  ,
-        4.55894852,  2.25584732])
-
-x_qwp_q_opt_0 =\
-array([ 3.24987415,  4.77269977,  4.40563393,  5.01999253,  3.60394262,
-        0.06547399, 10.01597369,  6.65948829,  4.47663773,  4.46594113,
-        6.70603116,  6.69779776])
-
-def R(v):
-    return array([[cos(v), sin(v)],
-                  [-sin(v), cos(v)]])
-
+d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])
+angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14]))
+x_ghz = np.concatenate((angles_ghz, d_ghz))
 
 if __name__ == '__main__':
 
-    f = (np.arange(0.25, 1.6, 0.05)*THz)[:]
+    #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
+
+    f_min, f_max = 0.05*THz, 0.15*THz
+
+    eps_mat1, f = load_material_data()
+    eps_mat2 = np.ones_like(eps_mat1)
 
     wls = (c0/f)*m_um
     m = len(wls)
 
-    no = 2.108#3.39
-    ne = 2.156#3.07
-    bf = np.ones_like(f)*(no-ne)
+    stripes = 628, 517.1
+
+    n_s, n_p, k_s, k_p = form_birefringence(stripes)
 
     #np.random.seed(1000)
-    n = 6
+    n = 4
     """
     xs = []
     for _ in range(1000):
@@ -237,9 +276,14 @@ if __name__ == '__main__':
 
     exit()
     """
-    j = opt(n=6, ret_j=True, x=x6)
+    j = opt(n=n, ret_j=True, x=x_ghz)
 
-    J = jones_matrix.create_Jones_matrices()
+    int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
+    int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
+
+    int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
+
+    J = jones_matrix.create_Jones_matrices('x_ghz')
     J.from_matrix(j)
     #J.remove_global_phase()
     #J.set_global_phase(0)
@@ -249,110 +293,6 @@ if __name__ == '__main__':
     #print(j[:, 1, 0])
     #print(j[:, 1, 1])
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    R = J.parameters.retardance()
-    alpha = pi/2-E1.parameters.alpha()
-    delta = E1.parameters.delta()+pi
-
-    #E1.draw_ellipse()
-    #E2.draw_ellipse()
-    #plt.show()
-    """
-    J_lin = jones_vector.create_Jones_vectors('J_lin')
-    J_lin.linear_light(azimuth=pi/4)
-    J_lin.draw_ellipse()
-    plt.show()
-    J_circ = jones_vector.create_Jones_vectors('J_circ')
-    J_circ.circular_light()
-    J_circ.draw_ellipse()
-    plt.show()
-    """
-    """
-
-    az = J_lin.parameters.azimuth()
-
-    J1 = jones_matrix.create_Jones_matrices('J1')
-    J1.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
-
-    J2 = jones_matrix.create_Jones_matrices('J2')
-    J2.retarder_linear(azimuth=0, R=R)
-
-    J3 = jones_matrix.create_Jones_matrices('J3')
-    J3.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
-
-    (J1*J2*J3*J_lin).draw_ellipse()
-    plt.show()
-
-    (J1*J2*J3*J_circ).draw_ellipse()
-    plt.show()
-    """
-    """
-    J = jones_matrix.create_Jones_matrices('J')
-    J.retarder_linear(azimuth=az, R=R)
-
-    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
-    J_lin_t.linear_light()
-
-    (J*J_lin_t).draw_ellipse()
-    plt.show()
-
-    J1 = jones_matrix.create_Jones_matrices('J1')
-    J1.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * az)
-    J2 = jones_matrix.create_Jones_matrices('J2')
-    J2.retarder_linear(azimuth=0, R=R)
-    J3 = jones_matrix.create_Jones_matrices('J3')
-    J3.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * az)
-
-    (J1*J2*J3*J_lin_t).draw_ellipse()
-    plt.show()
-    """
-    """
-    J = jones_matrix.create_Jones_matrices('J')
-    J.retarder_charac_angles(alpha=alpha, delay=delta, R=R)
-
-    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
-    J_lin_t.linear_light()
-
-    (J * J_lin_t).draw_ellipse()
-    plt.show()
-
-    J1 = jones_matrix.create_Jones_matrices('J1')
-    J1.retarder_linear(azimuth=0, R=-delta)
-
-    J2 = jones_matrix.create_Jones_matrices('J2')
-    J2.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=-2 * alpha)
-
-    J3 = jones_matrix.create_Jones_matrices('J3')
-    J3.retarder_linear(azimuth=0, R=R)
-
-    J4 = jones_matrix.create_Jones_matrices('J4')
-    J4.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * alpha)
-
-    J5 = jones_matrix.create_Jones_matrices('J5')
-    J5.retarder_linear(azimuth=0, R=delta)
-
-    (J1 * J2 * J3 * J4 * J5 * J_lin_t).draw_ellipse()
-    plt.show()
-    """
-    """
-    T1 = jones_matrix.create_Jones_matrices('T1')
-    T2 = jones_matrix.create_Jones_matrices('T2')
-    T3 = jones_matrix.create_Jones_matrices('T3')
-    T4 = jones_matrix.create_Jones_matrices('T4')
-    T5 = jones_matrix.create_Jones_matrices('T5')
-
-    T1.retarder_linear(azimuth=0, R=-delta)
-    T2.retarder_charac_angles(alpha=pi/4, delay=pi/2, R=-2*alpha)
-    T3.retarder_linear(azimuth=0, R=R)
-    T4.retarder_charac_angles(alpha=pi / 4, delay=pi / 2, R=2 * alpha)
-    T5.retarder_linear(azimuth=0, R=delta)
-    
-    J_lin_t = jones_vector.create_Jones_vectors('J_lin_t')
-    J_lin_t.linear_light()
-    T = T1*T2*T3*T4*T5
-
-    (T*J_lin_t).draw_ellipse()
-    plt.show()
-    """
     #E1.draw_ellipse()
     #E2.draw_ellipse()
     #plt.show()
@@ -388,29 +328,46 @@ if __name__ == '__main__':
     #print(Jhi.parameters)
     #J.remove_global_phase()
     #print(J[11].parameters)
-    #J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
-    #J_qwp.quarter_waveplate(azimuth=pi/4)
+    J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
+    J_qwp.quarter_waveplate(azimuth=pi/4)
 
-    # INPUT
     Jin_c = jones_vector.create_Jones_vectors('Jin_c')
     Jin_c.circular_light(kind='l')
-    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
-    Jin_l.linear_light(azimuth=0*pi/2)
-    Jin_l.draw_ellipse()
+    Jin_c.draw_ellipse()
     plt.show()
+
+    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
+    Jin_l.linear_light()
+    Jin_l.draw_ellipse()
+
+    J_ideal_out = J_qwp*J_qwp*Jin_c
+
+    J_ideal_out.draw_ellipse()
+    plt.show()
+    #exit('hello : )')
+
+    Jin_c.draw_ellipse()
+    plt.show()
+    #Jin.draw_ellipse()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
-    print(Jout_l.parameters.azimuth())
+
+    plt.plot(int_x)
+    plt.plot(int_y)
+    plt.show()
+    #Jout = Jhi * Jin
+    #Jout[::3].draw_ellipse()
+    #Jout.normalize()
+    #print(Jout.parameters.delay())
+    #print(Jout.parameters)
+    #plt.show()
     Jout_l.draw_ellipse()
     plt.show()
-    #Jout_c.draw_ellipse()
+    Jout_c.draw_ellipse()
+    plt.show()
+    #Jout.draw_ellipse()
     #plt.show()
 
-    J_w = (1/sqrt(2))*array([1j*cos(2*pi/4)+1, -1j*sin(2*pi/4)])
-    J_ = jones_vector.create_Jones_vectors('J_w')
-    J_.from_matrix(J_w)
-    J_.draw_ellipse()
-    plt.show()
     #print(Jout.parameters)
 
     A, B = j[:, 0, 0], j[:, 0, 1]
@@ -421,11 +378,6 @@ if __name__ == '__main__':
 
     Jlin = jones_vector.create_Jones_vectors()
     Jlin.linear_light()
-
-    J0 = jones_vector.create_Jones_vectors()
-    J0.from_matrix([-1, 1])
-    #J0.draw_ellipse()
-    #plt.show()
 
     Jhi = jones_matrix.create_Jones_matrices()
     Jhi.retarder_linear(R=res_mass)

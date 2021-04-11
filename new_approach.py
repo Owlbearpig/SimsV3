@@ -13,7 +13,7 @@ import string
 
 np.random.seed(1234)
 
-path = r"4Eck_D=2042.csv"
+path = r"material_data/4Eck_D=2042.csv"
 um = 1#10 ** -6
 THz = 10**-12
 

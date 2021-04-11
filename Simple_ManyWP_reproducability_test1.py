@@ -187,7 +187,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
     """
-    from py_pol import jones_matrix, jones_vector
+    from py_pol_calcs import jones_matrix, jones_vector
 
     j = opt(n=20, res_only=True, x=x20)
     J = jones_matrix.create_Jones_matrices()
