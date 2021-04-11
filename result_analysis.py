@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import power, outer, sqrt, exp, sin, cos, conj, dot, pi, einsum, arctan, array, arccos, conjugate, flip
+from numpy import (power, outer, sqrt, exp, sin, cos, conj, dot, pi,
+                   einsum, arctan, array, arccos, conjugate, flip, angle)
 import pandas
 from pathlib import Path, PureWindowsPath
 import scipy
@@ -17,7 +18,6 @@ import sys
 
 THz = 10**12
 m_um = 10**6 # m to um conversion
-
 
 def load_material_data(mat_name):
 
@@ -38,7 +38,7 @@ def load_material_data(mat_name):
 
     data_slice = np.where((frequencies > f_min) &
                           (frequencies < f_max))
-    data_slice = data_slice[0][::30]
+    data_slice = data_slice[0][::20]
 
     eps_mat_r = np.array(df[eps_mat_r_key])[data_slice]
     eps_mat_i = np.array(df[eps_mat_i_key])[data_slice]
@@ -160,18 +160,19 @@ def opt(n, x=None, ret_j=False):
         """
 
         # hwp 4 mat opt back to start
-        #print(np.absolute(j[:, 0, 0]) ** 2)
-        #print(np.absolute(j[:, 1, 1]) ** 2)
-        #print((1-j[:, 0, 1].imag) ** 2)
-        #print((1-j[:, 1, 0].imag) ** 2)
-        #print()
-
-        res = sum(np.absolute(j[:, 0, 0]) ** 2 + np.absolute(j[:, 1, 1]) ** 2) \
-        + sum((1-j[:, 0, 1].imag) ** 2 + (1-j[:, 1, 0].imag) ** 2)
+        #res = sum(np.absolute(j[:, 0, 0]) ** 2 + np.absolute(j[:, 1, 1]) ** 2) \
+        #+ sum((1-j[:, 0, 1].imag) ** 2 + (1-j[:, 1, 0].imag) ** 2)
 
         # qwp state opt
         #q = j[:, 0, 0] / j[:, 1, 0]
-        #res = (1 / m) * sum(q.real ** 2 + (q.imag - 1) ** 2)
+        #res = sum(q.real ** 2 + (q.imag - 1) ** 2)
+
+        # qwp state opt 2.
+        a, b = j[:, 0, 0], j[:, 1, 0]
+        phi = angle(a)-angle(b)
+        print(np.abs(a),np.abs(b))
+        print(angle(a),angle(b))
+        res = sum((np.abs(b)-np.abs(a))**2+(phi-pi/2)**2)
 
         # Masson ret. opt.
         #A, B = j[:, 0, 0], j[:, 0, 1]
@@ -183,7 +184,7 @@ def opt(n, x=None, ret_j=False):
     def print_fun(x, f, accepted):
         print(x, f, accepted)
 
-    bounds = list(zip([0]*n, [4*pi]*n)) + list(zip([0]*n, [16*pi]*n))
+    bounds = list(zip([0]*n, [2*pi]*n)) + list(zip([0]*n, [10**4]*n))
 
     minimizer_kwargs = {}
 
@@ -222,24 +223,24 @@ def opt(n, x=None, ret_j=False):
 
     bounded_step = RandomDisplacementBounds(np.array([b[0] for b in bounds]), np.array([b[1] for b in bounds]))
 
-    x0 = np.concatenate((np.random.random(n)*16*pi, np.random.random(n)*16*pi))
+    x0 = np.concatenate((np.random.random(n)*2*pi, np.random.random(n)*10**4))
 
     if ret_j:
         return erf(x)
 
-    #return minimize(erf, x0)
+    return minimize(erf, x0)
     #return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
 
 
-d_cl4 = array([2720, 1450, 1680.0, 3090, 2440])
-angles_cl4 = np.deg2rad(array([97.9, 83.1, 144.9, 112.7, 3.1]))
+d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
+angles_cl4 = np.deg2rad(array([3.12, 112.71, 144.85, 83.07, 97.93]))
 x_ceramic_l4 = np.concatenate((angles_cl4, d_cl4))
 
 if __name__ == '__main__':
 
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
 
-    f_min, f_max = 0.2*THz, 2.00*THz
+    f_min, f_max = 0.2*THz, 2*THz
 
     eps_mat1, f = load_material_data('ceramic_fast')
     eps_mat2, _ = load_material_data('ceramic_slow')
@@ -263,14 +264,14 @@ if __name__ == '__main__':
     for x in xs:
         print(x)
     """
-    """
-    for _ in range(1000):
-        ret = opt(n=n)
-        print(ret.fun)
 
-    exit()
-    """
-    j = opt(n=n, ret_j=True, x=x_ceramic_l4)
+    for _ in range(1):
+        ret = opt(n=n)
+        print(ret)
+
+    exit('DONE ! :)')
+
+    j = opt(n=n, ret_j=False, x=x_ceramic_l4)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
