@@ -5,8 +5,8 @@ from pathlib import Path, PureWindowsPath
 import scipy
 from scipy.constants import c as c0
 from scipy.optimize import basinhopping
-from py_pol import jones_matrix
-from py_pol import jones_vector
+from py_pol_calcs import jones_matrix
+from py_pol_calcs import jones_vector
 from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize

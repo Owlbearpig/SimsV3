@@ -9,7 +9,7 @@ from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
 from numpy.linalg import solve
-from py_pol import jones_vector, jones_matrix
+from py_pol_calcs import jones_vector, jones_matrix
 import string
 import matplotlib.pyplot as plt
 import sys
