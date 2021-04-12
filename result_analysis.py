@@ -164,20 +164,17 @@ def opt(n, x=None, ret_j=False):
         #+ sum((1-j[:, 0, 1].imag) ** 2 + (1-j[:, 1, 0].imag) ** 2)
 
         # qwp state opt
-        #q = j[:, 0, 0] / j[:, 1, 0]
-        #res = sum(q.real ** 2 + (q.imag - 1) ** 2)
+        q = j[:, 0, 0] / j[:, 1, 0]
+        res = sum(q.real ** 2 + (q.imag - 1) ** 2)
 
         # qwp state opt 2.
-        a, b = j[:, 0, 0], j[:, 1, 0]
-        phi = angle(a)-angle(b)
-        print(np.abs(a),np.abs(b))
-        print(angle(a),angle(b))
-        res = sum((np.abs(b)-np.abs(a))**2+(phi-pi/2)**2)
+        #a, b = j[:,0,0], j[:,1,0]
+        #res = sum((a.real-1)**2+(a.imag+1)**2+(b.real-1)**2+(b.imag-1)**2)
 
         # Masson ret. opt.
         #A, B = j[:, 0, 0], j[:, 0, 1]
         #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-        #res = (1/m)*np.sum((delta_equiv-pi)**2)
+        #res = sum((delta_equiv-pi/2)**2)
 
         return res
 
@@ -228,8 +225,8 @@ def opt(n, x=None, ret_j=False):
     if ret_j:
         return erf(x)
 
-    return minimize(erf, x0)
-    #return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
+    #return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=25)
 
 
 d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
@@ -265,13 +262,19 @@ if __name__ == '__main__':
         print(x)
     """
 
-    for _ in range(1):
+    best, best_res = np.inf, None
+    for _ in range(10):
         ret = opt(n=n)
-        print(ret)
+        print(ret, _)
+        if ret.fun < best:
+            best = ret.fun
+            best_res = ret
 
-    exit('DONE ! :)')
+    print(best_res)
 
-    j = opt(n=n, ret_j=False, x=x_ceramic_l4)
+    #exit('DONE ! :)')
+
+    j = opt(n=n, ret_j=True, x=best_res.x)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
