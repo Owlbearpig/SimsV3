@@ -38,7 +38,7 @@ def load_material_data(mat_name):
 
     data_slice = np.where((frequencies > f_min) &
                           (frequencies < f_max))
-    data_slice = data_slice[0][::20]
+    data_slice = data_slice[0][::resolution]
 
     eps_mat_r = np.array(df[eps_mat_r_key])[data_slice]
     eps_mat_i = np.array(df[eps_mat_i_key])[data_slice]
@@ -168,13 +168,14 @@ def opt(n, x=None, ret_j=False):
         res = sum(q.real ** 2 + (q.imag - 1) ** 2)
 
         # qwp state opt 2.
-        #a, b = j[:,0,0], j[:,1,0]
-        #res = sum((a.real-1)**2+(a.imag+1)**2+(b.real-1)**2+(b.imag-1)**2)
+        #a, b = j[:, 0, 0], j[:, 1, 0]
+        #phi = angle(a)-angle(b)
+        #res = sum((np.abs(b)-np.abs(a))**2+(phi-pi/2)**2)
 
         # Masson ret. opt.
         #A, B = j[:, 0, 0], j[:, 0, 1]
         #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-        #res = sum((delta_equiv-pi/2)**2)
+        #res = (1/m)*np.sum((delta_equiv-pi)**2)
 
         return res
 
@@ -225,9 +226,12 @@ def opt(n, x=None, ret_j=False):
     if ret_j:
         return erf(x)
 
-    #return minimize(erf, x0)
-    return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=25)
+    return minimize(erf, x0)
+    #return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
 
+angles_cl4_full = array([4.61953041e+00, 4.58461298e-01, 2.48041345e+00, 3.78437858e+00, 5.25502234e+00])
+d_cl4_full = array([3.91043128e+03, 2.60763905e+03, 2.59679197e+03, 1.04906116e+04, 5.27866155e+03])
+x_cl4_full = np.concatenate((angles_cl4_full, d_cl4_full))
 
 d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
 angles_cl4 = np.deg2rad(array([3.12, 112.71, 144.85, 83.07, 97.93]))
@@ -236,8 +240,8 @@ x_ceramic_l4 = np.concatenate((angles_cl4, d_cl4))
 if __name__ == '__main__':
 
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
-
-    f_min, f_max = 0.2*THz, 2*THz
+    resolution = 1
+    f_min, f_max = 0.2*THz, 2.0*THz
 
     eps_mat1, f = load_material_data('ceramic_fast')
     eps_mat2, _ = load_material_data('ceramic_slow')
@@ -261,28 +265,26 @@ if __name__ == '__main__':
     for x in xs:
         print(x)
     """
-
-    best, best_res = np.inf, None
-    for _ in range(10):
+    """
+    for _ in range(1):
         ret = opt(n=n)
-        print(ret, _)
-        if ret.fun < best:
-            best = ret.fun
-            best_res = ret
+        print(ret)
 
-    print(best_res)
-
-    #exit('DONE ! :)')
-
-    j = opt(n=n, ret_j=True, x=best_res.x)
+    exit('DONE ! :)')
+    """
+    j = opt(n=n, ret_j=True, x=x_cl4_full)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
-
+    q = j[:, 0, 0] / j[:, 1, 0]
+    L = q.real ** 2 + (q.imag - 1) ** 2
+    plt.plot(f, L)
+    plt.show()
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
     J = jones_matrix.create_Jones_matrices('cl4')
     J.from_matrix(j)
+    print(J.parameters)
     #J.remove_global_phase()
     #J.set_global_phase(0)
     #J.analysis.retarder(verbose=True)
