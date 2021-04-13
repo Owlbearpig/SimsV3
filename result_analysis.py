@@ -26,6 +26,8 @@ def load_material_data(mat_name):
         'ceramic_fast': Path('material_data/Sample1_090deg_1825ps_0m88Grad_D=3000.csv'),
         'HIPS_MUT_1_1': Path('material_data/MUT 1-1.csv'),
         'Fused_4eck': Path('material_data/4Eck_D=2042.csv'),
+        'quartz_m_slow': Path('material_data/quartz_m_slow.csv'),
+        'quartz_m_fast': Path('material_data/quartz_m_fast.csv'),
     }
 
     df = pandas.read_csv(mat_paths[mat_name])
@@ -123,6 +125,7 @@ def opt(n, x=None, ret_j=False):
 
         phi_s, phi_p = (2 * n_s * pi / wls) * d.T, (2 * n_p * pi / wls) * d.T
         alpha_s, alpha_p = -(2 * pi * k_s / wls) * d.T, -(2 * pi * k_p / wls) * d.T
+        #alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
 
         x, y = 1j * phi_s + alpha_s, 1j * phi_p + alpha_p
         angles = np.tile(angles, (m, 1))
@@ -166,7 +169,7 @@ def opt(n, x=None, ret_j=False):
         # qwp state opt
         q = j[:, 0, 0] / j[:, 1, 0]
         res = sum(q.real ** 2 + (q.imag - 1) ** 2)
-
+        #res = sum((j[:, 1, 0] * conj(j[:, 1, 0]) - j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
         # qwp state opt 2.
         #a, b = j[:, 0, 0], j[:, 1, 0]
         #phi = angle(a)-angle(b)
@@ -226,25 +229,44 @@ def opt(n, x=None, ret_j=False):
     if ret_j:
         return erf(x)
 
-    return minimize(erf, x0)
-    #return basinhopping(erf, x0, niter=2500, callback=print_fun, take_step=bounded_step, disp=True, T=1.4*10**-5)
+    #return minimize(erf, x0)
+    return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=25)
 
-angles_cl4_full = array([4.61953041e+00, 4.58461298e-01, 2.48041345e+00, 3.78437858e+00, 5.25502234e+00])
-d_cl4_full = array([3.91043128e+03, 2.60763905e+03, 2.59679197e+03, 1.04906116e+04, 5.27866155e+03])
-x_cl4_full = np.concatenate((angles_cl4_full, d_cl4_full))
+angles_cl4_02_20 = array([4.61953041e+00, 4.58461298e-01, 2.48041345e+00, 3.78437858e+00, 5.25502234e+00])
+d_cl4_02_20 = array([3.91043128e+03, 2.60763905e+03, 2.59679197e+03, 1.04906116e+04, 5.27866155e+03]) # 24.9
+x_cl4_02_20 = np.concatenate((angles_cl4_02_20, d_cl4_02_20))
 
-d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
+angles_cl4_035_20 = array([1.55065274e+00,  3.02220562e-01, -3.14806903e-01,  1.34268867e+00, 1.73947220e-01])
+d_cl4_035_20 = array([3.90855784e+03,  5.21546932e+03,  5.06268420e+03, 7.66853582e+03,  7.75647746e+03]) # 29.6
+x_cl4_035_20 = np.concatenate((angles_cl4_035_20, d_cl4_035_20))
+
+angles_cl4_05_20 = array([4.70121322e+00,  6.53286936e+00,  4.50875188e+00,  1.76718691e+00, 3.21159687e+00,])
+d_cl4_05_20 = array([3.45388897e+03,  4.57809315e+03,  2.29421050e+03, -2.38574802e+03,  4.48955958e+03]) # 17.3
+x_cl4_05_20 = np.concatenate((angles_cl4_05_20, d_cl4_05_20))
+
+angles_cl4_05_15 = array([3.53388516e+00, 1.90528314e+00, 3.70143600e+00, 1.86344386e+00, 4.24715276e+00])
+d_cl4_05_15 = array([7.71441240e+03, 6.13007734e+03, 3.05190115e+03, 3.08095056e+03, 3.10321319e+03])
+x_cl4_05_15 = np.concatenate((angles_cl4_05_15, d_cl4_05_15))
+
+angles_m = flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0)
+d_m = flip(array([3360, 6730, 6460, 3140, 3330, 8430]), 0)
+x_ml4 = np.concatenate((angles_m, d_m))
+
+# obtained using wrong erf; (Int_x - Int_y)**2 # Although it's result that got printed ...
+"""
 angles_cl4 = np.deg2rad(array([3.12, 112.71, 144.85, 83.07, 97.93]))
+d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
 x_ceramic_l4 = np.concatenate((angles_cl4, d_cl4))
+"""
 
 if __name__ == '__main__':
-
+    from dataexport import save
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
     resolution = 1
-    f_min, f_max = 0.2*THz, 2.0*THz
+    f_min, f_max = 0.2*THz, 2.5*THz
 
-    eps_mat1, f = load_material_data('ceramic_fast')
-    eps_mat2, _ = load_material_data('ceramic_slow')
+    eps_mat1, f = load_material_data('quartz_m_fast')
+    eps_mat2, _ = load_material_data('quartz_m_slow')
 
     wls = (c0/f)*m_um
     m = len(wls)
@@ -255,31 +277,36 @@ if __name__ == '__main__':
     k_s, k_p = sqrt(np.abs(eps_mat1)-eps_mat1.real)/sqrt(2), sqrt(np.abs(eps_mat2)-eps_mat2.real)/sqrt(2)
 
     #np.random.seed(1000)
-    n = 5
+    n = 6
     """
-    xs = []
-    for _ in range(1000):
-        ret = opt(n=n)
-        print(str(ret.fun)+',')
-        xs.append(list(ret.x))
-    for x in xs:
-        print(x)
-    """
-    """
-    for _ in range(1):
+    best, best_res = np.inf, None
+    for _ in range(10):
         ret = opt(n=n)
         print(ret)
+        print(ret, _)
+        if ret.fun < best:
+            best = ret.fun
+            best_res = ret
 
-    exit('DONE ! :)')
+    print(best_res)
     """
-    j = opt(n=n, ret_j=True, x=x_cl4_full)
+    j = opt(n=n, ret_j=True, x=x_ml4)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
     q = j[:, 0, 0] / j[:, 1, 0]
     L = q.real ** 2 + (q.imag - 1) ** 2
+    #L = L / max(L)
+
+    #A, B = j[:, 0, 0], j[:, 0, 1]
+    #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+    #L = delta_equiv/pi
+
+    save({'freq': f.flatten(), 'L': L}, name='x_ml4')
+
     plt.plot(f, L)
     plt.show()
+    exit()
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
     J = jones_matrix.create_Jones_matrices('cl4')
