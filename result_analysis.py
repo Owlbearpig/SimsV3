@@ -28,6 +28,8 @@ def load_material_data(mat_name):
         'Fused_4eck': Path('material_data/4Eck_D=2042.csv'),
         'quartz_m_slow': Path('material_data/quartz_m_slow.csv'),
         'quartz_m_fast': Path('material_data/quartz_m_fast.csv'),
+        'quartz_m_slow2': Path('material_data/quartz_m_slow2.csv'),
+        'quartz_m_fast2': Path('material_data/quartz_m_fast2.csv'),
     }
 
     df = pandas.read_csv(mat_paths[mat_name])
@@ -232,6 +234,26 @@ def opt(n, x=None, ret_j=False):
     #return minimize(erf, x0)
     return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=25)
 
+angles_cl4_05_22_n6 = array([6.45706370e+00, 3.23172880e+00, 1.62683796e+00, 3.38754487e+00,1.53410411e+00, 3.53553954e+00])
+d_cl4_05_22_n6 = array([5.25952607e+03, 1.99339481e+03,8.33507973e+03, 4.27282730e+03, 4.25283016e+03, 2.12689058e+03])
+x_cl4_05_22_n6 = np.concatenate((angles_cl4_05_22_n6, d_cl4_05_22_n6))
+
+angles_cl4_04_24_n6 = array([6.15370628e-01, 1.30340254e+00, 2.90403823e+00, 3.45621387e-01, 2.24195442e+00, 2.35872063e-01])
+d_cl4_04_24_n6 = array([1.06871635e+03, 8.34445653e+03, 4.11903805e+03, 2.10233555e+03, 2.09616433e+03, 6.35692990e+03])
+x_cl4_04_24_n6 = np.concatenate((angles_cl4_04_24_n6, d_cl4_04_24_n6))
+
+angles_cl4_05_20_n6 = array([6.28519254e+00, 4.64743972e+00, 6.81758339e+00, 2.29016774e+00, 6.66441738e+00, 1.17972161e+00])
+d_cl4_05_20_n6 = array([5.95435042e+03, 9.51799993e+03, 4.79662256e+03, 4.77927465e+03, 4.75038499e+03, 2.40089682e+03])
+x_cl4_05_20_n6 = np.concatenate((angles_cl4_05_20_n6, d_cl4_05_20_n6))
+
+angles_cl4_02_20_n6 = array([5.33985248e+00,  9.56709262e-01, -4.97426771e-01, -1.46739563e-02, 5.59238259e-01,  7.63377294e-02])
+d_cl4_02_20_n6 = array([2.73466001e+03,  8.24960819e+03, 2.00002995e+03,  1.91378856e+03,  2.72786597e+03,  5.47221231e+03])
+x_cl4_02_20_n6 = np.concatenate((angles_cl4_02_20_n6, d_cl4_02_20_n6))
+
+angles_cl4_02_15_n6 = array([8.97059689e-01, 3.39617650e+00, 1.24729401e+00, 2.75500826e+00, 5.59629715e+00, 4.46653490e+00])
+d_cl4_02_15_n6 = array([1.68288798e+03, 6.67721916e+03, 6.77502950e+03, 3.43409664e+03, 3.34206925e+03, 1.00276008e+04])
+x_cl4_02_15_n6 = np.concatenate((angles_cl4_02_15_n6, d_cl4_02_15_n6))
+
 angles_cl4_02_20 = array([4.61953041e+00, 4.58461298e-01, 2.48041345e+00, 3.78437858e+00, 5.25502234e+00])
 d_cl4_02_20 = array([3.91043128e+03, 2.60763905e+03, 2.59679197e+03, 1.04906116e+04, 5.27866155e+03]) # 24.9
 x_cl4_02_20 = np.concatenate((angles_cl4_02_20, d_cl4_02_20))
@@ -265,9 +287,9 @@ if __name__ == '__main__':
     resolution = 1
     f_min, f_max = 0.2*THz, 2.5*THz
 
-    eps_mat1, f = load_material_data('quartz_m_fast')
-    eps_mat2, _ = load_material_data('quartz_m_slow')
-
+    eps_mat1, f = load_material_data('ceramic_fast')
+    eps_mat2, _ = load_material_data('ceramic_slow')
+    #print(len(f))
     wls = (c0/f)*m_um
     m = len(wls)
 
@@ -276,7 +298,6 @@ if __name__ == '__main__':
     n_s, n_p = sqrt(np.abs(eps_mat1)+eps_mat1.real)/sqrt(2), sqrt(np.abs(eps_mat2)+eps_mat2.real)/sqrt(2)
     k_s, k_p = sqrt(np.abs(eps_mat1)-eps_mat1.real)/sqrt(2), sqrt(np.abs(eps_mat2)-eps_mat2.real)/sqrt(2)
 
-    #np.random.seed(1000)
     n = 6
     """
     best, best_res = np.inf, None
@@ -290,7 +311,7 @@ if __name__ == '__main__':
 
     print(best_res)
     """
-    j = opt(n=n, ret_j=True, x=x_ml4)
+    j = opt(n=n, ret_j=True, x=x_cl4_05_22_n6)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
@@ -302,7 +323,7 @@ if __name__ == '__main__':
     #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
     #L = delta_equiv/pi
 
-    save({'freq': f.flatten(), 'L': L}, name='x_ml4')
+    save({'freq': f.flatten(), 'L': L}, name='x_cl4_05_22_n6')
 
     plt.plot(f, L)
     plt.show()
