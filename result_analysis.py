@@ -288,8 +288,8 @@ if __name__ == '__main__':
     resolution = 1
     f_min, f_max = 0.2*THz, 2.5*THz
 
-    eps_mat1, f = load_material_data('quartz_m_fast2')
-    eps_mat2, _ = load_material_data('quartz_m_slow2')
+    eps_mat1, f = load_material_data('ceramic_fast')
+    eps_mat2, _ = load_material_data('ceramic_slow')
     #print(len(f))
     wls = (c0/f)*m_um
     m = len(wls)
@@ -312,7 +312,7 @@ if __name__ == '__main__':
 
     print(best_res)
     """
-    j = opt(n=n, ret_j=True, x=x_ml4)
+    j = opt(n=n, ret_j=True, x=x_cl4_02_15_n6)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
@@ -400,8 +400,8 @@ if __name__ == '__main__':
     #Jin.draw_ellipse()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
-
-    pe_export(f, Jout_l, name='x_ml4')
+    print(len(Jout_l))
+    pe_export(f, Jout_l, name='x_cl4_02_15_n6')
 
     #plt.plot(int_x)
     #plt.plot(int_y)
