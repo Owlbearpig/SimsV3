@@ -234,6 +234,7 @@ def opt(n, x=None, ret_j=False):
     #return minimize(erf, x0)
     return basinhopping(erf, x0, niter=200, callback=print_fun, take_step=bounded_step, disp=True, T=25)
 
+
 angles_cl4_05_22_n6 = array([6.45706370e+00, 3.23172880e+00, 1.62683796e+00, 3.38754487e+00,1.53410411e+00, 3.53553954e+00])
 d_cl4_05_22_n6 = array([5.25952607e+03, 1.99339481e+03,8.33507973e+03, 4.27282730e+03, 4.25283016e+03, 2.12689058e+03])
 x_cl4_05_22_n6 = np.concatenate((angles_cl4_05_22_n6, d_cl4_05_22_n6))
@@ -282,13 +283,13 @@ x_ceramic_l4 = np.concatenate((angles_cl4, d_cl4))
 """
 
 if __name__ == '__main__':
-    from dataexport import save
+    from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
     resolution = 1
     f_min, f_max = 0.2*THz, 2.5*THz
 
-    eps_mat1, f = load_material_data('ceramic_fast')
-    eps_mat2, _ = load_material_data('ceramic_slow')
+    eps_mat1, f = load_material_data('quartz_m_fast2')
+    eps_mat2, _ = load_material_data('quartz_m_slow2')
     #print(len(f))
     wls = (c0/f)*m_um
     m = len(wls)
@@ -311,7 +312,7 @@ if __name__ == '__main__':
 
     print(best_res)
     """
-    j = opt(n=n, ret_j=True, x=x_cl4_05_22_n6)
+    j = opt(n=n, ret_j=True, x=x_ml4)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
@@ -323,16 +324,16 @@ if __name__ == '__main__':
     #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
     #L = delta_equiv/pi
 
-    save({'freq': f.flatten(), 'L': L}, name='x_cl4_05_22_n6')
+    #save({'freq': f.flatten(), 'L': L}, name='x_cl4_05_22_n6')
 
-    plt.plot(f, L)
-    plt.show()
-    exit()
+    #plt.plot(f, L)
+    #plt.show()
+
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
     J = jones_matrix.create_Jones_matrices('cl4')
     J.from_matrix(j)
-    print(J.parameters)
+
     #J.remove_global_phase()
     #J.set_global_phase(0)
     #J.analysis.retarder(verbose=True)
@@ -400,6 +401,8 @@ if __name__ == '__main__':
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
 
+    pe_export(f, Jout_l, name='x_ml4')
+
     #plt.plot(int_x)
     #plt.plot(int_y)
     #plt.show()
@@ -409,10 +412,10 @@ if __name__ == '__main__':
     #print(Jout.parameters.delay())
     #print(Jout.parameters)
     #plt.show()
-    Jout_l.draw_ellipse()
-    plt.show()
-    Jout_c.draw_ellipse()
-    plt.show()
+    #Jout_l.draw_ellipse()
+    #plt.show()
+    #Jout_c.draw_ellipse()
+    #plt.show()
     #Jout.draw_ellipse()
     #plt.show()
 
