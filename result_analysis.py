@@ -286,10 +286,10 @@ if __name__ == '__main__':
     from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
     resolution = 1
-    f_min, f_max = 0.2*THz, 2.5*THz
+    f_min, f_max = 0.2*THz, 2.0*THz
 
-    eps_mat1, f = load_material_data('quartz_m_fast2')
-    eps_mat2, _ = load_material_data('quartz_m_slow2')
+    eps_mat1, f = load_material_data('ceramic_fast')  # 'ceramic_slow' # quartz_m_fast2
+    eps_mat2, _ = load_material_data('ceramic_slow')  # 'ceramic_fast' # quartz_m_slow2
     #print(len(f))
     wls = (c0/f)*m_um
     m = len(wls)
@@ -312,7 +312,7 @@ if __name__ == '__main__':
 
     print(best_res)
     """
-    j = opt(n=n, ret_j=True, x=x_ml4)
+    j = opt(n=n, ret_j=True, x=x_cl4_02_15_n6)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
@@ -400,8 +400,18 @@ if __name__ == '__main__':
     #Jin.draw_ellipse()
     Jout_l = J * Jin_l
     Jout_c = J * Jin_c
+    from plotting import draw_ellipse
+    Ex, Ey = draw_ellipse(Jout_l, return_values=True)
+    print(len(Ex))
 
-    pe_export(f, Jout_l, name='x_ml4')
+    for i in range(0, len(Ex), 21):
+        freq = str(np.round(f[i]*(1/THz), 1))
+        fact = np.max([Ex[i,:], Ey[i,:]])
+        plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
+    plt.legend()
+    plt.show()
+
+    #pe_export(f, Jout_l, name='x_cl4_02_15_n6', normalize=True)
 
     #plt.plot(int_x)
     #plt.plot(int_y)

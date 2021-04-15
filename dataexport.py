@@ -12,13 +12,16 @@ def save(data, name):
     df.to_csv(name + '.csv')
 
 
-def pe_export(f, jones_vec, name):
+def pe_export(f, jones_vec, name, normalize):
     Ex, Ey = draw_ellipse(jones_vec, return_values=True)
     data = {}
     for ind, freq in enumerate(f.flatten()):
         col_name = str(round((1/THz)*freq, 2))
-        data[col_name + '_X'] = Ex[ind, :]
-        data[col_name + '_Y'] = Ey[ind, :]
+        normalization_factor = 1
+        if normalize:
+            normalization_factor /= np.max([Ex[ind, :], Ey[ind, :]])
+        data[col_name + '_X'] = Ex[ind, :]*normalization_factor
+        data[col_name + '_Y'] = Ey[ind, :]*normalization_factor
 
     save(data, name=name+'_pe')
 
