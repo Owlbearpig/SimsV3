@@ -107,7 +107,8 @@ def draw_ellipse(E,
             limit = np.array([E0x.max(), E0y.max(), E0u.max()]).max() * 1.2
 
     # Prepare the figure and the subplots
-    fig = plt.figure(figsize=figsize)
+    if not return_values:
+        fig = plt.figure(figsize=figsize)
     if depol_prob:
         if type(subplots) is tuple and E.size == np.prod(np.array(subplots)):
             pass  # Only case subplots is not overwritten
@@ -169,41 +170,42 @@ def draw_ellipse(E,
     # Main loop
     ax = []
     for ind in range(E.size):  # Loop in curves
-        # Initial considerations for the subplot
-        indS = int(np.floor(ind / Ncurves))
-        indC = int(ind % Ncurves)
-        if indC == 0:
-            axis = fig.add_subplot(Nx, Ny, indS + 1)
-            ax.append(axis)
-            if Nsubplots > 1:
-                if subplots in ('individual', 'Individual', 'INDIVIDUAL'):
-                    string = str(indS)
+        if not return_values:
+            # Initial considerations for the subplot
+            indS = int(np.floor(ind / Ncurves))
+            indC = int(ind % Ncurves)
+            if indC == 0:
+                axis = fig.add_subplot(Nx, Ny, indS + 1)
+                ax.append(axis)
+                if Nsubplots > 1:
+                    if subplots in ('individual', 'Individual', 'INDIVIDUAL'):
+                        string = str(indS)
+                    else:
+                        string = str(list(np.unravel_index(indS, (Nx, Ny))))
+                    plt.title(string, fontsize=18)
                 else:
-                    string = str(list(np.unravel_index(indS, (Nx, Ny))))
-                plt.title(string, fontsize=18)
+                    plt.title(E.name, fontsize=26)
+            # Other considerations
+            if depol_prob:
+                color = 'w'
             else:
-                plt.title(E.name, fontsize=26)
-        # Other considerations
-        if depol_prob:
-            color = 'w'
-        else:
-            color = colors[name_colors[ind % 10]]
-        if subplots in ('AS_SHAPE', 'as_shape',
-                        'As_shape') and Nx * Ny > 1 and Ncurves > 1:
-            string = str(list(np.unravel_index(ind, E.shape)[2:]))
-        else:
-            if Ncurves == 1:
-                string = 'Polarized'
+                color = colors[name_colors[ind % 10]]
+            if subplots in ('AS_SHAPE', 'as_shape',
+                            'As_shape') and Nx * Ny > 1 and Ncurves > 1:
+                string = str(list(np.unravel_index(ind, E.shape)[2:]))
             else:
-                string = str(list(np.unravel_index(ind, E.shape)))
-        # Plot the probability distribution
-        if depol_prob and is_depol[ind]:
-            IDimage = axis.imshow(prob[ind, :, :],
-                                  interpolation='bilinear',
-                                  aspect='equal',
-                                  origin='lower',
-                                  extent=[-limit, limit, -limit, limit])
-            # axis = axis[0]
+                if Ncurves == 1:
+                    string = 'Polarized'
+                else:
+                    string = str(list(np.unravel_index(ind, E.shape)))
+            # Plot the probability distribution
+            if depol_prob and is_depol[ind]:
+                IDimage = axis.imshow(prob[ind, :, :],
+                                      interpolation='bilinear',
+                                      aspect='equal',
+                                      origin='lower',
+                                      extent=[-limit, limit, -limit, limit])
+                # axis = axis[0]
         # Plot the curve
         if return_values:
             return Ex, Ey

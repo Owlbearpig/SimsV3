@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import (power, outer, sqrt, exp, sin, cos, conj, dot, pi,
-                   einsum, arctan, array, arccos, conjugate, flip, angle)
+                   einsum, arctan, array, arccos, conjugate, flip, angle, tan, arctan2)
 import pandas
 from pathlib import Path, PureWindowsPath
 import scipy
@@ -16,6 +16,7 @@ import string
 import matplotlib.pyplot as plt
 import sys
 
+rad = 180 / np.pi
 THz = 10**12
 m_um = 10**6 # m to um conversion
 
@@ -28,8 +29,8 @@ def load_material_data(mat_name):
         'Fused_4eck': Path('material_data/4Eck_D=2042.csv'),
         'quartz_m_slow': Path('material_data/quartz_m_slow.csv'),
         'quartz_m_fast': Path('material_data/quartz_m_fast.csv'),
-        'quartz_m_slow2': Path('material_data/quartz_m_slow2.csv'),
-        'quartz_m_fast2': Path('material_data/quartz_m_fast2.csv'),
+        'quartz_sellmeier_slow': Path('material_data/sellmeier_quartz_slow.csv'),
+        'quartz_sellmeier_fast': Path('material_data/sellmeier_quartz_fast.csv'),
     }
 
     df = pandas.read_csv(mat_paths[mat_name])
@@ -45,7 +46,10 @@ def load_material_data(mat_name):
     data_slice = data_slice[0][::resolution]
 
     eps_mat_r = np.array(df[eps_mat_r_key])[data_slice]
-    eps_mat_i = np.array(df[eps_mat_i_key])[data_slice]
+    if not eps_mat_i_key:
+        eps_mat_i = np.zeros_like(eps_mat_r)
+    else:
+        eps_mat_i = np.array(df[eps_mat_i_key])[data_slice]
 
     eps_mat1 = (eps_mat_r + eps_mat_i * 1j).reshape(len(data_slice), 1)
 
@@ -169,9 +173,12 @@ def opt(n, x=None, ret_j=False):
         #+ sum((1-j[:, 0, 1].imag) ** 2 + (1-j[:, 1, 0].imag) ** 2)
 
         # qwp state opt
-        q = j[:, 0, 0] / j[:, 1, 0]
+        norm = j[:, 0, 0] * conjugate(j[:, 0, 0]) + j[:, 1, 0] * conjugate(j[:, 1, 0])
+        A, C = j[:, 0, 0]/norm, j[:, 1, 0]/norm
+        q = A/C
         res = sum(q.real ** 2 + (q.imag - 1) ** 2)
         #res = sum((j[:, 1, 0] * conj(j[:, 1, 0]) - j[:, 0, 0] * conj(j[:, 0, 0])) ** 2)
+
         # qwp state opt 2.
         #a, b = j[:, 0, 0], j[:, 1, 0]
         #phi = angle(a)-angle(b)
@@ -286,14 +293,16 @@ if __name__ == '__main__':
     from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
     resolution = 1
-    f_min, f_max = 0.2*THz, 2.0*THz
+    f_min, f_max = 0.2*THz, 2.5*THz
 
-    eps_mat1, f = load_material_data('ceramic_fast')  # 'ceramic_slow' # quartz_m_fast2
-    eps_mat2, _ = load_material_data('ceramic_slow')  # 'ceramic_fast' # quartz_m_slow2
-    #print(len(f))
+    eps_mat1, f = load_material_data('ceramic_fast')  # 'ceramic_fast' # quartz_m_fast2 # quartz_m_fast # quartz_sellmeier_fast
+    eps_mat2, _ = load_material_data('ceramic_slow')  # 'ceramic_slow' # quartz_m_slow2 # quartz_m_slow # quartz_sellmeier_slow
+
     wls = (c0/f)*m_um
     m = len(wls)
 
+    #print(len(f))
+    #exit()
     #stripes = 628, 517.1
     #n_s, n_p, k_s, k_p = form_birefringence(stripes)
     n_s, n_p = sqrt(np.abs(eps_mat1)+eps_mat1.real)/sqrt(2), sqrt(np.abs(eps_mat2)+eps_mat2.real)/sqrt(2)
@@ -313,6 +322,8 @@ if __name__ == '__main__':
     print(best_res)
     """
     j = opt(n=n, ret_j=True, x=x_cl4_02_15_n6)
+    J = jones_matrix.create_Jones_matrices('cl4')
+    J.from_matrix(j)
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
@@ -324,15 +335,14 @@ if __name__ == '__main__':
     #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
     #L = delta_equiv/pi
 
-    #save({'freq': f.flatten(), 'L': L}, name='x_cl4_05_22_n6')
+    #save({'freq': f.flatten(), 'L': L}, name='x_ml4')
 
-    #plt.plot(f, L)
+    #plt.semilogy(f, L)
+    #plt.semilogy(f, (L))
+    #plt.xlim((0.1*THz, 2.5*THz))
     #plt.show()
 
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
-
-    J = jones_matrix.create_Jones_matrices('cl4')
-    J.from_matrix(j)
 
     #J.remove_global_phase()
     #J.set_global_phase(0)
@@ -399,19 +409,52 @@ if __name__ == '__main__':
     #plt.show()
     #Jin.draw_ellipse()
     Jout_l = J * Jin_l
-    Jout_c = J * Jin_c
+    #Jout_c = J * Jin_c
+    #Jout_l.normalize()
     from plotting import draw_ellipse
     Ex, Ey = draw_ellipse(Jout_l, return_values=True)
-    print(len(Ex))
+    #print(len(Ex))
+    circ_pol_deg = Jout_l.parameters.degree_circular_polarization()
+    lin_pol_deg = Jout_l.parameters.degree_linear_polarization()
 
-    for i in range(0, len(Ex), 21):
-        freq = str(np.round(f[i]*(1/THz), 1))
-        fact = np.max([Ex[i,:], Ey[i,:]])
-        plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
+    alpha = Jout_l.parameters.alpha()
+    delay = Jout_l.parameters.delay()
+
+    azimuth = Jout_l.parameters.azimuth()
+    ellipticity_angle = Jout_l.parameters.ellipticity_angle()
+
+    slice = np.where(f < 2.5*THz)[0]
+
+    plt.plot(f[slice], alpha[slice]*rad, label='alpha')
+    plt.plot(f[slice], delay[slice]*rad, label='delay')
+    plt.plot(f[slice], azimuth[slice]*rad, label='azimuth')
+    plt.plot(f[slice], ellipticity_angle[slice]*rad, label='ellipticity_angle')
     plt.legend()
     plt.show()
 
-    #pe_export(f, Jout_l, name='x_cl4_02_15_n6', normalize=True)
+    #circ_pol_deg = np.array(Jout_l.parameters.degree_circular_polarization())
+    """
+    save({'freq': f[slice].flatten(),
+          'alpha': alpha[slice]*rad, 'delay': delay[slice]*rad,
+          'azimuth': azimuth[slice]*rad, 'ellipticity_angle': ellipticity_angle[slice]*rad},
+         name='x_cl4_02_15_n6_lp_params')
+    """
+    #Jout_l.draw_ellipse()
+    #plt.show()
+    for i in range(0, len(Ex), 1):
+        #if i != 297:
+        #    continue
+        print(str(np.round((1/THz)*f[i], 2)))
+        freq = str(np.round(f[i]*(1/THz), 2))
+        fact = np.max([Ex[i,:], Ey[i,:]])
+        #print(Ex[i,:]/fact, Ey[i,:]/fact)
+        #plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
+    plt.ylim((-1.1, 1.1))
+    plt.xlim((-1.1, 1.1))
+    plt.legend()
+    #plt.show()
+
+    #pe_export(f, Jout_c, name='x_ml4_cp', normalize=True)
 
     #plt.plot(int_x)
     #plt.plot(int_y)
