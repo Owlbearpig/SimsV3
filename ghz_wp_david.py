@@ -21,7 +21,7 @@ m_um = 10**6 # m to um conversion
 
 def load_material_data():
 
-    data_filepath = Path('/home/alex/Desktop/Projects/SimsV3/MUT 1-1.csv')
+    data_filepath = Path('material_data/MUT 1-1.csv')
     df = pandas.read_csv(data_filepath)
 
     freq_dict_key = [key for key in df.keys() if "freq" in key][0]
@@ -276,7 +276,7 @@ if __name__ == '__main__':
 
     int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
-    J = jones_matrix.create_Jones_matrices('x_ghz')
+    J = jones_matrix.create_Jones_matrices('WP_x_ghz')
     J.from_matrix(j)
     #J.remove_global_phase()
     #J.set_global_phase(0)
@@ -317,33 +317,32 @@ if __name__ == '__main__':
     #E1.draw_ellipse()
     #E2.draw_ellipse()
     #plt.show()
-    #plt.show()
     #print(Jhi.parameters)
     #J.remove_global_phase()
     #print(J[11].parameters)
     J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
     J_qwp.quarter_waveplate(azimuth=pi/4)
 
-    Jin_c = jones_vector.create_Jones_vectors('Jin_c')
-    Jin_c.circular_light(kind='l')
-    Jin_c.draw_ellipse()
-    plt.show()
+    #Jin_c = jones_vector.create_Jones_vectors('Jin_c')
+    #Jin_c.circular_light(kind='l')
+    #Jin_c.draw_ellipse()
+    #plt.show()
 
-    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
-    Jin_l.linear_light()
-    Jin_l.draw_ellipse()
+    Jin_l = jones_vector.create_Jones_vectors('J_lp_.5pi')
+    Jin_l.linear_light(azimuth=pi/2)
+    #Jin_l.draw_ellipse()
 
-    J_ideal_out = J_qwp*J_qwp*Jin_c
+    #J_ideal_out = J_qwp*J_qwp*Jin_c
 
-    J_ideal_out.draw_ellipse()
-    plt.show()
+    #J_ideal_out.draw_ellipse()
+    #plt.show()
     #exit('hello : )')
 
-    Jin_c.draw_ellipse()
-    plt.show()
+    #Jin_c.draw_ellipse()
+    #plt.show()
     #Jin.draw_ellipse()
     Jout_l = J * Jin_l
-    Jout_c = J * Jin_c
+    #Jout_c = J * Jin_c
 
     plt.plot(int_x)
     plt.plot(int_y)
@@ -356,8 +355,8 @@ if __name__ == '__main__':
     #plt.show()
     Jout_l.draw_ellipse()
     plt.show()
-    Jout_c.draw_ellipse()
-    plt.show()
+    #Jout_c.draw_ellipse()
+    #plt.show()
     #Jout.draw_ellipse()
     #plt.show()
 
