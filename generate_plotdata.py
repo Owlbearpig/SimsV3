@@ -30,8 +30,8 @@ def pe_export(f, jones_vec, path, normalize):
 
 
 if __name__ == '__main__':
-    from results import result_masson
-    result = result_masson
+    from results import *
+    result = result1
 
     res_name = result['name']
     dir = plot_data_dir / Path(res_name)

@@ -40,6 +40,15 @@ x_cl4_05_15 = np.concatenate((angles_cl4_05_15, d_cl4_05_15))
 angles_m = flip(np.deg2rad(array([31.7, 10.4, 118.7, 24.9, 5.1, 69.0])), 0)
 d_m = flip(array([3360, 6730, 6460, 3140, 3330, 8430]), 0)
 x_ml4 = np.concatenate((angles_m, d_m))
+#x_ml4 = np.concatenate(([69.0*np.pi/180], [8430]))
+
+angles_random = np.random.random(6)*np.pi
+d_random = np.random.random(6)*10**0
+x_random = np.concatenate((angles_random, d_random))
+
+angles_cl4_02_15_n5 = array([1.73770094e+00, 3.58427180e+00, 2.93089513e+00, 1.31295306e+00, 3.24404925e+00])
+d_cl4_02_15_n5 = array([5.03207110e+03, 6.71045482e+03, 3.32913889e+03, 6.68308395e+03, 1.00463001e+04])
+x_cl4_02_15_n5 = np.concatenate((angles_cl4_02_15_n5, d_cl4_02_15_n5))
 
 # obtained using wrong erf; (Int_x - Int_y)**2 # Although it's result that got printed ...
 """
@@ -59,11 +68,34 @@ result1 = {
         'mat_name': ('fast_mat_name', 'slow_mat_name') # if form, only 'fast_mat_name' is used. 'slow_mat_name' is air
 }
 """
+result_random = {
+        'name': 'c_random',
+        'comments': '',
+        'x': x_random,
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
 
 result1 = {
         'name': 'c_l4_02_15',
         'comments': '',
         'x': x_cl4_02_15_n6,
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
+
+result2 = {
+        'name': 'c_l4_05_22_n6',
+        'comments': '',
+        'x': x_cl4_05_22_n6,
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
+
+result_5wp = {
+        'name': 'c_l4_02_15_n5',
+        'comments': '',
+        'x': x_cl4_02_15_n5,
         'bf': 'intrinsic',
         'mat_name': ('ceramic_fast', 'ceramic_slow')
 }

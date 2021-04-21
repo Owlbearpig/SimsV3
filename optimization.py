@@ -73,9 +73,9 @@ def optimize(settings):
 
 if __name__ == '__main__':
     # run in terminal and output to .txt file (python optimization.py > somename.txt)
-    n = 6
-    resolution = 1
-    f_range = 0.2 * THz, 2.5 * THz
+    n = 5
+    resolution = 14
+    f_range = 0.25 * THz, 1.5 * THz
     bf = 'intrinsic'
     mat_name = ('ceramic_fast', 'ceramic_slow')
 

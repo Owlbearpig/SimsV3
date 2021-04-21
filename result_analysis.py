@@ -20,13 +20,13 @@ from consts import *
 # plotting single values and stuff
 
 if __name__ == '__main__':
-    from results import result1
+    from results import *
     from functions import setup
 
-    j, f, wls = setup(result1, return_vals=True)
+    j, f, wls = setup(result_masson, return_vals=True)
     J = jones_matrix.create_Jones_matrices(result1['name'])
     J.from_matrix(j)
-
+    #slice = np.where(f < 1.6*THz)[0]
     #from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
 
@@ -38,17 +38,20 @@ if __name__ == '__main__':
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
     q = j[:, 0, 0] / j[:, 1, 0]
-    L = q.real ** 2 + (q.imag - 1) ** 2
+
+    L_state = (q.real ** 2 + (q.imag - 1) ** 2)
     #L = L / max(L)
-
-    #A, B = j[:, 0, 0], j[:, 0, 1]
-    #delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
-    #L = delta_equiv/pi
-
-    #plt.semilogy(f, L)
-    #plt.semilogy(f, (L))
-    #plt.xlim((0.1*THz, 2.5*THz))
-    #plt.show()
+    #print(np.mean(L), np.std(L))
+    A, B = j[:, 0, 0], j[:, 0, 1]
+    delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
+    L_ret = (delta_equiv-pi/2)**2
+    from generate_plotdata import export_csv
+    plt.plot(f, L_state, label='state')
+    #export_csv({'freq': f.flatten(), 'L': L}, 'plot_data/masson/MassLoss.csv')
+    plt.plot(f, L_ret, label='ret')
+    #plt.ylim((-2.5*10**-4, 2.5*10**-3))
+    plt.legend()
+    plt.show()
 
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
