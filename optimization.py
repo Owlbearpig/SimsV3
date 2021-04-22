@@ -73,7 +73,7 @@ def optimize(settings):
 
 if __name__ == '__main__':
     # run in terminal and output to .txt file (python optimization.py > somename.txt)
-    n = 5
+    n = 6
     resolution = 14
     f_range = 0.25 * THz, 1.5 * THz
     bf = 'intrinsic'

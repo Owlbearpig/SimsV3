@@ -138,7 +138,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x) - exp(y))
     j[:, :, 1, 0] = j[:, :, 0, 1]
     j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
-    j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
+    #j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
     """
     delta = (phi_s-phi_p)/2
     sd = 1j * sin(delta)
@@ -153,7 +153,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     np.einsum(einsum_str, *j.transpose((1, 0, 2, 3)), out=j[:, 0], optimize=einsum_path[0])
 
     j = j[:, 0]
-    print(j[0])
+
     return j
 
 
