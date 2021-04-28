@@ -82,4 +82,5 @@ if __name__ == '__main__':
     pe_export(f, Jout_l, path=dir / Path('lp_pe.csv'), normalize=True)
     pe_export(f, Jout_c, path=dir / Path('cp_pe.csv'), normalize=True)
 
-
+    intensity = Jout_l.parameters.intensity()
+    export_csv({'freq': f_flat, 'intensity': intensity}, path=dir / Path('intensity.csv'))

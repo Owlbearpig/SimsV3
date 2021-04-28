@@ -35,12 +35,12 @@ if __name__ == '__main__':
 
     j, f, wls = setup(res, return_vals=True)
     #j,f,wls = j[::20], f[::20], wls[::20]
-    J = jones_matrix.create_Jones_matrices(result1['name'])
-    J.from_matrix(j)
+    J = jones_matrix.create_Jones_matrices(res['name'])
+    J.from_matrix(j[::20])
     #slice = np.where(f < 1.6*THz)[0]
     #from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
-    print(np.argmin(np.abs(f-0.540*THz)))
+    print(np.argmin(np.abs(f-0.861*THz)))
     m = len(wls)
     thickness_for_1thz(res)
     #print(len(f))
@@ -56,8 +56,11 @@ if __name__ == '__main__':
     #L = L / max(L)
     #print(np.mean(L), np.std(L))
     A, B = j[:, 0, 0], j[:, 0, 1]
+    #print(j)
     delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
     L_ret = (delta_equiv-pi/2)**2
+    #print(L_ret)
+    #print(L_state)
     from generate_plotdata import export_csv
     plt.semilogy(f, L_state, label='state')
     #export_csv({'freq': f.flatten(), 'L': L}, 'plot_data/masson/MassLoss.csv')
@@ -75,10 +78,10 @@ if __name__ == '__main__':
     #print(j[:, 0, 1])
     #print(j[:, 1, 0])
     #print(j[:, 1, 1])
-    #v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    #E1.draw_ellipse()
-    #E2.draw_ellipse()
-    #plt.show()
+    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    E1.draw_ellipse()
+    E2.draw_ellipse()
+    plt.show()
     #J.parameters.global_phase(verbose=True)
     #Jqwp = jones_matrix.create_Jones_matrices()
     #Jqwp.retarder_linear()
@@ -120,7 +123,7 @@ if __name__ == '__main__':
     #plt.show()
 
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
-    Jin_l.linear_light()
+    Jin_l.linear_light(azimuth=pi/3)
     #Jin_l.draw_ellipse()
 
     #J_ideal_out = J_qwp*J_qwp*Jin_c
@@ -145,7 +148,14 @@ if __name__ == '__main__':
 
     alpha = Jout.parameters.alpha()
     delay = Jout.parameters.delay()
-
+    #plt.plot(f, delay-pi, label='delay')
+    """
+    plt.plot(f, delta_equiv/pi, label='delta equiv')
+    plt.xlim((0, 1.75*THz))
+    plt.ylim((0.2, 0.6))
+    plt.legend()
+    plt.show()
+    """
     azimuth = Jout.parameters.azimuth()
     ellipticity_angle = Jout.parameters.ellipticity_angle()
 
@@ -157,9 +167,9 @@ if __name__ == '__main__':
     #plt.show()
 
 
-    slice = np.where(f < 1.6*THz)[0]
+    slice = np.where(f < 2.5*THz)[0]
 
-    plt.semilogy(f[slice], (alpha[slice]*rad-45)**2, label='alpha')
+    plt.plot(f[slice], alpha[slice]*rad, label='alpha')
     #plt.plot(f[slice], delay[slice]*rad, label='delay')
     #plt.plot(f[slice], azimuth[slice]*rad, label='azimuth')
     #plt.plot(f[slice], ellipticity_angle[slice]*rad, label='ellipticity_angle')
@@ -175,9 +185,9 @@ if __name__ == '__main__':
 
     #Jout_l.draw_ellipse()
     #plt.show()
-    for i in range(0, len(Ex[slice]), 1):
+    for i in range(0, len(Ex[slice]), 20):
         if i != 50:
-            continue
+            pass
         print(str(np.round((1/THz)*f[i], 2)))
         freq = str(np.round(f[i]*(1/THz), 3))
         fact = np.max([Ex[i,:], Ey[i,:]])

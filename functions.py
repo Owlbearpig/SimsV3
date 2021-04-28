@@ -27,6 +27,8 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'quartz_m_fast': Path('material_data/quartz_m_fast.csv'),
         'quartz_sellmeier_slow': Path('material_data/sellmeier_quartz_slow.csv'),
         'quartz_sellmeier_fast': Path('material_data/sellmeier_quartz_fast.csv'),
+        'quartz_full_slow': Path('material_data/abs_slow_grisch1990_fit.csv'),
+        'quartz_full_fast': Path('material_data/abs_fast_grisch1990_fit.csv'),
     }
 
     df = pandas.read_csv(mat_paths[mat_name])
