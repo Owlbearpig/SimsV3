@@ -69,15 +69,15 @@ def optimize(settings):
     erf = setup(settings)
 
     # return minimize(erf, settings['x0'])
-    return basinhopping(erf, settings['x'], niter=200, callback=print, take_step=bounded_step, disp=True, T=25)
+    return basinhopping(erf, settings['x'], niter=20000, callback=print, take_step=bounded_step, disp=True, T=25)
 
 if __name__ == '__main__':
     # run in terminal and output to .txt file (python optimization.py > somename.txt)
     n = 6
-    resolution = 14
-    f_range = 0.25 * THz, 1.5 * THz
+    resolution = 20
+    f_range = 0.25 * THz, 2.0 * THz
     bf = 'intrinsic'
-    mat_name = ('ceramic_fast', 'ceramic_slow')
+    mat_name = ('quartz_sellmeier_fast', 'quartz_sellmeier_slow')
 
     settings = {'resolution': resolution, 'f_range': f_range, 'bf': bf, 'mat_name': mat_name}
 

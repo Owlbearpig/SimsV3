@@ -31,7 +31,7 @@ def pe_export(f, jones_vec, path, normalize):
 
 if __name__ == '__main__':
     from results import *
-    result = result1
+    result = result_masson
 
     res_name = result['name']
     dir = plot_data_dir / Path(res_name)
@@ -43,8 +43,11 @@ if __name__ == '__main__':
     J = jones_matrix.create_Jones_matrices(result['name'])
     J.from_matrix(j)
 
-    Jin_c = jones_vector.create_Jones_vectors('LCP')
-    Jin_c.circular_light(kind='l')
+    Jin_c = jones_vector.create_Jones_vectors('RCP')
+    Jin_c.circular_light(kind='r')
+
+    #print(Jin_c)
+    #exit()
 
     Jin_l = jones_vector.create_Jones_vectors('LP_0')
     Jin_l.linear_light()

@@ -21,17 +21,28 @@ from consts import *
 
 if __name__ == '__main__':
     from results import *
-    from functions import setup
+    from functions import setup, thickness_for_1thz
 
-    j, f, wls = setup(result_masson, return_vals=True)
+    res_test = {
+        'name': 'test',
+        'comments': '',
+        'x': np.concatenate(([45*pi/180], [1.525*10**3])),
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+    }
+
+    res = result_masson
+
+    j, f, wls = setup(res, return_vals=True)
+    #j,f,wls = j[::20], f[::20], wls[::20]
     J = jones_matrix.create_Jones_matrices(result1['name'])
     J.from_matrix(j)
     #slice = np.where(f < 1.6*THz)[0]
     #from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
-
+    print(np.argmin(np.abs(f-0.540*THz)))
     m = len(wls)
-
+    thickness_for_1thz(res)
     #print(len(f))
     #exit()
 
@@ -40,15 +51,17 @@ if __name__ == '__main__':
     q = j[:, 0, 0] / j[:, 1, 0]
 
     L_state = (q.real ** 2 + (q.imag - 1) ** 2)
+    print('argmin:', np.argmin(L_state), 'f(argmin):', f[np.argmin(L_state)]*(1/THz))
+    print('min:', min(L_state))
     #L = L / max(L)
     #print(np.mean(L), np.std(L))
     A, B = j[:, 0, 0], j[:, 0, 1]
     delta_equiv = 2 * arctan(sqrt((A.imag ** 2 + B.imag ** 2) / (A.real ** 2 + B.real ** 2)))
     L_ret = (delta_equiv-pi/2)**2
     from generate_plotdata import export_csv
-    plt.plot(f, L_state, label='state')
+    plt.semilogy(f, L_state, label='state')
     #export_csv({'freq': f.flatten(), 'L': L}, 'plot_data/masson/MassLoss.csv')
-    plt.plot(f, L_ret, label='ret')
+    plt.semilogy(f, L_ret, label='ret')
     #plt.ylim((-2.5*10**-4, 2.5*10**-3))
     plt.legend()
     plt.show()
@@ -101,8 +114,8 @@ if __name__ == '__main__':
     #J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
     #J_qwp.quarter_waveplate(azimuth=pi/4)
 
-    Jin_c = jones_vector.create_Jones_vectors('Jin_c')
-    Jin_c.circular_light(kind='l')
+    Jin_c = jones_vector.create_Jones_vectors('RCP')
+    Jin_c.circular_light(kind='r')
     #Jin_c.draw_ellipse()
     #plt.show()
 
@@ -119,27 +132,42 @@ if __name__ == '__main__':
     #Jin_c.draw_ellipse()
     #plt.show()
     #Jin.draw_ellipse()
-    Jout_l = J * Jin_l
-    #Jout_c = J * Jin_c
+    #Jout_l = J * Jin_l
+    #Jout_l.draw_ellipse()
+    #plt.show()
+    Jout = J * Jin_l
     #Jout_l.normalize()
     from plotting import draw_ellipse
-    Ex, Ey = draw_ellipse(Jout_l, return_values=True)
+    Ex, Ey = draw_ellipse(Jout, return_values=True)
     #print(len(Ex))
-    circ_pol_deg = Jout_l.parameters.degree_circular_polarization()
-    lin_pol_deg = Jout_l.parameters.degree_linear_polarization()
+    circ_pol_deg = Jout.parameters.degree_circular_polarization()
+    lin_pol_deg = Jout.parameters.degree_linear_polarization()
 
-    alpha = Jout_l.parameters.alpha()
-    delay = Jout_l.parameters.delay()
+    alpha = Jout.parameters.alpha()
+    delay = Jout.parameters.delay()
 
-    azimuth = Jout_l.parameters.azimuth()
-    ellipticity_angle = Jout_l.parameters.ellipticity_angle()
+    azimuth = Jout.parameters.azimuth()
+    ellipticity_angle = Jout.parameters.ellipticity_angle()
 
-    slice = np.where(f < 2.5*THz)[0]
+    eccentricity = Jout.parameters.eccentricity()
 
-    plt.plot(f[slice], alpha[slice]*rad, label='alpha')
-    plt.plot(f[slice], delay[slice]*rad, label='delay')
-    plt.plot(f[slice], azimuth[slice]*rad, label='azimuth')
-    plt.plot(f[slice], ellipticity_angle[slice]*rad, label='ellipticity_angle')
+    intensity = Jout.parameters.intensity()
+
+    #plt.plot(f, 10*np.log10(intensity))
+    #plt.show()
+
+
+    slice = np.where(f < 1.6*THz)[0]
+
+    plt.semilogy(f[slice], (alpha[slice]*rad-45)**2, label='alpha')
+    #plt.plot(f[slice], delay[slice]*rad, label='delay')
+    #plt.plot(f[slice], azimuth[slice]*rad, label='azimuth')
+    #plt.plot(f[slice], ellipticity_angle[slice]*rad, label='ellipticity_angle')
+    #plt.plot(f[slice], ellipticity_angle[slice] * rad, label='ellipticity_angle')
+    plt.legend()
+    plt.show()
+
+    plt.plot(f[slice], eccentricity[slice], label='eccentricity')
     plt.legend()
     plt.show()
 
@@ -147,18 +175,18 @@ if __name__ == '__main__':
 
     #Jout_l.draw_ellipse()
     #plt.show()
-    for i in range(0, len(Ex), 1):
-        #if i != 297:
-        #    continue
+    for i in range(0, len(Ex[slice]), 1):
+        if i != 50:
+            continue
         print(str(np.round((1/THz)*f[i], 2)))
-        freq = str(np.round(f[i]*(1/THz), 2))
+        freq = str(np.round(f[i]*(1/THz), 3))
         fact = np.max([Ex[i,:], Ey[i,:]])
         #print(Ex[i,:]/fact, Ey[i,:]/fact)
-        #plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
+        plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
     plt.ylim((-1.1, 1.1))
     plt.xlim((-1.1, 1.1))
     plt.legend()
-    #plt.show()
+    plt.show()
 
     #plt.plot(int_x)
     #plt.plot(int_y)

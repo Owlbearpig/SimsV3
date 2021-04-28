@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import sys
 from consts import *
 
-def load_material_data(mat_name, f_min, f_max, resolution):
+def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
     mat_paths = {
         'ceramic_slow': Path('material_data/Sample1_000deg_1825ps_0m-2Grad_D=3000.csv'),
         'ceramic_fast': Path('material_data/Sample1_090deg_1825ps_0m88Grad_D=3000.csv'),
@@ -129,7 +129,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
 
     phi_s, phi_p = (2 * n_s * pi / wls) * d.T, (2 * n_p * pi / wls) * d.T
     alpha_s, alpha_p = -(2 * pi * k_s / wls) * d.T, -(2 * pi * k_p / wls) * d.T
-    # alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
+    alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
     #"""
     x, y = 1j * phi_s + alpha_s, 1j * phi_p + alpha_p
     angles = np.tile(angles, (m, 1))
@@ -138,7 +138,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x) - exp(y))
     j[:, :, 1, 0] = j[:, :, 0, 1]
     j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
-    #j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
+    j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
     """
     delta = (phi_s-phi_p)/2
     sd = 1j * sin(delta)
@@ -164,6 +164,22 @@ def wp_cnt(settings):
         n = (len(settings['x'])-2) // 2
     return n
 
+
+def min_thickness(settings):
+    eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=True)
+    bf = n_s - n_p
+    argmax_wls = np.argmax(wls)
+    print(bf[argmax_wls])
+    print(wls[argmax_wls])
+    print(0.25*wls[argmax_wls]/bf[argmax_wls])
+
+def thickness_for_1thz(settings):
+    eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=True)
+    bf = n_s - n_p
+    index_1thz = np.argmin(np.abs(1*THz-f))
+    print('bf @ 1 THz:', bf[index_1thz])
+    print('wl @ 1 THz:', wls[index_1thz])
+    print('thickness req.:', 0.25*wls[index_1thz]/bf[index_1thz])
 
 def loss(j):
     #d, angles = x[0:n], x[n:2*n]
@@ -214,8 +230,7 @@ def loss(j):
 
     return L
 
-
-def setup(settings, return_vals=False):
+def material_values(settings, return_vals=False):
     if return_vals: # full range for plotting. Throw values right before plot
         resolution = 1
         f_min, f_max = 0.2*THz, 2.5*THz
@@ -233,6 +248,13 @@ def setup(settings, return_vals=False):
         eps_mat2 = np.ones_like(eps_mat1).reshape(m, 1)  # air
         n_s, n_p, k_s, k_p = None, None, None, None,
 
+    return eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m
+
+
+def setup(settings, return_vals=False):
+    eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=return_vals)
+    #print(len(f))
+    #exit()
     n = wp_cnt(settings)
 
     einsum_str, einsum_path = get_einsum(m, n)

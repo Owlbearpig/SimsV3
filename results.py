@@ -21,6 +21,11 @@ angles_cl4_02_15_n6 = array([8.97059689e-01, 3.39617650e+00, 1.24729401e+00, 2.7
 d_cl4_02_15_n6 = array([1.68288798e+03, 6.67721916e+03, 6.77502950e+03, 3.43409664e+03, 3.34206925e+03, 1.00276008e+04])
 x_cl4_02_15_n6 = np.concatenate((angles_cl4_02_15_n6, d_cl4_02_15_n6))
 
+angles_cl4_02_20_n6_2 = array([-1.60081771e+00, -1.98399984e-03,  3.33358212e-01,  4.42111574e+00, 3.24610128e+00,  1.67694383e+00])
+d_cl4_02_20_n6_2 = array([9.37443383e+03,  5.44969377e+03, 5.24113696e+03,  2.63116488e+03,  1.14254757e+04,  3.55949929e+03])
+x_cl4_02_20_n6_2 = np.concatenate((angles_cl4_02_20_n6_2, d_cl4_02_20_n6_2))
+
+
 angles_cl4_02_20 = array([4.61953041e+00, 4.58461298e-01, 2.48041345e+00, 3.78437858e+00, 5.25502234e+00])
 d_cl4_02_20 = array([3.91043128e+03, 2.60763905e+03, 2.59679197e+03, 1.04906116e+04, 5.27866155e+03]) # 24.9
 x_cl4_02_20 = np.concatenate((angles_cl4_02_20, d_cl4_02_20))
@@ -49,6 +54,11 @@ x_random = np.concatenate((angles_random, d_random))
 angles_cl4_02_15_n5 = array([1.73770094e+00, 3.58427180e+00, 2.93089513e+00, 1.31295306e+00, 3.24404925e+00])
 d_cl4_02_15_n5 = array([5.03207110e+03, 6.71045482e+03, 3.32913889e+03, 6.68308395e+03, 1.00463001e+04])
 x_cl4_02_15_n5 = np.concatenate((angles_cl4_02_15_n5, d_cl4_02_15_n5))
+
+angles_cl4_02_15_n5 = array([1.54223461e+00, 3.09294378e-01, 4.40114922e+00, 2.85212256e+00, 3.24777983e+00, 3.13319887e+00,])
+d_cl4_02_15_n5 = array([3.90033596e+03, 5.20779039e+03, 1.01684284e+04, 7.55828581e+03, 7.81641390e+03, 1.04555262e+04])
+x_cl4_02_20_n6_1kits = np.concatenate((angles_cl4_02_15_n5, d_cl4_02_15_n5))
+
 
 # obtained using wrong erf; (Int_x - Int_y)**2 # Although it's result that got printed ...
 """
@@ -92,6 +102,22 @@ result2 = {
         'mat_name': ('ceramic_fast', 'ceramic_slow')
 }
 
+result1_02_20_1kits = {
+        'name': 'result1_02_20_1kits',
+        'comments': '',
+        'x': x_cl4_02_20_n6_1kits,
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
+
+result_02_20_2 = {
+        'name': 'x_cl4_02_20_n6_2',
+        'comments': '',
+        'x': x_cl4_02_20_n6_2,
+        'bf': 'intrinsic',
+        'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
+
 result_5wp = {
         'name': 'c_l4_02_15_n5',
         'comments': '',
@@ -106,4 +132,6 @@ result_masson = {
         'x': x_ml4,
         'bf': 'intrinsic',
         'mat_name': ('quartz_sellmeier_fast', 'quartz_sellmeier_slow')
+        #'mat_name': ('ceramic_fast', 'ceramic_slow')
 }
+
