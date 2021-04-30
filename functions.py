@@ -235,7 +235,7 @@ def loss(j):
 def material_values(settings, return_vals=False):
     if return_vals: # full range for plotting. Throw values right before plot
         resolution = 1
-        f_min, f_max = 0.2*THz, 2.5*THz
+        f_min, f_max = 0.0*THz, 2.5*THz
     else:
         resolution = settings['resolution']
         f_min, f_max = settings['f_range']

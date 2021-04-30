@@ -31,26 +31,28 @@ if __name__ == '__main__':
         'mat_name': ('ceramic_fast', 'ceramic_slow')
     }
 
-    res = result_masson
+    res = result_GHz
+
+
 
     j, f, wls = setup(res, return_vals=True)
-    #j,f,wls = j[::20], f[::20], wls[::20]
+    j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
     J = jones_matrix.create_Jones_matrices(res['name'])
-    J.from_matrix(j[::20])
+    J.from_matrix(j)
+    J.rotate(angle=0.1)
     #slice = np.where(f < 1.6*THz)[0]
     #from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]
-    print(np.argmin(np.abs(f-0.861*THz)))
+    #print(np.argmin(np.abs(f-0.861*THz)))
     m = len(wls)
-    thickness_for_1thz(res)
+    #thickness_for_1thz(res)
     #print(len(f))
     #exit()
 
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
     q = j[:, 0, 0] / j[:, 1, 0]
-
-    L_state = (q.real ** 2 + (q.imag - 1) ** 2)
+    L_state = (q.real ** 2 + (q.imag + 1) ** 2)
     print('argmin:', np.argmin(L_state), 'f(argmin):', f[np.argmin(L_state)]*(1/THz))
     print('min:', min(L_state))
     #L = L / max(L)
@@ -78,10 +80,10 @@ if __name__ == '__main__':
     #print(j[:, 0, 1])
     #print(j[:, 1, 0])
     #print(j[:, 1, 1])
-    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    E1.draw_ellipse()
-    E2.draw_ellipse()
-    plt.show()
+    #v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    #E1.draw_ellipse()
+    #E2.draw_ellipse()
+    #plt.show()
     #J.parameters.global_phase(verbose=True)
     #Jqwp = jones_matrix.create_Jones_matrices()
     #Jqwp.retarder_linear()
@@ -123,7 +125,7 @@ if __name__ == '__main__':
     #plt.show()
 
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
-    Jin_l.linear_light(azimuth=pi/3)
+    Jin_l.linear_light()
     #Jin_l.draw_ellipse()
 
     #J_ideal_out = J_qwp*J_qwp*Jin_c
@@ -169,15 +171,14 @@ if __name__ == '__main__':
 
     slice = np.where(f < 2.5*THz)[0]
 
-    plt.plot(f[slice], alpha[slice]*rad, label='alpha')
-    #plt.plot(f[slice], delay[slice]*rad, label='delay')
-    #plt.plot(f[slice], azimuth[slice]*rad, label='azimuth')
-    #plt.plot(f[slice], ellipticity_angle[slice]*rad, label='ellipticity_angle')
-    #plt.plot(f[slice], ellipticity_angle[slice] * rad, label='ellipticity_angle')
+    plt.plot(f, alpha*rad, label='alpha')
+    plt.plot(f, delay*rad, label='delay')
+    plt.plot(f, azimuth*rad, label='azimuth')
+    plt.plot(f, ellipticity_angle*rad, label='ellipticity_angle')
     plt.legend()
     plt.show()
 
-    plt.plot(f[slice], eccentricity[slice], label='eccentricity')
+    plt.plot(f, eccentricity, label='eccentricity')
     plt.legend()
     plt.show()
 
@@ -185,10 +186,10 @@ if __name__ == '__main__':
 
     #Jout_l.draw_ellipse()
     #plt.show()
-    for i in range(0, len(Ex[slice]), 20):
-        if i != 50:
-            pass
-        print(str(np.round((1/THz)*f[i], 2)))
+    for i in range(0, len(Ex[slice])):
+        #if i != 50:
+        #    pass
+        #print(str(np.round((1/THz)*f[i], 2)))
         freq = str(np.round(f[i]*(1/THz), 3))
         fact = np.max([Ex[i,:], Ey[i,:]])
         #print(Ex[i,:]/fact, Ey[i,:]/fact)
