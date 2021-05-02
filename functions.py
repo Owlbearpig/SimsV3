@@ -121,6 +121,8 @@ def form_birefringence(stripes, wls, eps_mat1, eps_mat2):
         sqrt(abs(wp_eps_s_2) - wp_eps_s_2.real) / sqrt(2)
     )
 
+    n_s = n_s#-(np.linspace(0, 0.023, n_s.shape[0]).reshape(n_s.shape))
+    print(eps_mat1)
     return np.array([n_s, n_p, k_s, k_p])
 
 
@@ -233,7 +235,7 @@ def loss(j):
     return L
 
 def material_values(settings, return_vals=False):
-    if return_vals: # full range for plotting. Throw values right before plot
+    if return_vals:
         resolution = 1
         f_min, f_max = 0.0*THz, 2.5*THz
     else:

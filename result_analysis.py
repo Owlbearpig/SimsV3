@@ -33,8 +33,6 @@ if __name__ == '__main__':
 
     res = result_GHz
 
-
-
     j, f, wls = setup(res, return_vals=True)
     j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
     J = jones_matrix.create_Jones_matrices(res['name'])

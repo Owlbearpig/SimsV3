@@ -28,8 +28,8 @@ for idx in range(0, len(f)):
 
     plt.plot(Ex, Ey, label=f[idx]/10**9)
 
-plt.ylim((-1.1,1.1))
-plt.xlim((-1.1,1.1))
+plt.ylim((-1.1, 1.1))
+plt.xlim((-1.1, 1.1))
 plt.legend()
 plt.show()
 
