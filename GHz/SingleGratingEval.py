@@ -55,6 +55,8 @@ eps_mat1, eps_mat2, _, _, _, _, f, wls, m = material_values(result_GHz, return_v
 stripes = stripes_ghz[-2], stripes_ghz[-1]
 n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
 
+plt.plot(f.flatten(), eps_mat1.flatten(), label=r'$\epsilon \ HIPS \ measured$')
+plt.plot(f.flatten(), np.sqrt(eps_mat1.flatten()), label=r'$n \ HIPS \ measured$')
 base = Path('ResultTeralyzerMinFreq')
 
 plt.plot(f.flatten(), n_s, label='n_s, real data')
