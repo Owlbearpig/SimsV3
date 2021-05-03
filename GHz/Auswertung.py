@@ -22,21 +22,36 @@ def func2(phi, p1, p2, a, b, delta):
     I0 = (a*np.cos(phi)+b*np.sin(phi)*np.cos(delta))**2+(b*np.sin(phi)*np.sin(delta))**2
     return sqrt(p1**2*cos(phi)**2+p2**2*sin(phi)**2)*sqrt(I0)
 
+def func21(phi, p1):
+    phi = phi
+    a,b,delta = 1,1, pi/2
+    p1 = p1
+    p2 = 1-p1
+    I0 = (a*np.cos(phi)+b*np.sin(phi)*np.cos(delta))**2+(b*np.sin(phi)*np.sin(delta))**2
+    return sqrt(p1**2*cos(phi)**2+p2**2*sin(phi)**2)*sqrt(I0)
+
+def func22(phi, a, b, delta):
+    print(p1,p2)
+    phi = phi
+    I0 = (a*np.cos(phi)+b*np.sin(phi)*np.cos(delta))**2+(b*np.sin(phi)*np.sin(delta))**2
+    return sqrt(p1**2*cos(phi)**2+p2**2*sin(phi)**2)*sqrt(I0)
+
 def func3(freq, ampl, omega, shift, shift2):
     freq = freq
     shift = 13.558989995949837
     omega = 0.08900501265729782
     return ampl*sin(omega*freq+shift)+shift2
 
-func = func1
 
 plt.style.use('fast')
 
 angles = np.arange(0,370,10)
 
-ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(100))
-ampl_offset = np.abs(ntwk.s[:,0,1])
-plt.plot(ntwk.f, np.abs(ntwk.s[:,0,1]))
+for angle in angles:
+    ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
+    ampl_offset = np.abs(ntwk.s[:,0,1])
+    plt.plot(ntwk.f, np.abs(ntwk.s[:,0,1]), label=str(angle))
+plt.legend()
 plt.show()
 
 ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(10))
@@ -75,15 +90,15 @@ plt.show()
 
 plt.figure()
 phi = np.deg2rad(phi)
-popt, pcov = curve_fit(func, phi, s21)
+popt, pcov = curve_fit(func1, phi, s21)
 a = popt[0]
 b = popt[1]
 delta = popt[2]
 print('p1, p2, a, b, delta')
 print(popt)
-plt.plot(phi, s21,'.')
+plt.polar(phi, s21,'.')
 phi = np.linspace(0,2*np.pi,1000)
-plt.plot(phi, func(phi, *popt))
+plt.plot(phi, func1(phi, *popt))
 plt.xlabel('$\phi$ in deg.')
 #plt.savefig(f'Polarplot_{f/10**9}GHz.pdf')
 plt.show()
@@ -95,6 +110,7 @@ plt.figure()
 f = np.array([])
 delta = np.array([])
 a, b = np.array([]), np.array([])
+p1_arr, p2_arr = np.array([]), np.array([])
 for idx in range(ntwk.f.size):
     if idx%50 != 0:
         continue
@@ -113,14 +129,44 @@ for idx in range(ntwk.f.size):
         s12 = np.append(s12, np.abs(ntwk.s[idx,0,1]))
 
     phi = np.deg2rad(phi)
-    popt, pcov = curve_fit(func, phi, s21)
+    popt, pcov = curve_fit(func21, phi, s21, p0=[1])
+
+    #p1, p2 = popt[0], popt[1]
+    p1 = popt[0]
+    p2 = 1-p1
+    p1_arr = np.append(p1_arr, popt[0])
+    p2_arr = np.append(p2_arr, p2)
+
+    popt, _ = curve_fit(func22, phi, s21)
 
     print(*popt)
-
-    delta = np.append(delta, np.abs(popt[-1]))
+    #p1, p2, a, b, delta
     a = np.append(a, popt[0])
     b = np.append(b, popt[1])
+    delta = np.append(delta, np.abs(popt[2]))
 
+plt.plot(f, p1_arr, label='p1')
+plt.plot(f, p2_arr, label='p2')
+plt.legend()
+plt.show()
+
+plt.plot(f/10**9, a/b, label='a/b')
+plt.legend()
+plt.show()
+
+plt.plot(f/10**9, delta/np.pi, '.-',label = 'Messung')
+plt.plot(f/10**9, f*0+0.5*1.03, 'k--',label='+3%')
+plt.plot(f/10**9, f*0+0.5*0.97, 'k--',label='-3%')
+plt.grid(True)
+plt.xlabel('$f$ in GHz')
+plt.ylabel(r"$\frac{\delta}{\pi}$")
+plt.xlim([75,110])
+plt.ylim([0.0,1.0])
+#plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+#plt.savefig('Retardation.pdf', bbox_inches='tight')
+plt.show()
+
+exit()
 """
 np.save('f', f)
 np.save('a', a)
