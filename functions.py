@@ -122,7 +122,7 @@ def form_birefringence(stripes, wls, eps_mat1, eps_mat2):
     )
 
     n_s = n_s#-(np.linspace(0, 0.023, n_s.shape[0]).reshape(n_s.shape))
-    print(eps_mat1)
+
     return np.array([n_s, n_p, k_s, k_p])
 
 
