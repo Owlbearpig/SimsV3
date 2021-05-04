@@ -41,11 +41,11 @@ result_GHz = {
         'mat_name': ('HIPS_MUT_1_1', '')
 }
 
-def fake_fb(f):
+def fake_fb(f, eps_const):
     m = len(f)
     stripes = stripes_ghz[-2], stripes_ghz[-1]
     eps_mat2 = (np.ones_like(f)).reshape(m, 1)
-    eps_mat1 = (np.ones_like(f)*2.149).reshape(m, 1)
+    eps_mat1 = (np.ones_like(f)*eps_const).reshape(m, 1)
     wls = um*(c0/f).reshape(m, 1)
     n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
 
@@ -73,10 +73,16 @@ for result in resultfiles:
     plt.plot(frequencies, ref_ind, label=result)
 
 freq = np.linspace(0.100*THz, 1.400*THz, 1000)
-n_s, n_p = fake_fb(freq)
+n_s, n_p = fake_fb(freq, 2.149)
 
-plt.plot(freq, n_s, label='n_s, fake')
-plt.plot(freq, n_p, label='n_p, fake')
+plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.149)$')
+plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.149)$')
+
+freq = np.linspace(0.100*THz, 1.400*THz, 1000)
+n_s, n_p = fake_fb(freq, 2.437)
+
+plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.437)$')
+plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.437)$')
 
 plt.legend()
 plt.show()

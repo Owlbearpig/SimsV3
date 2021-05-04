@@ -47,10 +47,18 @@ plt.style.use('fast')
 
 angles = np.arange(0,370,10)
 
+ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(190))
+normalization = np.abs(ntwk.s[:,0,1])
+
 for angle in angles:
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
-    ampl_offset = np.abs(ntwk.s[:,0,1])
-    plt.plot(ntwk.f, np.abs(ntwk.s[:,0,1]), label=str(angle))
+    plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,0,1]), label=str(angle))
+
+plt.grid(True)
+plt.xlabel('$f$ in GHz')
+plt.ylabel(r"Normalized amplitude")
+plt.xlim([75,110])
+plt.ylim([0.0,1.1])
 plt.legend()
 plt.show()
 
@@ -67,7 +75,7 @@ for angle in angles:
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
     f = ntwk.f[idx]
     phi = np.append(phi, angle-phi_offset)
-    s21 = np.append(s21, (np.abs(ntwk.s[idx,1,0]))/normalization[idx])
+    s21 = np.append(s21, (np.abs(ntwk.s[idx,1,0])))
     s12 = np.append(s12, np.abs(ntwk.s[idx,0,1]))
 
 #ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(190))
@@ -113,7 +121,7 @@ a, b = np.array([]), np.array([])
 p1_arr, p2_arr = np.array([]), np.array([])
 for idx in range(ntwk.f.size):
     if idx%50 != 0:
-        continue
+        pass
     print(idx)
     #phi_offset = 4.725 + (14.84-4.725)*idx/1400
     phi = np.array([])
@@ -132,12 +140,12 @@ for idx in range(ntwk.f.size):
     popt, pcov = curve_fit(func21, phi, s21, p0=[1])
 
     #p1, p2 = popt[0], popt[1]
-    p1 = popt[0]
+    p1 = 0#popt[0]
     p2 = 1-p1
     p1_arr = np.append(p1_arr, popt[0])
     p2_arr = np.append(p2_arr, p2)
 
-    popt, _ = curve_fit(func22, phi, s21)
+    popt, _ = curve_fit(func1, phi, s21)
 
     print(*popt)
     #p1, p2, a, b, delta
@@ -166,17 +174,16 @@ plt.ylim([0.0,1.0])
 #plt.savefig('Retardation.pdf', bbox_inches='tight')
 plt.show()
 
-exit()
-"""
+
 np.save('f', f)
 np.save('a', a)
 np.save('b', b)
 np.save('phi', phi)
 np.save('delta', delta)
-"""
+
 
 #delta = np.load('delta.npy')
-
+exit()
 
 popt, pcov = curve_fit(func3, f/10**9, delta, p0=[0.05, 0.2, pi, pi/2]) # 0.05*sin(0.2*f/10**9 + pi)+pi/2
 print(pcov)
