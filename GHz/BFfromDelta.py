@@ -92,12 +92,15 @@ n_s_arr, n_p_arr = np.array([]), np.array([])
 for idx in range(m):
     if idx%50 != 0:
         continue
+    if idx == 0:
+        continue
     print(idx)
     f = np.append(f, f_measured[idx])
 
     best_val = 1000
     best_res = None
     for i, n_s in enumerate(n_s_range):
+        print(i)
         for j, n_p in enumerate(n_p_range):
             delta = calc_delta(n_s, n_p)
             diff = (delta_measured[idx] - delta)**2
@@ -107,9 +110,12 @@ for idx in range(m):
             image[i,j] = delta
     print(best_val, best_res)
     print(delta_measured[idx])
-    break
+    np.save(str(idx), image)
+
+    continue
     n_s_arr = np.append(n_s_arr, best_res[0])
     n_p_arr = np.append(n_p_arr, best_res[1])
+
 
 print(best_val, best_res)
 plt.imshow(image)
