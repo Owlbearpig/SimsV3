@@ -72,6 +72,16 @@ for result in resultfiles:
     frequencies, ref_ind = load_material_data(result)
     plt.plot(frequencies, ref_ind, label=result)
 
+baseHHI = Path("ResultTeralyzerHHI")
+resultfilesHHI = [os.path.join(root, name)
+               for root, dirs, files in os.walk(baseHHI)
+               for name in files
+               if name.endswith('.csv')]
+
+for result in resultfilesHHI:
+    frequencies, ref_ind = load_material_data(result)
+    plt.plot(frequencies, ref_ind, label=result)
+
 freq = np.linspace(0.100*THz, 1.400*THz, 1000)
 n_s, n_p = fake_fb(freq, 2.149)
 
