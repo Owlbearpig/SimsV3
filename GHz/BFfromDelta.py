@@ -92,7 +92,7 @@ n_s_arr, n_p_arr = np.array([]), np.array([])
 for idx in range(m):
     if idx%50 != 0:
         continue
-    if idx == 0:
+    if idx < 400:
         continue
     print(idx)
     f = np.append(f, f_measured[idx])
