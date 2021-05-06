@@ -77,13 +77,42 @@ def calc_delta(n_s, n_p):
 
     return delta
 
+def calc_delta_measlike(n_s, n_p):
+    j = j_stack(n_s, n_p)
+    J = jones_matrix.create_Jones_matrices()
+    J.from_matrix(j[idx])
+
+    J_A = jones_matrix.create_Jones_matrices('A')
+    J_A.diattenuator_linear(p1=1, p2=0, azimuth=0 * pi / 180)
+
+    phi = np.array([])
+    s21 = np.array([])
+    for angle in angles:
+        J_P = jones_matrix.create_Jones_matrices('P')
+        J_P.diattenuator_linear(p1=1, p2=0, azimuth=angle * pi / 180)
+
+        phi = np.append(phi, angle)
+        J_out = J_A * J_P * J * Jin_l
+        intensity = J_out.parameters.intensity()
+        s21 = np.append(s21, np.sqrt(intensity))
+
+    phi = np.deg2rad(phi)
+    popt, pcov = curve_fit(func, phi, s21)
+
+    # p1, p2, a, b, delta
+    a = popt[0]
+    b = popt[1]
+    delta = popt[2]
+
+    return delta
+
 def func2(n_s, n_p):
     delta = calc_delta(n_s, n_p)
 
     return (delta_measured[idx] - delta)**2
 
 n_s_range = np.linspace(1.0, 1.45, 500)#np.linspace(1.256, 1.268, 50)
-n_p_range = np.linspace(1.0, 1.45, 500)#np.linspace(1.334, 1.345, 50)
+n_p_range = np.linspace(1.0, 1.45, 2)#np.linspace(1.334, 1.345, 50)
 
 image = np.zeros((len(n_s_range), len(n_p_range)))
 
@@ -92,32 +121,22 @@ n_s_arr, n_p_arr = np.array([]), np.array([])
 for idx in range(m):
     if idx%50 != 0:
         continue
-    if idx < 400:
-        continue
     print(idx)
     f = np.append(f, f_measured[idx])
-
     best_val = 1000
     best_res = None
     for i, n_s in enumerate(n_s_range):
         print(i)
         for j, n_p in enumerate(n_p_range):
-            delta = calc_delta(n_s, n_p)
-            diff = (delta_measured[idx] - delta)**2
-            if diff < best_val:
-                best_val = diff
-                best_res = n_s, n_p
+            #delta = calc_delta(n_s, n_p)
+            delta = calc_delta_measlike(n_s, n_p)
+
             image[i,j] = delta
     print(best_val, best_res)
     print(delta_measured[idx])
-    np.save(str(idx), image)
-
-    continue
-    n_s_arr = np.append(n_s_arr, best_res[0])
-    n_p_arr = np.append(n_p_arr, best_res[1])
+    np.save(str(idx) + '_measLikeStripe', image)
 
 
-print(best_val, best_res)
 plt.imshow(image)
 plt.show()
 exit()
