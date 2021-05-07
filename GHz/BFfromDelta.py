@@ -112,7 +112,7 @@ def func2(n_s, n_p):
     return (delta_measured[idx] - delta)**2
 
 n_s_range = np.linspace(1.0, 1.45, 500)#np.linspace(1.256, 1.268, 50)
-n_p_range = np.linspace(1.0, 1.45, 2)#np.linspace(1.334, 1.345, 50)
+n_p_range = np.linspace(1.0, 1.45, 500)#np.linspace(1.334, 1.345, 50)
 
 image = np.zeros((len(n_s_range), len(n_p_range)))
 
@@ -128,13 +128,13 @@ for idx in range(m):
     for i, n_s in enumerate(n_s_range):
         print(i)
         for j, n_p in enumerate(n_p_range):
-            #delta = calc_delta(n_s, n_p)
-            delta = calc_delta_measlike(n_s, n_p)
+            delta = calc_delta(n_s, n_p)
+            #delta = calc_delta_measlike(n_s, n_p)
 
             image[i,j] = delta
     print(best_val, best_res)
     print(delta_measured[idx])
-    np.save(str(idx) + '_measLikeStripe', image)
+    np.save(str(idx), image)
 
 
 plt.imshow(image)

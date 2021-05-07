@@ -46,7 +46,7 @@ for idx in range(len(f_measured)):
             print(n_s_range[i], n_p_range[j])
         bfs = np.append(bfs, n_p_range[j] - n_s_range[i])
 
-    if idx == 1250:
+    if idx < 0:
         print(delta_measured[idx])
         plt.imshow(delta, cmap='gray', extent=[1, 1.45, 1.45, 1])
         plt.xlabel('n_p')
@@ -58,7 +58,9 @@ for idx in range(len(f_measured)):
     cluster_centers = np.append(cluster_centers, kmeans.cluster_centers_.flatten().reshape((-1, cluster_cnt)), axis=0)
 
     print(kmeans.cluster_centers_)
-    if idx == 1250:
+    if idx < 0:
+        cluster_center = kmeans.cluster_centers_.flatten()
+        print(cluster_center[np.argmin(np.abs(np.abs(cluster_center) - 0.1))])
         plt.scatter(range(len(bfs)), bfs)
         plt.show()
 
@@ -93,17 +95,19 @@ Jin_l.linear_light(azimuth=0*pi/180)
 selected_bf = np.array([])
 for cluster_center in cluster_centers:
     chosen_index = np.argmin(np.abs(np.abs(cluster_center) - 0.1))
-    selected_bf = np.append(selected_bf, np.abs(cluster_center[chosen_index]))
+    selected_bf = np.append(selected_bf, cluster_center[chosen_index])
 
-bf_interp = np.interp(f_measured, f, selected_bf)
+bf_interp = np.interp(f_measured, f, np.abs(selected_bf))
+
+np.save('bf_interp.npy', bf_interp)
 
 plt.plot(f, selected_bf, label='evaluated bf')
 plt.plot(f_measured, bf_interp, label='interpolated bf')
 plt.legend()
 plt.show()
 
-n_s_brute = np.ones_like(bf_interp)*1.25
-n_p_brute = np.ones_like(bf_interp)*1.25
+n_s_brute = np.ones_like(bf_interp)*1.0
+n_p_brute = np.ones_like(bf_interp)*1.0
 n_p_brute += bf_interp
 
 plt.plot(f_measured, n_s_brute, label='n_s_brute')
@@ -111,7 +115,7 @@ plt.plot(f_measured, n_p_brute, label='n_p_brute')
 plt.legend()
 plt.show()
 
-idx = 0
+
 def calc_delta(n_s, n_p):
     j = j_stack(n_s, n_p)
 
@@ -140,17 +144,15 @@ for idx in range(len(f_measured)):
     j = j_stack(n_s, n_p)
     J = jones_matrix.create_Jones_matrices()
     J.from_matrix(j[idx])
-    J.rotate(angle=0 * pi / 180)
-    p2 = 0  # p2_100deg[idx]
-    p1 = 1 - p2  # p1_190deg[idx]  # 0.5+0.5*(idx/len(f))
+
     J_A = jones_matrix.create_Jones_matrices('A')
-    J_A.diattenuator_linear(p1=p1, p2=p2, azimuth=0 * pi / 180)
+    J_A.diattenuator_linear(p1=1, p2=0, azimuth=0 * pi / 180)
 
     phi = np.array([])
     s21 = np.array([])
     for angle in angles:
         J_P = jones_matrix.create_Jones_matrices('P')
-        J_P.diattenuator_linear(p1=1, p2=0, azimuth=angle * pi / 180)
+        J_P.diattenuator_linear(p1=1, p2=0, azimuth=(angle) * pi / 180)
 
         phi = np.append(phi, angle)
         J_out = J_A * J_P * J * Jin_l
@@ -172,7 +174,7 @@ for idx in range(len(f_measured)):
     plt.legend()
     plt.show()
 
-plt.plot(f_cut/10**9, delta, '.-',label = 'Messung')
+plt.plot(f_cut/10**9, delta, '.-',label = 'delta -> bf -> delta')
 plt.plot(f_measured/10**9, delta_measured, '.-',label = 'Reale Messung')
 #plt.plot(f_cut/10**9, f_cut*0+0.5*1.03, 'k--',label='+3%')
 #plt.plot(f_cut/10**9, f_cut*0+0.5*0.97, 'k--',label='-3%')
@@ -187,23 +189,49 @@ plt.show()
 
 
 for i in range(cluster_cnt):
-    plt.scatter(f/10**9, np.abs(cluster_centers[:, i]), label='cluster_' + str(i))
+    plt.scatter(f/10**9, cluster_centers[:, i], label='cluster_' + str(i))
 
 plt.plot(f_measured.flatten()/10**9, bf_interp, label='possible(bruteforce) bf')
 
 plt.ylabel('possible birefringence')
 plt.xlabel('frequency (GHz)')
 
+# stripes_ghz = np.array([628, 517.1])
+
+
 eps_mat1, eps_mat2, _, _, _, _, f, wls, m = material_values(result_GHz, return_vals=True)
 stripes = stripes_ghz[-2], stripes_ghz[-1]
+#stripes = np.array([750, 550])
 n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
 
 plt.plot(f.flatten()/10**9, n_p-n_s, label='FormBF(Rytov)')
 
+yeh_te = np.load('yeh_te.npy')
+yeh_tm = np.load('yeh_tm.npy')
+
+plt.plot(f.flatten()/10**9, np.abs(yeh_tm-yeh_te), label=r'yeh bf')
+
+materials = ['HIPS_MUT_1_1', 'HIPS_MUT_1_2', 'HIPS_MUT_1_3', 'HIPS_MUT_2_1', 'HIPS_MUT_2_2', 'HIPS_MUT_2_3']
+for mi, material in enumerate(materials):
+
+    result_HIPS_David = {
+            'name': '',
+            'comments': '',
+            'x': '',
+            'bf': 'form',
+            'mat_name': (material, '')
+    }
+
+    eps_mat1, eps_mat2, _, _, _, _, f, wls, m = material_values(result_HIPS_David, return_vals=True)
+    stripes = np.array([628, 517.1])
+    n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
+
+    #plt.plot(f.flatten()/10**9, eps_mat1.flatten(), label=material)
+
+    plt.plot(f.flatten()/10**9, n_p.flatten()-n_s.flatten(), label=f'bf rytov {material}')
+
 plt.legend()
 plt.show()
-
-
 
 
 

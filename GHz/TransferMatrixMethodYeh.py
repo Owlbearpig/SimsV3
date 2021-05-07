@@ -2,9 +2,17 @@ import numpy as np
 from numpy import exp, pi, arccos, sin, cos, sqrt
 from scipy.constants import c as c0
 from functions import material_values
-from results import result_GHz
+from results import result_GHz, x_ghz
 import matplotlib.pyplot as plt
 from numpy.lib.scimath import sqrt as csqrt
+
+result_HIPS_HHI = {
+        'name': 'c_random',
+        'comments': '',
+        'x': '',
+        'bf': 'form',
+        'mat_name': ('HIPS_HHI', '')
+}
 
 um = 10**-6
 GHz = 10**9
@@ -20,7 +28,6 @@ n1, n2 = 1.54, 1 # overwritten in loop
 a, b = 628*um, 517*um
 omega = 2*pi*f
 
-
 def k(omega, beta):
     return csqrt((n1*omega/c0)**2-beta**2), csqrt((n2*omega/c0)**2-beta**2)
 
@@ -31,56 +38,78 @@ def PsiN_(N, A, D):
 def A_TE(k1, k2):
     return exp(-1j*k1*a)*(cos(k2*b)-0.5*1j*(k2/k1+k1/k2)*sin(k2*b))
 
-def D_TM(k1, k2):
+def D_TE(k1, k2):
     return exp(1j*k1*a)*(cos(k2*b)+0.5*1j*(k2/k1+k1/k2)*sin(k2*b))
 
 def A_TM(k1, k2):
-    return exp()
+    return exp(-1j*k1*a)*(cos(k2*b)-0.5j*((n2**2*k1)/(n1**2*k2)+(n1**2*k2)/(n2**2*k1))*sin(k2*b))
+
+def D_TM(k1, k2):
+    return exp(1j*k1*a)*(cos(k2*b)+0.5j*((n2**2*k1)/(n1**2*k2)+(n1**2*k2)/(n2**2*k1))*sin(k2*b))
 
 beta_arr = 2*pi/wls
-beta_arr = np.linspace(0, 4, 1000)*1000
+beta_arr = np.linspace(0, 4, len(omega))*1000
 
-ref_min, ref_max = [],[]
+f_cut = np.array([])
+res_min_te, res_max_te = [], []
+res_min_tm, res_max_tm = [], []
 for idx in range(len(omega)):
-    #idx = 335
+    if idx % 10 != 0:
+        pass
+    print(idx, f[idx]/10**9)
+    f_cut = np.append(f_cut, f[idx])
+
     n1, n2 = sqrt(abs(eps_mat1[idx]) + eps_mat1[idx].real) / sqrt(2), \
              sqrt(abs(eps_mat2[idx]) + eps_mat2[idx].real) / sqrt(2)
-    print(f[idx])
-    lhs = np.array([])
+
+    lhs_te, lhs_tm = np.array([]), np.array([])
     for beta in beta_arr:
         k1, k2 = k(omega[idx], beta)
         if isinstance(k1, complex) or isinstance(k2, complex):
             pass
             #print(beta)
-        Ate, Dte = A_TE(k1, k2), D_TM(k1, k2)
-        lhs = np.append(lhs, np.abs(0.5 * (Ate + Dte).real) - 1)
+        Ate, Dte = A_TE(k1, k2), D_TE(k1, k2)
+        lhs_te = np.append(lhs_te, np.abs(0.5 * (Ate + Dte)) - 1)
 
-    #plt.plot(beta_arr, lhs)
-    #plt.show()
+        Atm, Dtm = A_TM(k1, k2), D_TM(k1, k2)
+        lhs_tm = np.append(lhs_tm, np.abs(0.5 * (Atm + Dtm)) - 1)
 
-    zeros = np.array([], dtype=int)
-    prev_pnt = lhs[0]
-    for i, pnt in enumerate(lhs):
-        if prev_pnt*pnt < 0:
-            zeros = np.append(zeros, int(i))
-        prev_pnt = pnt
+    zeros_te, zeros_tm = np.array([], dtype=int), np.array([], dtype=int)
+    prev_pnt_te, prev_pnt_tm = lhs_te[0], lhs_tm[0]
+    for i, (pnt_te, pnt_tm) in enumerate(zip(lhs_te, lhs_tm)):
+        if prev_pnt_te*pnt_te < 0:
+            zeros_te = np.append(zeros_te, i)
+        prev_pnt_te = pnt_te
 
-    print(zeros)
-    res = beta_arr[zeros]*c0/omega[idx]
-    print(res)
+        if prev_pnt_tm*pnt_tm < 0:
+            zeros_tm = np.append(zeros_tm, i)
+        prev_pnt_tm = pnt_tm
+
+    print('zeros_te', zeros_te)
+    res_te = beta_arr[zeros_te]*c0/omega[idx]
     try:
-        ref_min.append(res[-2])
+        res_min_te.append(res_te[-2])
     except IndexError:
-        ref_min.append(1)
-    ref_max.append(res[-1])
+        res_min_te.append(1)
+    res_max_te.append(res_te[-1])
 
-plt.plot(f, ref_min)
-plt.plot(f, ref_max)
-plt.ylim((1, 1.5))
+    print('zeros_tm', zeros_tm)
+    res_tm = beta_arr[zeros_tm] * c0 / omega[idx]
+    try:
+        res_min_tm.append(res_tm[-2])
+    except IndexError:
+        res_min_tm.append(1)
+    res_max_tm.append(res_tm[-1])
+
+np.save('HIPS_HHI_yeh_te.npy', res_max_te)
+np.save('HIPS_HHI_yeh_tm.npy', res_max_tm)
+
+#plt.plot(f_cut, ref_min)
+plt.plot(f_cut, res_max_te, label='te')
+plt.plot(f_cut, res_max_tm, label='tm')
+#plt.ylim((0, 1.5))
+plt.legend()
 plt.show()
-
-
-
 
 
 """

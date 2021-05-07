@@ -22,6 +22,11 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'ceramic_slow': Path('material_data/Sample1_000deg_1825ps_0m-2Grad_D=3000.csv'),
         'ceramic_fast': Path('material_data/Sample1_090deg_1825ps_0m88Grad_D=3000.csv'),
         'HIPS_MUT_1_1': Path('material_data/MUT 1-1.csv'),
+        'HIPS_MUT_1_2': Path('material_data/MUT 1-2.csv'),
+        'HIPS_MUT_1_3': Path('material_data/MUT 1-3.csv'),
+        'HIPS_MUT_2_1': Path('material_data/MUT 2-1.csv'),
+        'HIPS_MUT_2_2': Path('material_data/MUT 2-2.csv'),
+        'HIPS_MUT_2_3': Path('material_data/MUT 2-3.csv'),
         'Fused_4eck': Path('material_data/4Eck_D=2042.csv'),
         'quartz_m_slow': Path('material_data/quartz_m_slow.csv'),
         'quartz_m_fast': Path('material_data/quartz_m_fast.csv'),
@@ -29,6 +34,8 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'quartz_sellmeier_fast': Path('material_data/sellmeier_quartz_fast.csv'),
         'quartz_full_slow': Path('material_data/abs_slow_grisch1990_fit.csv'),
         'quartz_full_fast': Path('material_data/abs_fast_grisch1990_fit.csv'),
+        'HIPS_HHI': Path('material_data/2mmHIPS_D=2000.csv'),
+
     }
 
     df = pandas.read_csv(mat_paths[mat_name])

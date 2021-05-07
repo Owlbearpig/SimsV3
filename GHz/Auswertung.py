@@ -68,7 +68,7 @@ print(normalization)
 phi = np.array([])
 s21 = np.array([])
 s12 = np.array([])
-phi_offset = 4.5#9.64#14.84#10#9.64
+phi_offset = 9.64#14.84#10#9.64 # 4.5
 idx = 1400
 for angle in angles:
 
@@ -153,7 +153,7 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
     delta = np.append(delta, np.abs(popt[2]))
 
-np.save('delta_phi4.5.npy', delta)
+np.save('delta.npy', delta)
 
 plt.plot(f, p1_arr, label='p1')
 plt.plot(f, p2_arr, label='p2')
