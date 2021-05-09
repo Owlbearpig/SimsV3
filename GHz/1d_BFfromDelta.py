@@ -16,7 +16,7 @@ um = 10**6
 THz = 10**12
 
 resolution = 50
-phi_offset = 5
+phi_offset = 2
 #delta_measured = np.load('delta.npy')
 
 try:
