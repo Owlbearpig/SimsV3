@@ -68,7 +68,7 @@ print(normalization)
 phi = np.array([])
 s21 = np.array([])
 s12 = np.array([])
-phi_offset = 9.64#14.84#10#9.64 # 4.5
+phi_offset = 0#9.64#14.84#10#9.64 # 4.5
 idx = 1400
 for angle in angles:
 
@@ -153,7 +153,7 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
     delta = np.append(delta, np.abs(popt[2]))
 
-np.save('delta.npy', delta)
+np.save('delta_phi0.npy', delta)
 
 plt.plot(f, p1_arr, label='p1')
 plt.plot(f, p2_arr, label='p2')
@@ -176,7 +176,7 @@ plt.ylim([0.0,1.0])
 #plt.savefig('Retardation.pdf', bbox_inches='tight')
 plt.show()
 
-
+exit()
 np.save('f', f)
 np.save('a', a)
 np.save('b', b)
@@ -185,7 +185,7 @@ np.save('delta', delta)
 
 
 #delta = np.load('delta.npy')
-exit()
+
 
 popt, pcov = curve_fit(func3, f/10**9, delta, p0=[0.05, 0.2, pi, pi/2]) # 0.05*sin(0.2*f/10**9 + pi)+pi/2
 print(pcov)
