@@ -48,22 +48,22 @@ plt.style.use('fast')
 angles = np.arange(0,370,10)
 
 ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(190))
-normalization = np.abs(ntwk.s[:,0,1])
+normalization = np.abs(ntwk.s[:,1,0])
 
 for angle in angles:
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
-    plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,0,1]), label=str(angle))
+    plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,1,0]), label=str(angle))
 
 plt.grid(True)
 plt.xlabel('$f$ in GHz')
-plt.ylabel(r"Normalized amplitude")
+plt.ylabel(r"amplitude")
 plt.xlim([75,110])
-plt.ylim([0.0,1.1])
+#plt.ylim([0.0,1.1])
 plt.legend()
 plt.show()
 
 ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(10))
-normalization = np.abs(ntwk.s[:,0,1])
+normalization = np.abs(ntwk.s[:,1,0])
 print(normalization)
 phi = np.array([])
 s21 = np.array([])
@@ -153,7 +153,7 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
     delta = np.append(delta, np.abs(popt[2]))
 
-np.save('delta_phi0.npy', delta)
+#np.save('delta_phi0.npy', delta)
 
 plt.plot(f, p1_arr, label='p1')
 plt.plot(f, p2_arr, label='p2')

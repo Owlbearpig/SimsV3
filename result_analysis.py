@@ -31,13 +31,21 @@ if __name__ == '__main__':
         'mat_name': ('ceramic_fast', 'ceramic_slow')
     }
 
-    res = result_GHz
+    res = result1
 
     j, f, wls = setup(res, return_vals=True)
-    j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
+    #j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
     J = jones_matrix.create_Jones_matrices(res['name'])
     J.from_matrix(j)
-    J.rotate(angle=0.1)
+    diattenuation = J.parameters.diattenuation()
+    retardance = J.parameters.retardance()
+
+    plt.plot(f, diattenuation, label='diattenuation')
+    plt.plot(f, retardance, label='retardance')
+    plt.legend()
+    plt.show()
+
+    #J.rotate(angle=0.1)
     #slice = np.where(f < 1.6*THz)[0]
     #from dataexport import save, pe_export
     #f = (np.arange(0.2, 2.0, 0.05)*THz)[:]

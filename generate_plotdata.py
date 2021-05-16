@@ -46,9 +46,6 @@ if __name__ == '__main__':
     Jin_c = jones_vector.create_Jones_vectors('RCP')
     Jin_c.circular_light(kind='r')
 
-    #print(Jin_c)
-    #exit()
-
     Jin_l = jones_vector.create_Jones_vectors('LP_0')
     Jin_l.linear_light()
 
@@ -66,7 +63,7 @@ if __name__ == '__main__':
 
     azimuth = Jout_l.parameters.azimuth()
     ellipticity_angle = Jout_l.parameters.ellipticity_angle()
-
+    exit()
     export_csv({'freq': f_flat,
           'alpha': alpha * rad, 'delay': delay * rad,
           'azimuth': azimuth * rad, 'ellipticity_angle': ellipticity_angle * rad},
