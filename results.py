@@ -135,6 +135,7 @@ result_masson = {
         'x': x_ml4,
         'bf': 'intrinsic',
         'mat_name': ('quartz_sellmeier_fast', 'quartz_sellmeier_slow')
+        #'mat_name': ('quartz_full_fast', 'quartz_full_slow')
         #'mat_name': ('ceramic_fast', 'ceramic_slow')
 }
 
