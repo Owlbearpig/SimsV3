@@ -84,3 +84,8 @@ if __name__ == '__main__':
 
     intensity = Jout_l.parameters.intensity()
     export_csv({'freq': f_flat, 'intensity': intensity}, path=dir / Path('intensity.csv'))
+
+    diattenuation = J.parameters.diattenuation()
+    export_csv({'freq': f_flat, 'diattenuation': diattenuation}, path=dir / Path('diattenuation.csv'))
+    retardance = J.parameters.retardance()
+    export_csv({'freq': f_flat, 'retardance': retardance}, path=dir / Path('retardance.csv'))
