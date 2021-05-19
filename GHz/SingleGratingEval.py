@@ -55,12 +55,12 @@ eps_mat1, eps_mat2, _, _, _, _, f, wls, m = material_values(result_GHz, return_v
 stripes = stripes_ghz[-2], stripes_ghz[-1]
 n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
 
-plt.plot(f.flatten(), eps_mat1.flatten(), label=r'$\epsilon \ HIPS \ measured$')
-plt.plot(f.flatten(), np.sqrt(eps_mat1.flatten()), label=r'$n \ HIPS \ measured$')
+#plt.plot(f.flatten(), eps_mat1.flatten(), label=r'$\epsilon \ HIPS \ measured$')
+#plt.plot(f.flatten(), np.sqrt(eps_mat1.flatten()), label=r'$n \ HIPS \ measured$')
 base = Path('ResultTeralyzerMinFreq')
 
-plt.plot(f.flatten(), n_s, label='n_s, real data')
-plt.plot(f.flatten(), n_p, label='n_p, real data')
+plt.plot(f.flatten()*10**-12, n_s, label='n_s, (VNA)')
+plt.plot(f.flatten()*10**-12, n_p, label='n_p, (VNA)')
 
 # find result files
 resultfiles = [os.path.join(root, name)
@@ -70,7 +70,7 @@ resultfiles = [os.path.join(root, name)
 
 for result in resultfiles:
     frequencies, ref_ind = load_material_data(result)
-    plt.plot(frequencies, ref_ind, label=result)
+    plt.plot(frequencies*10**-12, ref_ind, label=result + ' ' + 'SystemLab1')
 
 baseHHI = Path("ResultTeralyzerHHI")
 resultfilesHHI = [os.path.join(root, name)
@@ -80,25 +80,26 @@ resultfilesHHI = [os.path.join(root, name)
 
 for result in resultfilesHHI:
     frequencies, ref_ind = load_material_data(result)
-    plt.plot(frequencies, ref_ind, label=result)
+    plt.plot(frequencies*10**-12, ref_ind, label=result + ' ' + 'HHI' )
 
 freq = np.linspace(0.100*THz, 1.400*THz, 1000)
 n_s, n_p = fake_fb(freq, 2.149)
 
-plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.149)$')
-plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.149)$')
+#plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.149)$')
+#plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.149)$')
 
 freq = np.linspace(0.100*THz, 1.400*THz, 1000)
 n_s, n_p = fake_fb(freq, 2.437)
 
-plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.437)$')
-plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.437)$')
+#plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.437)$')
+#plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.437)$')
 
 yeh_te = np.load('yeh_te.npy')
 yeh_tm = np.load('yeh_tm.npy')
 
-plt.plot(f.flatten(), yeh_te, label=r'$yeh \ te$')
-plt.plot(f.flatten(), yeh_tm, label=r'$yeh \ tm$')
-
+#plt.plot(f.flatten(), yeh_te, label=r'$yeh \ te$')
+#plt.plot(f.flatten(), yeh_tm, label=r'$yeh \ tm$')
+plt.ylabel('RI')
+plt.xlabel('Freq. (THz)')
 plt.legend()
 plt.show()

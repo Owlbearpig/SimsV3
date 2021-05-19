@@ -140,7 +140,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
 
     phi_s, phi_p = (2 * n_s * pi / wls) * d.T, (2 * n_p * pi / wls) * d.T
     alpha_s, alpha_p = -(2 * pi * k_s / wls) * d.T, -(2 * pi * k_p / wls) * d.T
-    alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
+    #alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
     #"""
     x, y = 1j * phi_s + alpha_s, 1j * phi_p + alpha_p
     angles = np.tile(angles, (m, 1))
@@ -149,7 +149,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x) - exp(y))
     j[:, :, 1, 0] = j[:, :, 0, 1]
     j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
-    j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
+    #j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
     """
     delta = (phi_s-phi_p)/2
     sd = 1j * sin(delta)
@@ -262,8 +262,23 @@ def material_values(settings, return_vals=False):
     return eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m
 
 
+def bf_measured():
+    n_s = np.load('measured_bf_BowTie_0deg.npy')
+    n_p = np.load('measured_bf_BowTie_90deg.npy')
+
+    f = np.load('measured_bf_BowTie_freqs.npy')
+    m = len(f)
+    n_s, n_p = n_s.reshape(m, 1), n_p.reshape(m, 1)
+    f = f.reshape(m, 1)
+
+    k_s, k_p = np.zeros_like(n_p), np.zeros_like(n_s)
+    wls =  (c0 / f) * m_um
+
+    return n_s, n_p, k_s, k_p, f, wls, m
+
 def setup(settings, return_vals=False):
     eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=return_vals)
+
     #print(len(f))
     #exit()
     n = wp_cnt(settings)
@@ -271,14 +286,22 @@ def setup(settings, return_vals=False):
     einsum_str, einsum_path = get_einsum(m, n)
 
     def make_j(x):
-        nonlocal n_s, n_p, k_s, k_p
+        nonlocal n_s, n_p, k_s, k_p, m, wls
+
+        measured = False
+        if measured:
+            n_s, n_p, k_s, k_p, f, wls, m = bf_measured()
+            print(n_s, n_p)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
 
         if settings['bf'] == 'intrinsic':
             j = j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
         else:
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
+            #n_p = n_s + np.linspace(0.11, 0.105, len(n_s)).reshape(len(n_s), 1)
             j = j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
+        print(n_s, n_p)
         return j
 
     def erf(x):

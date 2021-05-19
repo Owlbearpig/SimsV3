@@ -58,9 +58,12 @@ angles_cl4_02_15_n5 = array([1.54223461e+00, 3.09294378e-01, 4.40114922e+00, 2.8
 d_cl4_02_15_n5 = array([3.90033596e+03, 5.20779039e+03, 1.01684284e+04, 7.55828581e+03, 7.81641390e+03, 1.04555262e+04])
 x_cl4_02_20_n6_1kits = np.concatenate((angles_cl4_02_15_n5, d_cl4_02_15_n5))
 
-angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14]))# + (5*np.random.random(4) - 2.5*np.ones(4)) # 2*np.ones(4)#
-d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])#*(0.85+np.random.random(4)*0.1)
-stripes_ghz = np.array([628, 517.1]) #+ (50*np.random.random(2) + 100*np.ones(2))
+angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14])) #+ np.deg2rad((10*np.random.random(4) - 5*np.ones(4))) # 2*np.ones(4)#
+print(angles_ghz)
+d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8]) * (1 + (np.random.random(4)-0.5)/5)
+stripes_ghz = np.array([628, 517.1]) #+ (300*np.random.random(2) - 150*np.ones(2))
+stripes_ghz = np.array([750, 450.1])
+print(stripes_ghz)
 x_ghz = np.concatenate((angles_ghz, d_ghz, stripes_ghz))
 
 # obtained using wrong erf; (Int_x - Int_y)**2 # Although it's result that got printed ...
@@ -136,6 +139,14 @@ result_masson = {
         'bf': 'intrinsic',
         'mat_name': ('quartz_sellmeier_fast', 'quartz_sellmeier_slow')
         #'mat_name': ('ceramic_fast', 'ceramic_slow')
+}
+
+result_masson_full = {
+        'name': 'masson',
+        'comments': '',
+        'x': x_ml4,
+        'bf': 'intrinsic',
+        'mat_name': ('quartz_full_fast', 'quartz_full_slow')
 }
 
 result_GHz = {

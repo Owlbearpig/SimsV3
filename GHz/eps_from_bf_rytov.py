@@ -31,7 +31,7 @@ def eps_from_bf(phi_offset):
     return eps_brute_fit
 
 if __name__ == '__main__':
-    bf_meas = np.load('bf_interp_phi0.npy')
+    bf_meas = np.load('bf_interp_phi9.64.npy')
     stripes = np.array([628, 517.1])
     #stripes = np.array([750, 450.1])
     _, _, _, _, _, _, f, wls, m = material_values(result_GHz, return_vals=True)
@@ -42,12 +42,14 @@ if __name__ == '__main__':
     plt.plot(np.abs(bf_meas))
     plt.show()
     eps_brute_fit = np.array([])
-    for idx in range(len(f)):
+    f_cut = np.array([])
+    for idx in range(m):
         if idx % 50 != 0:
             continue
+        f_cut = np.append(f_cut, f[idx])
         bf = bf_meas[idx]
         wl = wls[idx]
-        print(f'prog: {idx}/{len(f)}')
+        print(f'prog: {idx}/{m}')
         min_diff, best_eps = 100, None
         for possible_mat_eps in possible_mat_eps_arr:
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wl, possible_mat_eps, eps_mat2[idx])
@@ -57,7 +59,7 @@ if __name__ == '__main__':
                 best_eps = possible_mat_eps
         eps_brute_fit = np.append(eps_brute_fit, best_eps)
 
-    plt.plot(f.flatten(), eps_brute_fit)
+    plt.plot(f_cut/10**9, eps_brute_fit)
     plt.show()
 
     #np.save('eps_brute_fit_phi9.64.npy', eps_brute_fit)

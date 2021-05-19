@@ -51,6 +51,11 @@ ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(190))
 normalization = np.abs(ntwk.s[:,1,0])
 
 for angle in angles:
+    if angle > 120:
+        continue
+    if angle < 70:
+        continue
+
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
     plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,1,0]), label=str(angle))
 
@@ -68,7 +73,7 @@ print(normalization)
 phi = np.array([])
 s21 = np.array([])
 s12 = np.array([])
-phi_offset = 0#9.64#14.84#10#9.64 # 4.5
+phi_offset = 9.64#9.64#14.84#10#9.64 # 4.5
 idx = 1400
 for angle in angles:
 
@@ -120,8 +125,8 @@ delta = np.array([])
 a, b = np.array([]), np.array([])
 p1_arr, p2_arr = np.array([]), np.array([])
 for idx in range(ntwk.f.size):
-    if idx%50 != 0:
-        pass
+    if idx%1 != 0:
+        continue
     print(idx)
     #phi_offset = 4.725 + (14.84-4.725)*idx/1400
     phi = np.array([])
@@ -164,6 +169,9 @@ plt.plot(f/10**9, a/b, label='a/b')
 plt.legend()
 plt.show()
 
+from generate_plotdata import export_csv
+export_csv({'freq': f, 'delta': delta}, 'delta_measured')
+
 plt.plot(f/10**9, delta/np.pi, '.-',label = 'Messung')
 plt.plot(f/10**9, f*0+0.5*1.03, 'k--',label='+3%')
 plt.plot(f/10**9, f*0+0.5*0.97, 'k--',label='-3%')
@@ -172,7 +180,7 @@ plt.xlabel('$f$ in GHz')
 plt.ylabel(r"$\frac{\delta}{\pi}$")
 plt.xlim([75,110])
 plt.ylim([0.0,1.0])
-#plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 #plt.savefig('Retardation.pdf', bbox_inches='tight')
 plt.show()
 

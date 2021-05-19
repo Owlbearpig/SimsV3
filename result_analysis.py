@@ -58,7 +58,7 @@ if __name__ == '__main__':
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
     q = j[:, 0, 0] / j[:, 1, 0]
-    L_state = (q.real ** 2 + (q.imag + 1) ** 2)
+    L_state = (q.real ** 2 + (q.imag - 1) ** 2)
     print('argmin:', np.argmin(L_state), 'f(argmin):', f[np.argmin(L_state)]*(1/THz))
     print('min:', min(L_state))
     #L = L / max(L)
@@ -138,7 +138,6 @@ if __name__ == '__main__':
 
     #J_ideal_out.draw_ellipse()
     #plt.show()
-    #exit('hello : )')
 
     #Jin_c.draw_ellipse()
     #plt.show()
@@ -150,7 +149,7 @@ if __name__ == '__main__':
     #Jout_l.normalize()
     from plotting import draw_ellipse
     Ex, Ey = draw_ellipse(Jout, return_values=True)
-    #print(len(Ex))
+    print(len(Ex))
     circ_pol_deg = Jout.parameters.degree_circular_polarization()
     lin_pol_deg = Jout.parameters.degree_linear_polarization()
 
@@ -171,11 +170,9 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    #plt.plot(f, 10*np.log10(intensity))
-    #plt.show()
+    plt.plot(f, 10*np.log(intensity))
+    plt.show()
 
-
-    slice = np.where(f < 2.5*THz)[0]
 
     plt.plot(f, alpha*rad, label='alpha')
     plt.plot(f, delay*rad, label='delay')
@@ -192,16 +189,21 @@ if __name__ == '__main__':
 
     #Jout_l.draw_ellipse()
     #plt.show()
-    for i in range(0, len(Ex[slice])):
-        #if i != 50:
-        #    pass
+    for i in range(0, len(Ex)):
+        if i % 25 != 0:
+            continue
+        if i < 300:
+            continue
+        print(i)
         #print(str(np.round((1/THz)*f[i], 2)))
         freq = str(np.round(f[i]*(1/THz), 3))
-        fact = np.max([Ex[i,:], Ey[i,:]])
+        fact = 1#np.max([Ex[i,:], Ey[i,:]])
         #print(Ex[i,:]/fact, Ey[i,:]/fact)
         plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
     plt.ylim((-1.1, 1.1))
     plt.xlim((-1.1, 1.1))
+    plt.ylim((-5*10**-7, 5*10**-7))
+    plt.xlim((-5*10**-7, 5*10**-7))
     plt.legend()
     plt.show()
 
