@@ -279,6 +279,14 @@ def setup(settings, return_vals=False):
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
             j = j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
+        """
+        plt.plot(f, n_s, label='n_s')
+        plt.plot(f, n_p, label='n_p')
+        plt.show()
+        
+        from generate_plotdata import export_csv
+        export_csv({'freq': f.flatten(), 'n_s': n_s.flatten(), 'n_p': n_p.flatten()}, 'calculated_ref_ind_design_err.csv')
+        """
         return j
 
     def erf(x):
