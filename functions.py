@@ -149,7 +149,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x) - exp(y))
     j[:, :, 1, 0] = j[:, :, 0, 1]
     j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
-    j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
+    #j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
     """
     delta = (phi_s-phi_p)/2
     sd = 1j * sin(delta)
@@ -262,32 +262,40 @@ def material_values(settings, return_vals=False):
     return eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m
 
 
-def setup(settings, return_vals=False):
+def setup(settings, return_vals=False, measured_bf = False):
     eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=return_vals)
-    #print(len(f))
-    #exit()
+
     n = wp_cnt(settings)
 
     einsum_str, einsum_path = get_einsum(m, n)
 
     def make_j(x):
-        nonlocal n_s, n_p, k_s, k_p
+        nonlocal n_s, n_p, k_s, k_p, f, wls, m
+
+        if measured_bf:
+            f = np.load('measured_bf_Phat_BowTie_freqs.npy')
+            f = f.reshape(len(f), 1)
+            wls = ((c0 / f) * m_um)
+            n_p = np.load('measured_bf_Phat_BowTie_0deg.npy').reshape(len(f), 1)
+            n_s = np.load('measured_bf_Phat_BowTie_90deg.npy').reshape(len(f), 1)
+            k_p = np.zeros_like(n_p)
+            k_s = np.zeros_like(n_s)
+            m = len(f)
+            #print(n_p, n_s)
+            #n_p = np.linspace(1.33662326, 1.32865051, len(f)).reshape(len(f), 1)
+            #n_s = np.linspace(1.25298611, 1.25445006, len(f)).reshape(len(f), 1)
+            #n_p = np.linspace(1.33+0.11, 1.33+0.095, len(f)).reshape(len(f), 1)
+            #n_s = np.linspace(1.33, 1.33, len(f)).reshape(len(f), 1)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
 
         if settings['bf'] == 'intrinsic':
-            j = j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
         else:
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
-            j = j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
-        """
-        plt.plot(f, n_s, label='n_s')
-        plt.plot(f, n_p, label='n_p')
-        plt.show()
-        
-        from generate_plotdata import export_csv
-        export_csv({'freq': f.flatten(), 'n_s': n_s.flatten(), 'n_p': n_p.flatten()}, 'calculated_ref_ind_design_err.csv')
-        """
-        return j
+            print(n_p-0.01, n_s)
+            return j_stack(x, m, n, wls, n_s, n_p-0.00, k_s, k_p, einsum_str, einsum_path)
+
 
     def erf(x):
         j = make_j(x)

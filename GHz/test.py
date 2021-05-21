@@ -39,15 +39,15 @@ res = result_GHz
 #j,f,wls = j[::len(f)//pnt_cnt], f[::len(f)//pnt_cnt], wls[::len(f)//pnt_cnt]
 #j = np.random.random((1401, 2, 2)) + 1j*np.random.random((1401, 2, 2))
 def random_j():
-    angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14]))+ np.deg2rad((4*np.random.random(4) - 2)) # 2*np.ones(4)# +(10*np.random.random()-5))#
-    d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])*(0.95+np.random.random(4)*0.1)
+    angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14]))#+ np.deg2rad((4*np.random.random(4) - 2)) # 2*np.ones(4)# +(10*np.random.random()-5))#
+    d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])#*(0.95+np.random.random(4)*0.1)
     stripes_ghz = np.array([628, 517.1]) #+ (50*np.random.random(2) + 100*np.ones(2))
     stripes_ghz = np.array([734.55, 392.95])
     #stripes_ghz = np.array([10.55, 10.95])
     x_ghz = np.concatenate((angles_ghz, d_ghz, stripes_ghz))
     res['x'] = x_ghz
 
-    j, _, _ = setup(res, return_vals=True)
+    j, _, _ = setup(res, return_vals=True, measured_bf=False)
 
     return j
 
@@ -58,12 +58,12 @@ p1_190deg = np.abs(ntwk.s[:,0,1])
 
 angles = np.arange(0,370,10)
 
-#_, f, wls = setup(res, return_vals=True)
-f = ntwk.f
+_, f, wls = setup(res, return_vals=True, measured_bf=False)
+#f = ntwk.f
 
 plt.figure()
 plot_data = {}
-for i in range(50):
+for i in range(1):
     print(i)
     f_cut = np.array([])
     delta = np.array([])
@@ -71,7 +71,8 @@ for i in range(50):
     for idx in range(len(f)):
         if idx%50 != 0:
             continue
-        print(idx)
+        if f[idx] > 0.115*10**12:
+            break
         #phi_offset = 4.725 + (14.84-4.725)*idx/1400
 
         f_cut = np.append(f_cut, f[idx])
@@ -88,7 +89,7 @@ for i in range(50):
         s21 = np.array([])
         for angle in angles:
             J_P = jones_matrix.create_Jones_matrices('P')
-            J_P.diattenuator_linear(p1=1, p2=0, azimuth=angle * pi / 180)
+            J_P.diattenuator_linear(p1=1, p2=0, azimuth=(angle) * pi / 180)
 
             phi = np.append(phi, angle)
             J_out = J_A * J_P * J * Jin_l
@@ -130,15 +131,15 @@ plot_data['delta_min_curve'] = min_curve
 plot_data['delta_max_curve'] = max_curve
 
 
-export_csv(plot_data, 'delta_all_err.csv')
+#export_csv(plot_data, 'delta_bf_from_phatgrating.csv')
 
 plt.plot(f_cut/10**9, f_cut*0+0.5*1.03, 'k--',label='+3%')
 plt.plot(f_cut/10**9, f_cut*0+0.5*0.97, 'k--',label='-3%')
 plt.grid(True)
 plt.xlabel('$f$ in GHz')
 plt.ylabel(r"$\frac{\delta}{\pi}$")
-plt.ylim([0, 1])
-plt.xlim([75,110])
+#plt.ylim([0, 1])
+#plt.xlim([75,110])
 plt.show()
 
 exit()
