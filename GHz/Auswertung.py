@@ -50,6 +50,8 @@ angles = np.arange(0,370,10)
 ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(190))
 normalization = np.abs(ntwk.s[:,1,0])
 
+from generate_plotdata import export_csv
+data_export = {'freq': ntwk.f}
 for angle in angles:
     if angle > 120:
         continue
@@ -58,7 +60,9 @@ for angle in angles:
 
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
     plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,1,0]), label=str(angle))
+    data_export[str(angle)] = np.abs(ntwk.s[:,1,0])
 
+#export_csv(data_export, 'amplitude_measuremt.csv')
 plt.grid(True)
 plt.xlabel('$f$ in GHz')
 plt.ylabel(r"amplitude")
