@@ -31,6 +31,8 @@ if __name__ == '__main__':
         'mat_name': ('ceramic_fast', 'ceramic_slow')
     }
 
+    res = result_masson_full
+    #res = result_masson
     res = result1
 
     j, f, wls = setup(res, return_vals=True)
@@ -39,9 +41,11 @@ if __name__ == '__main__':
     J.from_matrix(j)
     diattenuation = J.parameters.diattenuation()
     retardance = J.parameters.retardance()
+    inhomogeneity = J.parameters.inhomogeneity()
 
-    plt.plot(f, diattenuation, label='diattenuation')
-    plt.plot(f, retardance, label='retardance')
+    #plt.plot(f, diattenuation, label='diattenuation')
+    #plt.plot(f, retardance, label='retardance')
+    plt.plot(f, inhomogeneity, label='inhomogeneity')
     plt.legend()
     plt.show()
 
@@ -54,7 +58,7 @@ if __name__ == '__main__':
     #thickness_for_1thz(res)
     #print(len(f))
     #exit()
-
+    """
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
     q = j[:, 0, 0] / j[:, 1, 0]
@@ -76,7 +80,7 @@ if __name__ == '__main__':
     #plt.ylim((-2.5*10**-4, 2.5*10**-3))
     plt.legend()
     plt.show()
-
+    """
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
     #J.remove_global_phase()
@@ -86,13 +90,21 @@ if __name__ == '__main__':
     #print(j[:, 0, 1])
     #print(j[:, 1, 0])
     #print(j[:, 1, 1])
-    #v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    #E1.draw_ellipse()
-    #E2.draw_ellipse()
-    #plt.show()
+    J_lowres = jones_matrix.create_Jones_matrices('J_lr')
+    print(f[::30])
+    J.from_matrix(j[::30])
+    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    plt.plot(E1.parameters.azimuth())
+    plt.show()
+    E1.draw_ellipse()
+    E2.draw_ellipse()
+    plt.show()
     #J.parameters.global_phase(verbose=True)
     #Jqwp = jones_matrix.create_Jones_matrices()
     #Jqwp.retarder_linear()
+
+    J = jones_matrix.create_Jones_matrices()
+    J.from_matrix(j)
 
     #print(J.analysis.retarder(verbose=True))
     #E1[11].draw_ellipse()
@@ -170,7 +182,8 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    plt.plot(f, 10*np.log(intensity))
+    #plt.plot(f, 10*np.log(intensity))
+    plt.plot(f, intensity)
     plt.show()
 
 

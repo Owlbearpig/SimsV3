@@ -89,3 +89,7 @@ if __name__ == '__main__':
     export_csv({'freq': f_flat, 'diattenuation': diattenuation}, path=dir / Path('diattenuation.csv'))
     retardance = J.parameters.retardance()
     export_csv({'freq': f_flat, 'retardance': retardance}, path=dir / Path('retardance.csv'))
+    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+
+    export_csv({'freq': f_flat, 'E1 ellipticity': E1.parameters.ellipticity_angle(),
+                'E2 ellipticity': E2.parameters.ellipticity_angle()}, path=dir / Path('eigenstate_ellipticity.csv'))
