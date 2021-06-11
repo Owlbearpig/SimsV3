@@ -60,10 +60,11 @@ x_cl4_02_20_n6_1kits = np.concatenate((angles_cl4_02_15_n5, d_cl4_02_15_n5))
 
 angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14])) #+ np.deg2rad((10*np.random.random(4) - 5*np.ones(4))) # 2*np.ones(4)#
 #print(angles_ghz)
-d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])# * (1 + (np.random.random(4)-0.5)/5)
+d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8]) # * (1 + (np.random.random(4)-0.5)/5)
 stripes_ghz = np.array([628, 517.1]) #+ (300*np.random.random(2) - 150*np.ones(2))
 #stripes_ghz = np.array([750, 450.1])
 #print(stripes_ghz)
+
 x_ghz = np.concatenate((angles_ghz, d_ghz, stripes_ghz))
 
 # obtained using wrong erf; (Int_x - Int_y)**2 # Although it's result that got printed ...

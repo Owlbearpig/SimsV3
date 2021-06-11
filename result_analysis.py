@@ -40,6 +40,13 @@ if __name__ == '__main__':
     #j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
     J = jones_matrix.create_Jones_matrices(res['name'])
     J.from_matrix(j)
+
+    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
+    Jin_l.linear_light()
+
+    Jin_c = jones_vector.create_Jones_vectors('RCP')
+    Jin_c.circular_light(kind='r')
+
     diattenuation = J.parameters.diattenuation()
     retardance = J.parameters.retardance()
     inhomogeneity = J.parameters.inhomogeneity()
@@ -63,11 +70,11 @@ if __name__ == '__main__':
     #thickness_for_1thz(res)
     #print(len(f))
     #exit()
-    """
+
     #int_x = j[:, 0, 0]*np.conjugate(j[:, 0, 0])
     #int_y = j[:, 1, 0]*np.conjugate(j[:, 1, 0])
-    q = j[:, 0, 0] / j[:, 1, 0]
-    L_state = (q.real ** 2 + (q.imag - 1) ** 2)
+    q = j[:, 1, 0] / j[:, 0, 0]
+    L_state = q.real ** 2 + (q.imag - 1) ** 2
     print('argmin:', np.argmin(L_state), 'f(argmin):', f[np.argmin(L_state)]*(1/THz))
     print('min:', min(L_state))
     #L = L / max(L)
@@ -79,13 +86,13 @@ if __name__ == '__main__':
     #print(L_ret)
     #print(L_state)
     from generate_plotdata import export_csv
-    plt.semilogy(f, L_state, label='state')
+    plt.plot(f, L_state, label='state')
     #export_csv({'freq': f.flatten(), 'L': L}, 'plot_data/masson/MassLoss.csv')
-    plt.semilogy(f, L_ret, label='ret')
+    #plt.semilogy(f, L_ret, label='ret')
     #plt.ylim((-2.5*10**-4, 2.5*10**-3))
     plt.legend()
     plt.show()
-    """
+
     #int_x, int_y = 10*np.log10(int_x.real), 10*np.log10(int_y.real)
 
     #J.remove_global_phase()
@@ -97,8 +104,13 @@ if __name__ == '__main__':
     #print(j[:, 1, 1])
     J_lowres = jones_matrix.create_Jones_matrices('J_lr')
     print(f[::30])
-    J.from_matrix(j[::30])
-    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    J_lowres.from_matrix(j[::30])
+
+    J_o_lowres = J_lowres*Jin_l
+    J_o_lowres.draw_ellipse()
+    plt.show()
+
+    v1, v2, E1, E2 = J_lowres.parameters.eig(as_objects=True)
     plt.plot(E1.parameters.azimuth(), label='E1 azimuth')
     plt.plot(E2.parameters.azimuth(), label='E2 azimuth')
     plt.legend()
@@ -144,13 +156,10 @@ if __name__ == '__main__':
     #J_qwp = jones_matrix.create_Jones_matrices('J_qwp')
     #J_qwp.quarter_waveplate(azimuth=pi/4)
 
-    Jin_c = jones_vector.create_Jones_vectors('RCP')
-    Jin_c.circular_light(kind='r')
     #Jin_c.draw_ellipse()
     #plt.show()
 
-    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
-    Jin_l.linear_light()
+
     #Jin_l.draw_ellipse()
 
     #J_ideal_out = J_qwp*J_qwp*Jin_c
@@ -169,11 +178,24 @@ if __name__ == '__main__':
     from plotting import draw_ellipse
     Ex, Ey = draw_ellipse(Jout, return_values=True)
     print(len(Ex))
+
+
+
     circ_pol_deg = Jout.parameters.degree_circular_polarization()
     lin_pol_deg = Jout.parameters.degree_linear_polarization()
 
     plt.plot(f, circ_pol_deg, label='circ. pol. degree')
     plt.plot(f, lin_pol_deg, label='lin. pol. degree')
+    plt.legend()
+    plt.show()
+
+    a, b = Jout.parameters.ellipse_axes()
+    plt.plot(f, a, label='a')
+    plt.plot(f, b, label='b')
+    plt.legend()
+    plt.show()
+
+    plt.plot(f, b/a, label='b/a')
     plt.legend()
     plt.show()
 
