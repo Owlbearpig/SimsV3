@@ -34,6 +34,7 @@ if __name__ == '__main__':
     res = result_masson_full
     #res = result_masson
     res = result1
+    res = result_GHz
 
     j, f, wls = setup(res, return_vals=True)
     #j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
@@ -43,8 +44,12 @@ if __name__ == '__main__':
     retardance = J.parameters.retardance()
     inhomogeneity = J.parameters.inhomogeneity()
 
-    #plt.plot(f, diattenuation, label='diattenuation')
-    #plt.plot(f, retardance, label='retardance')
+    plt.plot(f, diattenuation, label='diattenuation')
+    plt.legend()
+    plt.show()
+    plt.plot(f, retardance, label='retardance')
+    plt.legend()
+    plt.show()
     plt.plot(f, inhomogeneity, label='inhomogeneity')
     plt.legend()
     plt.show()
@@ -94,7 +99,9 @@ if __name__ == '__main__':
     print(f[::30])
     J.from_matrix(j[::30])
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
-    plt.plot(E1.parameters.azimuth())
+    plt.plot(E1.parameters.azimuth(), label='E1 azimuth')
+    plt.plot(E2.parameters.azimuth(), label='E2 azimuth')
+    plt.legend()
     plt.show()
     E1.draw_ellipse()
     E2.draw_ellipse()
@@ -165,6 +172,11 @@ if __name__ == '__main__':
     circ_pol_deg = Jout.parameters.degree_circular_polarization()
     lin_pol_deg = Jout.parameters.degree_linear_polarization()
 
+    plt.plot(f, circ_pol_deg, label='circ. pol. degree')
+    plt.plot(f, lin_pol_deg, label='lin. pol. degree')
+    plt.legend()
+    plt.show()
+
     alpha = Jout.parameters.alpha()
     delay = Jout.parameters.delay()
     #plt.plot(f, delay-pi, label='delay')
@@ -182,8 +194,9 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    #plt.plot(f, 10*np.log(intensity))
-    plt.plot(f, intensity)
+    plt.plot(f, 10*np.log(intensity), label='intensity')
+    #plt.plot(f, intensity, label='intensity')
+    plt.legend()
     plt.show()
 
 
@@ -206,7 +219,7 @@ if __name__ == '__main__':
         if i % 25 != 0:
             continue
         if i < 300:
-            continue
+            pass
         print(i)
         #print(str(np.round((1/THz)*f[i], 2)))
         freq = str(np.round(f[i]*(1/THz), 3))
@@ -215,8 +228,8 @@ if __name__ == '__main__':
         plt.plot(Ex[i,:]/fact, Ey[i,:]/fact, label=freq)
     plt.ylim((-1.1, 1.1))
     plt.xlim((-1.1, 1.1))
-    plt.ylim((-5*10**-7, 5*10**-7))
-    plt.xlim((-5*10**-7, 5*10**-7))
+    #plt.ylim((-5*10**-7, 5*10**-7))
+    #plt.xlim((-5*10**-7, 5*10**-7))
     plt.legend()
     plt.show()
 

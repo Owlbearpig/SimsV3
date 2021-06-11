@@ -140,7 +140,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
 
     phi_s, phi_p = (2 * n_s * pi / wls) * d.T, (2 * n_p * pi / wls) * d.T
     alpha_s, alpha_p = -(2 * pi * k_s / wls) * d.T, -(2 * pi * k_p / wls) * d.T
-    alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
+    #alpha_s, alpha_p = np.zeros_like(wls), -(2 * pi * (k_p - k_s) / wls) * d.T
     #"""
     x, y = 1j * phi_s + alpha_s, 1j * phi_p + alpha_p
     angles = np.tile(angles, (m, 1))
@@ -149,7 +149,7 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 1] = 0.5 * sin(2 * angles) * (exp(x) - exp(y))
     j[:, :, 1, 0] = j[:, :, 0, 1]
     j[:, :, 1, 1] = exp(x) * sin(angles) ** 2 + exp(y) * cos(angles) ** 2
-    j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
+    #j = np.einsum('ijnm,ij->ijnm',j,exp(-(x+y)/2))
     """
     delta = (phi_s-phi_p)/2
     sd = 1j * sin(delta)
