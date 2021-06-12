@@ -293,7 +293,7 @@ def setup(settings, return_vals=False, measured_bf = False):
         else:
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
-            print(n_p-0.01, n_s)
+            #print(n_p-0.01, n_s)
             return j_stack(x, m, n, wls, n_s, n_p-0.00, k_s, k_p, einsum_str, einsum_path)
 
 

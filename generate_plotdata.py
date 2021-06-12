@@ -19,7 +19,7 @@ def pe_export(f, jones_vec, path, normalize):
     Ex, Ey = draw_ellipse(jones_vec, return_values=True)
     data = {}
     for ind, freq in enumerate(f.flatten()):
-        col_name = str(round((1/THz)*freq, 2))
+        col_name = str(round((1/THz)*freq, 4))
         normalization_factor = 1
         if normalize:
             normalization_factor /= np.max([Ex[ind, :], Ey[ind, :]])
@@ -31,7 +31,9 @@ def pe_export(f, jones_vec, path, normalize):
 
 if __name__ == '__main__':
     from results import *
-    result = result_masson
+    #result = result_masson_full
+    #result = result1
+    result = result_GHz
 
     res_name = result['name']
     dir = plot_data_dir / Path(res_name)
@@ -83,13 +85,21 @@ if __name__ == '__main__':
     pe_export(f, Jout_c, path=dir / Path('cp_pe.csv'), normalize=True)
 
     intensity = Jout_l.parameters.intensity()
-    export_csv({'freq': f_flat, 'intensity': intensity}, path=dir / Path('intensity.csv'))
+    export_csv({'freq': f_flat, 'intensity': 10*np.log10(intensity)}, path=dir / Path('intensity.csv'))
 
     diattenuation = J.parameters.diattenuation()
     export_csv({'freq': f_flat, 'diattenuation': diattenuation}, path=dir / Path('diattenuation.csv'))
     retardance = J.parameters.retardance()
     export_csv({'freq': f_flat, 'retardance': retardance}, path=dir / Path('retardance.csv'))
+
     v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
 
-    export_csv({'freq': f_flat, 'E1 ellipticity': E1.parameters.ellipticity_angle(),
-                'E2 ellipticity': E2.parameters.ellipticity_angle()}, path=dir / Path('eigenstate_ellipticity.csv'))
+    export_csv({'freq': f_flat, 'E1 ellipticity angle': E1.parameters.ellipticity_angle(),
+                'E2 ellipticity angle': E2.parameters.ellipticity_angle()}, path=dir / Path('eigenstate_ellipticity.csv'))
+
+    export_csv({'freq': f_flat, 'E1 eccentricity': E1.parameters.eccentricity(),
+                'E2 eccentricity': E2.parameters.eccentricity()}, path=dir / Path('eigenstate_eccentricity.csv'))
+
+    export_csv({'freq': f_flat, 'E1 azimuth': E1.parameters.azimuth()*rad,
+                'E2 azimuth': E2.parameters.azimuth()*rad}, path=dir / Path('eigenstate_azimuths.csv'))
+

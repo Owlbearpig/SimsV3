@@ -86,7 +86,7 @@ if __name__ == '__main__':
     #print(L_ret)
     #print(L_state)
     from generate_plotdata import export_csv
-    plt.plot(f, L_state, label='state')
+    plt.semilogy(f, L_state, label='state obj. func')
     #export_csv({'freq': f.flatten(), 'L': L}, 'plot_data/masson/MassLoss.csv')
     #plt.semilogy(f, L_ret, label='ret')
     #plt.ylim((-2.5*10**-4, 2.5*10**-3))
@@ -179,8 +179,6 @@ if __name__ == '__main__':
     Ex, Ey = draw_ellipse(Jout, return_values=True)
     print(len(Ex))
 
-
-
     circ_pol_deg = Jout.parameters.degree_circular_polarization()
     lin_pol_deg = Jout.parameters.degree_linear_polarization()
 
@@ -216,11 +214,14 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    plt.plot(f, 10*np.log(intensity), label='intensity')
+    plt.plot(f, 10*np.log10(intensity), label='intensity')
     #plt.plot(f, intensity, label='intensity')
     plt.legend()
     plt.show()
 
+    plt.plot(f, alpha * rad, label='alpha')
+    plt.legend()
+    plt.show()
 
     plt.plot(f, alpha*rad, label='alpha')
     plt.plot(f, delay*rad, label='delay')
