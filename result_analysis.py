@@ -41,6 +41,8 @@ if __name__ == '__main__':
     J = jones_matrix.create_Jones_matrices(res['name'])
     J.from_matrix(j)
 
+    print(np.round(f[0]*10**-9, 1), J[0])
+
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
     Jin_l.linear_light()
 
@@ -110,13 +112,26 @@ if __name__ == '__main__':
     J_o_lowres.draw_ellipse()
     plt.show()
 
-    v1, v2, E1, E2 = J_lowres.parameters.eig(as_objects=True)
+    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+
     plt.plot(E1.parameters.azimuth(), label='E1 azimuth')
     plt.plot(E2.parameters.azimuth(), label='E2 azimuth')
     plt.legend()
     plt.show()
-    E1.draw_ellipse()
-    E2.draw_ellipse()
+
+    plt.plot(90 - abs(E1.parameters.azimuth() - E2.parameters.azimuth())*rad, label='90 - E1 azimuth - E2 azimuth')
+    plt.legend()
+    plt.show()
+
+    plt.plot(E1.parameters.eccentricity(), label='E1 eccentricity')
+    plt.plot(E2.parameters.eccentricity(), label='E2 eccentricity')
+    plt.legend()
+    plt.show()
+
+    v1_lr, v2_lr, E1_lr, E2_lr = J_lowres.parameters.eig(as_objects=True)
+
+    E1_lr.draw_ellipse()
+    E2_lr.draw_ellipse()
     plt.show()
     #J.parameters.global_phase(verbose=True)
     #Jqwp = jones_matrix.create_Jones_matrices()
@@ -214,7 +229,7 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    plt.plot(f, 10*np.log10(intensity), label='intensity')
+    plt.plot(f, -10*np.log10(intensity), label='intensity')
     #plt.plot(f, intensity, label='intensity')
     plt.legend()
     plt.show()

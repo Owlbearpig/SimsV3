@@ -2,7 +2,7 @@ import os
 import pathlib
 from pathlib import Path
 
-name_filter = ['eigenstate_azimuths']
+name_filter = ['params']
 
 # get all csv files
 csv_files = [os.path.join(root, name)
