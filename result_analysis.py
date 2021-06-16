@@ -119,7 +119,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    plt.plot(90 - abs(E1.parameters.azimuth() - E2.parameters.azimuth())*rad, label='90 - E1 azimuth - E2 azimuth')
+    plt.plot(90 - (E1.parameters.azimuth() - E2.parameters.azimuth())*rad, label='90 - E1 azimuth - E2 azimuth')
     plt.legend()
     plt.show()
 

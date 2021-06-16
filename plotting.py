@@ -5,8 +5,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from numpy import (array, asarray, cos, exp, linspace, matrix, meshgrid,
                    ndarray, ones, outer, real, remainder, sin, size, sqrt,
-                   zeros_like)
+                   zeros_like, arccos, arcsin, arctan)
 from scipy.signal import fftconvolve
+from py_pol.stokes import draw_poincare
+from py_pol import stokes
 
 degrees = np.pi / 180
 
@@ -273,4 +275,45 @@ def draw_ellipse(E,
         plt.savefig(filename)
         print('Image {} saved succesfully!'.format(filename))
     return fig, ax
+
+def path(s1, s2):
+    # calc. great arc path in cartesian coords. between stokes params s1, s2
+    # s1,2 : stokes params, (1,x,y,z) on poincare
+    # Longitude = azimuth = phi (I think)
+    # https://math.stackexchange.com/questions/383711/parametric-equation-for-great-circle
+    t = np.linspace(0, 1, 100)
+
+    x1, y1, z1 = s1[1:]
+    x2, y2, z2 = s2[1:]
+
+    lat1, lat2 = arccos(z1), arccos(z2)
+    lon1, lon2 = arctan(y1/x1), arctan(y2/x2)
+
+    d = arccos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2))
+    A = sin((1 - t) * d) / sin(d)
+    B = sin(t * d) / sin(d)
+
+    x = A * cos(lat1) * cos(lon1) + B * cos(lat2) * cos(lon2)
+    y = A * cos(lat1) * sin(lon1) + B * cos(lat2) * sin(lon2)
+    z = A * sin(lat1) + B * sin(lat2)
+
+    stokes_vectors = []
+    for i in range(len(t)):
+        S = stokes.create_Stokes()
+        stokes_tuple = (1, x[i], y[i], z[i])
+        stokes_vectors.append(S.from_components(stokes_tuple))
+
+    return stokes_vectors
+
+S_top = stokes.create_Stokes()
+S_top.circular_light()
+S_top.draw_poincare()
+plt.show()
+S_top = array(S_top)
+print(S_top)
+S_middle = stokes.create_Stokes()
+S_middle.linear_light()
+S_middle.draw_poincare()
+plt.show()
+
 
