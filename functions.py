@@ -133,7 +133,7 @@ def form_birefringence(stripes, wls, eps_mat1, eps_mat2):
     return np.array([n_s, n_p, k_s, k_p])
 
 
-def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
+def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path, return_individual=False):
     j = np.zeros((m, n, 2, 2), dtype=complex)
 
     angles, d = x[0:n], x[n:2 * n]
@@ -161,6 +161,9 @@ def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path):
     j[:, :, 0, 0] += sdca
     j[:, :, 1, 1] -= sdca
     """
+    if return_individual:
+        return j
+
     np.einsum(einsum_str, *j.transpose((1, 0, 2, 3)), out=j[:, 0], optimize=einsum_path[0])
 
     j = j[:, 0]
@@ -262,7 +265,7 @@ def material_values(settings, return_vals=False, return_all=False):
     return eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m
 
 
-def setup(settings, return_vals=False, measured_bf = False, return_all=False):
+def setup(settings, return_vals=False, measured_bf = False, return_all=False, return_individual=False):
     eps_mat1, eps_mat2, n_s, n_p, k_s, k_p, f, wls, m = material_values(settings, return_vals=return_vals,
                                                                         return_all=return_all)
 
@@ -287,15 +290,15 @@ def setup(settings, return_vals=False, measured_bf = False, return_all=False):
             #n_s = np.linspace(1.25298611, 1.25445006, len(f)).reshape(len(f), 1)
             #n_p = np.linspace(1.33+0.11, 1.33+0.095, len(f)).reshape(len(f), 1)
             #n_s = np.linspace(1.33, 1.33, len(f)).reshape(len(f), 1)
-            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path, return_individual)
 
         if settings['bf'] == 'intrinsic':
-            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path, return_individual)
         else:
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
             #print(n_p-0.01, n_s)
-            return j_stack(x, m, n, wls, n_s, n_p-0.00, k_s, k_p, einsum_str, einsum_path)
+            return j_stack(x, m, n, wls, n_s, n_p-0.00, k_s, k_p, einsum_str, einsum_path, return_individual)
 
     def erf(x):
         j = make_j(x)

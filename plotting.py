@@ -5,10 +5,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from numpy import (array, asarray, cos, exp, linspace, matrix, meshgrid,
                    ndarray, ones, outer, real, remainder, sin, size, sqrt,
-                   zeros_like, arccos, arcsin, arctan)
+                   zeros_like, arccos, arcsin, arctan, arctan2, pi, dot)
 from scipy.signal import fftconvolve
-from py_pol.stokes import draw_poincare
-from py_pol import stokes
+from py_pol import stokes, mueller, jones_vector, jones_matrix
 
 degrees = np.pi / 180
 
@@ -276,18 +275,343 @@ def draw_ellipse(E,
         print('Image {} saved succesfully!'.format(filename))
     return fig, ax
 
-def path(s1, s2):
+
+def draw_empty_sphere(ax, angle_view, axis_equal=True):
+    """Fucntion that plots an empty Poincare sphere.
+    """
+
+    elev, azim = angle_view
+    max_size = 1
+
+    u = np.linspace(0, 360 * degrees, 90)
+    v = np.linspace(0, 180 * degrees, 90)
+
+    x = 1 * np.outer(np.cos(u), np.sin(v))
+    y = 1 * np.outer(np.sin(u), np.sin(v))
+    z = 1 * np.outer(np.ones_like(u), np.cos(v))
+
+    ax.plot_surface(x,
+                    y,
+                    z,
+                    rstride=4,
+                    cstride=4,
+                    color='b',
+                    edgecolor="k",
+                    linewidth=.0,
+                    alpha=0.1)
+    ax.plot(np.sin(u),
+            np.cos(u),
+            0,
+            color='k',
+            linestyle='dashed',
+            linewidth=0.5)
+    ax.plot(np.sin(u),
+            np.zeros_like(u),
+            np.cos(u),
+            color='k',
+            linestyle='dashed',
+            linewidth=0.5)
+    ax.plot(np.zeros_like(u),
+            np.sin(u),
+            np.cos(u),
+            color='k',
+            linestyle='dashed',
+            linewidth=0.5)
+
+    ax.plot([-1, 1], [0, 0], [0, 0], 'k-.', lw=1, alpha=0.5)
+    ax.plot([0, 0], [-1, 1], [0, 0], 'k-.', lw=1, alpha=0.5)
+    ax.plot([0, 0], [0, 0], [-1, 1], 'k-.', lw=1, alpha=0.5)
+
+    ax.plot(xs=(1, ),
+            ys=(0, ),
+            zs=(0, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+
+    ax.plot(xs=(-1, ),
+            ys=(0, ),
+            zs=(0, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+    ax.plot(xs=(0, ),
+            ys=(1, ),
+            zs=(0, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+    ax.plot(xs=(0, ),
+            ys=(-1, ),
+            zs=(0, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+    ax.plot(xs=(0, ),
+            ys=(0, ),
+            zs=(1, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+    ax.plot(xs=(0, ),
+            ys=(0, ),
+            zs=(-1, ),
+            color='black',
+            marker='o',
+            markersize=4,
+            alpha=0.5)
+    distance = 1.15
+    ax.text(distance, 0, 0, 'Q', fontsize=14)
+    ax.text(0, distance, 0, 'U', fontsize=14)
+    ax.text(0, 0, distance, 'V', fontsize=14)
+
+    ax.view_init(elev=elev / degrees, azim=azim / degrees)
+
+    ax.set_xlabel('$S_1$', fontsize=14, labelpad=-10)
+    ax.set_ylabel('$S_2$', fontsize=14, labelpad=-10)
+    ax.set_zlabel('$S_3$', fontsize=14, labelpad=-10)
+    ax.grid(False)
+
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_zticklabels([])
+
+    ax.set_xlim(-max_size, max_size)
+    ax.set_ylim(-max_size, max_size)
+    ax.set_zlim(-max_size, max_size)
+
+    plt.tight_layout()
+    # set_aspect_equal_3d(ax)
+    if axis_equal:
+        try:
+            ax.set_aspect('equal')
+        except:
+            print(
+                'Axis equal not supported by your current version of Matplotlib'
+            )
+
+def draw_stokes_points(ax,
+                       S,
+                       I_min=None,
+                       I_max=None,
+                       D_min=None,
+                       D_max=None,
+                       normalize=True,
+                       remove_depol=False,
+                       kind='scatter',
+                       color_scatter='Intensity',
+                       color_line='r',
+                       label=None):
+    """Function to draw Stokes vectors on the poincare sphere.
+
+    Parameters:
+        S (Stokes): Stokes object.
+        normalize (bool): If True, normalize the Stokes vectors to have intensity 1. Default: True.
+        I_min (float): Minimum intensity among all subplots.
+        I_max (float): Amximum intensity among all subplots.
+        D_min (float): Minimum polarization degree among all subplots.
+        D_max (float): Amximum polarization degree among all subplots.
+        remove_depol (bool): If True, plot the polarized part of the Stokes vector. Default: False.
+        kind (str): Plot type: LINE, SCATTER or BOTH. Default: SCATTER.
+        color_scatter (str): There are three options. INTENSITY sets the color of the points intensity dependent. DEGREE sets the color to match the polarization degree. Another posibility is to use valid color strings such as 'r'. Default: INTENSITY.
+        color_line (str): Only valid color strings such as 'r'. Default: 'r'.
+
+    Returns:
+
+    """
+    # Avoid empty objects
+    if S is None or S.size == 0:
+        return None
+
+    # if there is just one item in the Stokes object, change to scatter
+    if S.size == 1:
+        kind = 'scatter'
+
+    # Remove deopolarization if required
+    if remove_depol:
+        Sp, _ = S.parameters.polarized_unpolarized()
+    else:
+        Sp = S
+
+    # Normalize to intensity=1 if required
+    I = Sp.parameters.intensity(shape=False, out_number=False)
+    if normalize:
+        Sn = Sp.normalize(keep=True)
+    else:
+        Sn = Sp
+
+    # Calculate all the required parameters
+    _, S1, S2, S3 = Sn.parameters.components(shape=False, out_number=False)
+    im_scatter = None
+    if color_scatter.upper() == 'DEGREE':
+        depol = Sn.parameters.degree_depolarization(shape=False,
+                                                    out_number=False)
+
+    # Make the plots
+    if kind.upper() in ('SCATTER', 'BOTH'):
+        if color_scatter.upper() == 'INTENSITY':
+            im_scatter = ax.scatter(S1,
+                                    S2,
+                                    S3,
+                                    c=I,
+                                    s=60,
+                                    vmin=I_min,
+                                    vmax=I_max)
+        elif color_scatter.upper() == 'DEGREE':
+            im_scatter = ax.scatter(S1,
+                                    S2,
+                                    S3,
+                                    c=depol,
+                                    s=60,
+                                    vmin=D_min,
+                                    vmax=D_max)
+        else:
+            ax.scatter(S1, S2, S3, c=color_scatter, s=60, label=label)
+
+    if kind.upper() in ('LINE', 'BOTH') and Sn.size > 1:
+        ax.plot(S1, S2, S3, c=color_line, lw=2)
+
+    return im_scatter
+
+def draw_poincare(S,
+                  normalize=True,
+                  remove_depol=False,
+                  kind='scatter',
+                  color_scatter='r',
+                  color_line='r',
+                  angle_view=[0.5, -1],
+                  figsize=(6, 6),
+                  filename='',
+                  subplots=None,
+                  axis_equal=True):
+    """Function to draw the poincare sphere.
+    It admits Stokes or a list with Stokes, or None
+
+    Parameters:
+        stokes_points (Stokes, list, None): list of Stokes points.
+        angle_view (float, float): Elevation and azimuth for viewing.
+        is_normalized (bool): normalize intensity to 1.
+        kind (str): 'line' or 'scatter'.
+        color (str): color of line or scatter.
+        label (str): labels for drawing.
+        filename (str): name of filename to save the figure.
+        axis_equal (bool): If True, the axis_equal method is used. Default: True.
+    """
+    # Calculate the number of subplots
+    if subplots is None:
+        Nx, Ny, Nsubplots, Ncurves = (1, 1, 1, S.size)
+    elif type(subplots) is tuple:
+        Nsubplots = np.prod(np.array(subplots[0:2]))
+        if S.size % Nsubplots != 0:
+            raise ValueError(
+                'Shape {} is not valid for the object {} of {} elements'.
+                format(subplots, S.name, S.size))
+        Nx, Ny = subplots[0:2]
+        Ncurves = int(S.size / Nsubplots)
+    elif subplots.upper() == 'INDIVIDUAL':
+        Ny = int(np.floor(np.sqrt(S.size)))
+        Nx = int(np.ceil(S.size / Ny))
+        Nsubplots = S.size
+        Ncurves = 1
+    elif subplots.upper() == 'AS_SHAPE':
+        if S.ndim < 2:
+            Nx, Ny = (1, S.size)
+            Nsubplots, Ncurves = (S.size, 1)
+        else:
+            Nx, Ny = S.shape[0:2]
+            Nsubplots = Nx * Ny
+        Ncurves = int(S.size / Nsubplots)
+    else:
+        raise ValueError('{} is not a valid subplots option.')
+
+    # Flatten the object
+    Sf = S.copy()
+    Sf.shape = np.array([Sf.size])
+
+    # Calculate color min and max values
+    if color_line.upper() == 'INTENSITY' or color_scatter.upper(
+    ) in 'INTENSITY':
+        I = Sf.parameters.intensity(out_number=False)
+        I_min, I_max = (I.min(), I.max())
+    else:
+        I_min, I_max = (None, None)
+    if color_line.upper() == 'DEGREE' or color_scatter.upper() in 'DEGREE':
+        pol = Sf.parameters.degree_polarization(out_number=False)
+        D_min, D_max = (pol.min(), pol.max())
+    else:
+        D_min, D_max = (None, None)
+
+    # Create the figure
+    fig = plt.figure(figsize=figsize)
+    ax = []
+
+    # Loop to generate the poincare spheres
+    for indS in range(Nsubplots):
+        # Divide in subplots
+        axis = fig.add_subplot(Nx,
+                               Ny,
+                               indS + 1,
+                               projection='3d',
+                               adjustable='box')
+        ax += [axis]
+        # Create the Poincare sphere
+        draw_empty_sphere(axis, angle_view=angle_view, axis_equal=axis_equal)
+
+        # Add points from Stokes
+        im_scatter = draw_stokes_points(axis,
+                                        Sf[indS * Ncurves:(indS + 1) *
+                                           Ncurves],
+                                        I_min=I_min,
+                                        I_max=I_max,
+                                        D_min=D_min,
+                                        D_max=D_max,
+                                        normalize=normalize,
+                                        remove_depol=remove_depol,
+                                        kind=kind,
+                                        color_scatter=color_scatter,
+                                        color_line=color_line)
+        # Add titles
+        if Nsubplots > 1:
+            if subplots in ('individual', 'Individual', 'INDIVIDUAL'):
+                string = str(indS)
+            else:
+                string = str(list(np.unravel_index(indS, (Nx, Ny))))
+            plt.title(string, fontsize=18)
+        else:
+            plt.title(S.name, fontsize=26)
+
+    # Add supertitle if required
+    if Nsubplots > 1:
+        fig.suptitle(S.name, fontsize=26)
+
+    # Add colormap if required
+    if im_scatter is not None:
+        cbar = fig.colorbar(im_scatter, ax=ax)
+        if color_scatter.upper() == 'INTENSITY':
+            cbar.set_label(label='Intensity', fontsize=14)
+        else:
+            cbar.set_label(label='Pol. degree', fontsize=14)
+
+    return ax, fig
+
+def stokes_path(s1, s2):
     # calc. great arc path in cartesian coords. between stokes params s1, s2
     # s1,2 : stokes params, (1,x,y,z) on poincare
     # Longitude = azimuth = phi (I think)
     # https://math.stackexchange.com/questions/383711/parametric-equation-for-great-circle
-    t = np.linspace(0, 1, 100)
+    t = np.linspace(0, 1, 10)
+    s1_array, s2_array = s1.M.flatten(), s2.M.flatten()
 
-    x1, y1, z1 = s1[1:]
-    x2, y2, z2 = s2[1:]
+    x1, y1, z1 = s1_array[1:]
+    x2, y2, z2 = s2_array[1:]
 
-    lat1, lat2 = arccos(z1), arccos(z2)
-    lon1, lon2 = arctan(y1/x1), arctan(y2/x2)
+    lon1, lon2 = arctan2(y1, x1), arctan2(y2, x2)
+    lat1, lat2 = arctan2(z1, sqrt(x1**2+y1**2)), arctan2(z2, sqrt(x2**2+y2**2))
 
     d = arccos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2))
     A = sin((1 - t) * d) / sin(d)
@@ -297,23 +621,70 @@ def path(s1, s2):
     y = A * cos(lat1) * sin(lon1) + B * cos(lat2) * sin(lon2)
     z = A * sin(lat1) + B * sin(lat2)
 
-    stokes_vectors = []
-    for i in range(len(t)):
-        S = stokes.create_Stokes()
-        stokes_tuple = (1, x[i], y[i], z[i])
-        stokes_vectors.append(S.from_components(stokes_tuple))
+    S = stokes.create_Stokes()
+    stokes_vectors = (np.ones_like(t), x, y, z)
+    S.from_components(stokes_vectors)
 
-    return stokes_vectors
+    return S
 
-S_top = stokes.create_Stokes()
-S_top.circular_light()
-S_top.draw_poincare()
-plt.show()
-S_top = array(S_top)
-print(S_top)
-S_middle = stokes.create_Stokes()
-S_middle.linear_light()
-S_middle.draw_poincare()
-plt.show()
+def poincare_path(J0, T_matrix_list):
+
+    fig = plt.figure(figsize=(6, 6))
+
+    axis = fig.add_subplot(1, 1, 1, projection='3d', adjustable='box')
+    draw_empty_sphere(axis, angle_view=[0.5, -1], axis_equal=True)
+
+    prev_J = J0
+    for i, T in enumerate(T_matrix_list):
+        current_T = jones_matrix.create_Jones_matrices()
+        current_T.from_matrix(T)
+
+        current_J = current_T*prev_J
+
+        S_current = stokes.create_Stokes()
+        S_current.from_Jones(current_J)
+
+        S_prev = stokes.create_Stokes()
+        S_prev.from_Jones(prev_J)
+
+        path = stokes_path(S_prev, S_current)
+        draw_stokes_points(axis, path, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
+                           remove_depol=False,
+                           kind='line',
+                           color_scatter='r',
+                           color_line=name_colors[i])
+
+        draw_stokes_points(axis, S_prev, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
+                           remove_depol=False,
+                           kind='scatter',
+                           color_scatter=name_colors[i],
+                           color_line='r',
+                           label=f'waveplate {i+1}')
+
+        prev_J = current_J
+
+    draw_stokes_points(axis, S_current, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
+                       remove_depol=False,
+                       kind='scatter',
+                       color_scatter=name_colors[-1],
+                       color_line='r', label='final state')
+
+    plt.legend()
+    plt.show()
 
 
+if __name__ == '__main__':
+    from results import *
+    from py_pol import jones_vector
+    from functions import setup
+
+    Jin_l = jones_vector.create_Jones_vectors('Jin_l')
+    Jin_l.linear_light()
+
+    j_individual, freqs, wls = setup(result_GHz, return_vals=True, return_individual=True)
+
+    j_individual = j_individual[10]
+
+    j_individual = flip(j_individual)
+
+    poincare_path(Jin_l, j_individual)

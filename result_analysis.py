@@ -8,20 +8,21 @@ from scipy.constants import c as c0
 from scipy.optimize import basinhopping
 from py_pol import jones_matrix
 from py_pol import jones_vector
+from py_pol import stokes
 from scipy.optimize import OptimizeResult
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
 from numpy.linalg import solve
 import string
+from plotting import poincare_path, draw_ellipse
 import matplotlib.pyplot as plt
 import sys
 from consts import *
-
+from functions import setup, thickness_for_1thz
+from results import *
 # plotting single values and stuff
 
 if __name__ == '__main__':
-    from results import *
-    from functions import setup, thickness_for_1thz
 
     res_test = {
         'name': 'test',
@@ -36,22 +37,31 @@ if __name__ == '__main__':
     res = result1
     res = result_GHz
 
-    j, f, wls = setup(res, return_vals=True)
-    #j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
-    J = jones_matrix.create_Jones_matrices(res['name'])
-    J.from_matrix(j)
-
-    print(np.round(f[0]*10**-9, 1), J[0])
-
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
     Jin_l.linear_light()
+
+    #j_individual, _, _ = setup(res, return_vals=True, return_individual=True)
+    #poincare_path(Jin_l, j_individual)
+
+    j, f, wls = setup(res, return_vals=True)
+
+    #j,f,wls = j[::len(f)//20], f[::len(f)//20], wls[::len(f)//20]
+    T = jones_matrix.create_Jones_matrices(res['name'])
+    T.from_matrix(j)
+
+    print(np.round(f[700]*10**-9, 1), T[700])
+
+    S = stokes.create_Stokes()
+    S.from_Jones(T[700]*Jin_l)
+
+    print(S)
 
     Jin_c = jones_vector.create_Jones_vectors('RCP')
     Jin_c.circular_light(kind='r')
 
-    diattenuation = J.parameters.diattenuation()
-    retardance = J.parameters.retardance()
-    inhomogeneity = J.parameters.inhomogeneity()
+    diattenuation = T.parameters.diattenuation()
+    retardance = T.parameters.retardance()
+    inhomogeneity = T.parameters.inhomogeneity()
 
     plt.plot(f, diattenuation, label='diattenuation')
     plt.legend()
@@ -112,7 +122,7 @@ if __name__ == '__main__':
     J_o_lowres.draw_ellipse()
     plt.show()
 
-    v1, v2, E1, E2 = J.parameters.eig(as_objects=True)
+    v1, v2, E1, E2 = T.parameters.eig(as_objects=True)
 
     plt.plot(E1.parameters.azimuth(), label='E1 azimuth')
     plt.plot(E2.parameters.azimuth(), label='E2 azimuth')
@@ -137,8 +147,8 @@ if __name__ == '__main__':
     #Jqwp = jones_matrix.create_Jones_matrices()
     #Jqwp.retarder_linear()
 
-    J = jones_matrix.create_Jones_matrices()
-    J.from_matrix(j)
+    T = jones_matrix.create_Jones_matrices()
+    T.from_matrix(j)
 
     #print(J.analysis.retarder(verbose=True))
     #E1[11].draw_ellipse()
@@ -188,9 +198,9 @@ if __name__ == '__main__':
     #Jout_l = J * Jin_l
     #Jout_l.draw_ellipse()
     #plt.show()
-    Jout = J * Jin_l
+    Jout = T * Jin_l
     #Jout_l.normalize()
-    from plotting import draw_ellipse
+
     Ex, Ey = draw_ellipse(Jout, return_values=True)
     print(len(Ex))
 
