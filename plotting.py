@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from numpy import (array, asarray, cos, exp, linspace, matrix, meshgrid,
                    ndarray, ones, outer, real, remainder, sin, size, sqrt,
-                   zeros_like, arccos, arcsin, arctan, arctan2, pi, dot)
+                   zeros_like, arccos, arcsin, arctan, arctan2, pi, dot, argmin)
 from scipy.signal import fftconvolve
 from py_pol import stokes, mueller, jones_vector, jones_matrix
 
@@ -474,7 +474,7 @@ def draw_stokes_points(ax,
             ax.scatter(S1, S2, S3, c=color_scatter, s=60, label=label)
 
     if kind.upper() in ('LINE', 'BOTH') and Sn.size > 1:
-        ax.plot(S1, S2, S3, c=color_line, lw=2)
+        ax.plot(S1, S2, S3, c=color_line, lw=2, label=label)
 
     return im_scatter
 
@@ -604,7 +604,7 @@ def stokes_path(s1, s2):
     # s1,2 : stokes params, (1,x,y,z) on poincare
     # Longitude = azimuth = phi (I think)
     # https://math.stackexchange.com/questions/383711/parametric-equation-for-great-circle
-    t = np.linspace(0, 1, 10)
+    t = np.linspace(0, 1, 25)
     s1_array, s2_array = s1.M.flatten(), s2.M.flatten()
 
     x1, y1, z1 = s1_array[1:]
@@ -647,31 +647,43 @@ def poincare_path(J0, T_matrix_list):
         S_prev = stokes.create_Stokes()
         S_prev.from_Jones(prev_J)
 
+        if i == 0:
+            print(S_prev)
+            draw_stokes_points(axis, S_prev, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
+                               remove_depol=False,
+                               kind='scatter',
+                               color_scatter='black',
+                               color_line='black',
+                               label='Input state')
+
+
         path = stokes_path(S_prev, S_current)
         draw_stokes_points(axis, path, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
                            remove_depol=False,
                            kind='line',
                            color_scatter='r',
-                           color_line=name_colors[i])
+                           color_line=name_colors[i],
+                           label=f'Waveplate {i+1}')
 
-        draw_stokes_points(axis, S_prev, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
-                           remove_depol=False,
-                           kind='scatter',
-                           color_scatter=name_colors[i],
-                           color_line='r',
-                           label=f'waveplate {i+1}')
+        if i != 0:
+            draw_stokes_points(axis, S_prev, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
+                               remove_depol=False,
+                               kind='scatter',
+                               color_scatter=name_colors[i],
+                               color_line='r')
 
         prev_J = current_J
+
+    print(S_current)
 
     draw_stokes_points(axis, S_current, I_min=1, I_max=1, D_min=1, D_max=1, normalize=True,
                        remove_depol=False,
                        kind='scatter',
                        color_scatter=name_colors[-1],
-                       color_line='r', label='final state')
+                       color_line='r', label='Output state')
 
     plt.legend()
     plt.show()
-
 
 if __name__ == '__main__':
     from results import *
@@ -681,9 +693,14 @@ if __name__ == '__main__':
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
     Jin_l.linear_light()
 
-    j_individual, freqs, wls = setup(result_GHz, return_vals=True, return_individual=True)
+    res = result_GHz
 
-    j_individual = j_individual[700]
+    j_individual, freqs, wls = setup(res, return_vals=True, return_individual=True)
+
+    freq_idx = int(len(freqs) // 1.0001)
+
+    print(freqs[freq_idx]*10**-9)
+    j_individual = j_individual[freq_idx]
 
     j_individual = flip(j_individual)
 
