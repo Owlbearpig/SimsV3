@@ -117,3 +117,5 @@ if __name__ == '__main__':
     export_csv({'freq': f_flat, 'E1 azimuth': E1.parameters.azimuth() * rad,
                 'E2 azimuth': E2.parameters.azimuth() * rad}, path=dir / Path('eigenstate_azimuths.csv'))
 
+    a, b = Jout_l.parameters.ellipse_axes()
+    export_csv({'freq': f_flat, 'a': a, 'b': b}, path=dir / Path('ellipse_axes.csv'))

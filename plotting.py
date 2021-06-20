@@ -683,7 +683,7 @@ if __name__ == '__main__':
 
     j_individual, freqs, wls = setup(result_GHz, return_vals=True, return_individual=True)
 
-    j_individual = j_individual[10]
+    j_individual = j_individual[700]
 
     j_individual = flip(j_individual)
 

@@ -54,9 +54,9 @@ from generate_plotdata import export_csv
 data_export = {'freq': ntwk.f}
 for angle in angles:
     if angle > 120:
-        continue
+        pass
     if angle < 70:
-        continue
+        pass
 
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
     plt.plot(ntwk.f/10**9, np.abs(ntwk.s[:,1,0]), label=str(angle))
