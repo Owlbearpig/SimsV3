@@ -55,8 +55,8 @@ plt.figure()
 #plt.title(str(idx))
 #plt.plot(offsets, sigmas[:,0], label='sigma a')
 #plt.plot(offsets, sigmas[:,1], label='sigma b')
-for i in range(28):
-    plt.plot(offsets, sigmas[i*50, :, 2], label=f'sigma delta {i}')
+for i in range(4):
+    plt.plot(offsets, sigmas[i*50, :, 1], label=f'sigma delta freq_i:{i}')
 plt.legend()
 plt.show()
 

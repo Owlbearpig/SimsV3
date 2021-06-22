@@ -26,10 +26,11 @@ phi = np.array([])
 s21 = np.array([])
 s12 = np.array([])
 idx = 1400
+phi_offset = 5.7#9.64
 for angle in angles:
     ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
     f = ntwk.f[idx]
-    phi = np.append(phi, angle-9.64)
+    phi = np.append(phi, angle-phi_offset)
     s21 = np.append(s21, np.abs(ntwk.s[idx,1,0]))
     s12 = np.append(s12, np.abs(ntwk.s[idx,0,1]))
 
@@ -52,7 +53,7 @@ f = np.array([])
 delta, a, b = np.array([]), np.array([]), np.array([])
 for idx in range(ntwk.f.size):
     if idx%50 != 0:
-        continue
+        pass
     print(idx)
     
     phi = np.array([])
@@ -62,7 +63,7 @@ for idx in range(ntwk.f.size):
     f = np.append(f, ntwk.f[idx])
     for angle in angles:
         ntwk = rf.Network('%d deg_time_gated_bp_c0ps_s100ps_d20ps.s2p'%(angle))
-        phi = np.append(phi, angle-9.64)
+        phi = np.append(phi, angle-phi_offset)
         s21 = np.append(s21, np.abs(ntwk.s[idx,1,0]))
         s12 = np.append(s12, np.abs(ntwk.s[idx,0,1]))
         
@@ -73,7 +74,7 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
 
 #export_csv({'freqs': f/10**9, 'a': a, 'b': b, 'delta': delta}, 'measurement_result.csv')
-
+np.save(f'delta_{phi_offset}', delta)
 plt.plot(f/10**9, delta/np.pi, '.-',label = 'Messung')
 plt.plot(f/10**9, f*0+0.5*1.03, 'k--',label='+3%')
 plt.plot(f/10**9, f*0+0.5*0.97, 'k--',label='-3%')

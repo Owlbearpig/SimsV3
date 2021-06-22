@@ -134,6 +134,7 @@ def form_birefringence(stripes, wls, eps_mat1, eps_mat2):
 
 
 def j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path, return_individual=False):
+
     j = np.zeros((m, n, 2, 2), dtype=complex)
 
     angles, d = x[0:n], x[n:2 * n]
@@ -297,8 +298,12 @@ def setup(settings, return_vals=False, measured_bf = False, return_all=False, re
         else:
             stripes = x[-2], x[-1]
             n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
-            #print(n_p-0.01, n_s)
-            return j_stack(x, m, n, wls, n_s, n_p-0.00, k_s, k_p, einsum_str, einsum_path, return_individual)
+            #bf_data = pandas.read_csv('/home/alex/Desktop/Projects/SimsV3/fullplates_bf.csv')
+
+            #bf_interp = np.interp(f/10**9, bf_data['freq'], bf_data[r'2mm_uniform'])
+
+            #return j_stack(x, m, n, wls, n_s, n_p+bf_interp, k_s, k_p, einsum_str, einsum_path, return_individual)
+            return j_stack(x, m, n, wls, n_s, n_p, k_s, k_p, einsum_str, einsum_path, return_individual)
 
     def erf(x):
         j = make_j(x)

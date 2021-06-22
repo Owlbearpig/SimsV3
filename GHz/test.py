@@ -42,7 +42,7 @@ def random_j():
     angles_ghz = np.deg2rad(array([99.66, 141.24, 162.78, 168.14]))#+ np.deg2rad((4*np.random.random(4) - 2)) # 2*np.ones(4)# +(10*np.random.random()-5))#
     d_ghz = array([6659.3, 3766.7, 9139.0, 7598.8])#*(0.95+np.random.random(4)*0.1)
     stripes_ghz = np.array([628, 517.1]) #+ (50*np.random.random(2) + 100*np.ones(2))
-    #stripes_ghz = np.array([734.55, 392.95])
+    stripes_ghz = np.array([734.55, 392.95])
     #stripes_ghz = np.array([10.55, 10.95])
     x_ghz = np.concatenate((angles_ghz, d_ghz, stripes_ghz))
     res['x'] = x_ghz
@@ -71,7 +71,7 @@ for i in range(1):
     for idx in range(len(f)):
         print(idx)
         if idx%50 != 0:
-            pass
+            continue
         if f[idx] > 0.115*10**12:
             break
         #phi_offset = 4.725 + (14.84-4.725)*idx/1400
@@ -113,7 +113,7 @@ for i in range(1):
     plot_data['freq'] = f_cut
     plot_data['delta_'+str(i)] = delta
     print(result_GHz)
-    plt.plot(f_cut/10**9, delta/np.pi, '.-',label = 'Messung')
+    plt.plot(f_cut/10**9, delta/np.pi, '.-',label = 'Expected')
 
 min_curve, max_curve = None, None
 min_val_curve, max_val_curve = 100, 0
@@ -131,8 +131,12 @@ for key in plot_data:
 plot_data['delta_min_curve'] = min_curve
 plot_data['delta_max_curve'] = max_curve
 
-export_csv(plot_data, 'periodicity_design_highres.csv')
+#export_csv(plot_data, 'periodicity_design_highres.csv')
 
+delta_measured = np.load('delta6.npy')
+f = np.load('f.npy')
+
+plt.plot(f/10**9, delta_measured/pi, label='Measured4Real')
 plt.plot(f_cut/10**9, f_cut*0+0.5*1.03, 'k--',label='+3%')
 plt.plot(f_cut/10**9, f_cut*0+0.5*0.97, 'k--',label='-3%')
 plt.grid(True)
@@ -140,6 +144,7 @@ plt.xlabel('$f$ in GHz')
 plt.ylabel(r"$\frac{\delta}{\pi}$")
 #plt.ylim([0, 1])
 #plt.xlim([75,110])
+plt.legend()
 plt.show()
 
 exit()
