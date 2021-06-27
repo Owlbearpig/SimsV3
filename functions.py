@@ -16,12 +16,55 @@ import string
 import matplotlib.pyplot as plt
 import sys
 from consts import *
+import os
+
+def interpolate_ref_ind(ri_mes, freq_mes, freq_highres):
+    return np.interp(freq_highres, freq_mes, ri_mes)
+
+
+def find_file(dir_path, file_name):
+    for root, dirs, files in os.walk(dir_path):
+        for name in files:
+            if name.endswith('.csv') and str(file_name) in str(name):
+                return os.path.join(root, name)
+
+
+# return measurement data of material_name interpolated on freq_axis
+def load_custom_material(material_name, freq_axis):
+    # folder with teralyzer csv result files
+    base_path = r'E:\CURPROJECT\BowTie\1DirectionFullPlates\FullPlates'
+
+    data_file = find_file(base_path, material_name)
+    #print(f'Used measurement file: {data_file}')
+    df = pandas.read_csv(data_file)
+
+    epsilon_r_key = [key for key in df.keys() if "epsilon_r" in key][0]
+    epsilon_i_key = [key for key in df.keys() if "epsilon_i" in key][0]
+    freq_dict_key = [key for key in df.keys() if "freq" in key][0]
+
+    freq_mes = np.array(df[freq_dict_key])
+
+    eps_mat_r = np.array(df[epsilon_r_key])
+
+    eps_mat_r = np.interp(freq_axis, freq_mes, eps_mat_r)
+
+    if not epsilon_i_key:
+        eps_mat_i = np.zeros_like(eps_mat_r)
+    else:
+        eps_mat_i = np.array(df[epsilon_i_key])
+
+    eps_mat_i = np.interp(freq_axis, freq_mes, eps_mat_i)
+
+    eps_mat1 = (eps_mat_r + eps_mat_i * 1j).reshape(len(freq_axis), 1)
+
+    return eps_mat1
 
 def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
     mat_paths = {
         'ceramic_slow': Path('material_data/Sample1_000deg_1825ps_0m-2Grad_D=3000.csv'),
         'ceramic_fast': Path('material_data/Sample1_090deg_1825ps_0m88Grad_D=3000.csv'),
         'HIPS_MUT_1_1': Path('material_data/MUT 1-1.csv'),
+        'HIPS_MUT_1_1_constEps': Path('material_data/MUT 1-1_constEps.csv'),
         'HIPS_MUT_1_2': Path('material_data/MUT 1-2.csv'),
         'HIPS_MUT_1_3': Path('material_data/MUT 1-3.csv'),
         'HIPS_MUT_2_1': Path('material_data/MUT 2-1.csv'),
@@ -35,7 +78,7 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'quartz_full_slow': Path('material_data/abs_slow_grisch1990_fit.csv'),
         'quartz_full_fast': Path('material_data/abs_fast_grisch1990_fit.csv'),
         'HIPS_HHI': Path('material_data/2mmHIPS_D=2000.csv'),
-
+        'HIPS_HHI_linePrnt': Path('material_data/2mmHIPS_D=2000_LinePrnt.csv'),
     }
 
     df = pandas.read_csv(mat_paths[mat_name])

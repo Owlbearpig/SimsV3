@@ -1,9 +1,10 @@
 import numpy as np
+import pandas
 from numpy import pi
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from results import stripes_ghz, result_GHz, d_ghz, angles_ghz
-from functions import material_values, get_einsum, load_material_data
+from functions import material_values, get_einsum, load_material_data, load_custom_material
 from scipy.constants import c as c0
 from numpy import cos, sin, exp, power, outer, sqrt
 from py_pol import jones_matrix
@@ -11,6 +12,7 @@ from py_pol import jones_vector
 from scipy.optimize import curve_fit
 from AuswertungImport import delta_measured_eval
 from eps_from_bf_rytov import eps_from_bf
+
 
 um = 10**6
 THz = 10**12
@@ -23,7 +25,8 @@ einsum_str, einsum_path = get_einsum(m, n)
 
 wls = ((c0/f_measured)*um).reshape((m, 1))
 
-plt.plot(f_measured, delta_measured)
+plt.plot(f_measured, delta_measured, label='delta measured (goal)')
+plt.legend()
 plt.show()
 
 
@@ -31,7 +34,11 @@ def form_birefringence(delta_bf):
     """
     :return: array with length of frequency, frequency resolved [ns, np, ks, kp]
     """
-    eps_mat1, _, _, _ = load_material_data('HIPS_MUT_1_1')
+    material = 'MUT1 0deg noFP_D=2000'
+    material = 'S2 0deg noFP_D=2000'
+    eps_mat1 = load_custom_material(material, f_measured)
+
+    #eps_mat1, _, _, _ = load_material_data('HIPS_MUT_1_1_constEps')  # HIPS_HHI_linePrnt
 
     eps_mat2 = np.ones_like(eps_mat1)
 
@@ -128,14 +135,20 @@ def calc_delta_measlike(delta_bf, idx):
     return delta
 
 if __name__ == '__main__':
+    bf_fitted = np.load('bf_fitted.npy')
+    delta_fitted = np.load('delta_fitted.npy')
+    f = f_measured[::10]
+    from generate_plotdata import export_csv
+
+    export_csv({'freq': f, 'bf_fitted': bf_fitted, 'delta_fitted': delta_fitted}, 'fitted_bf_and_delta.csv')
+    exit()
+    resolution = 10
     best_fits, best_fits_delta = [], []
     for idx in range(m):
-        if idx % 50:
+        if idx % resolution:
             continue
-
-
         best_fit, min_deviation = None, 10
-        delta_bf_line = np.linspace(0, 0.05, 15)
+        delta_bf_line = np.linspace(0, 0.04, 40)
         for delta_bf in delta_bf_line:
             delta_calc = calc_delta_measlike(delta_bf, idx)
             delta_meas = delta_measured[idx]
@@ -149,7 +162,27 @@ if __name__ == '__main__':
 
     print(best_fits)
     print(best_fits_delta)
-    plt.plot(best_fits_delta, label='best_fits_delta')
-    plt.plot(delta_measured[::50], label='measured')
+
+    n_s, n_p, _, _ = form_birefringence(0)
+
+    df = pandas.read_csv(r'E:\CURPROJECT\SimsV3\GHz\FullPlates_bf.csv')
+    #ZigZag,2mm,8mm
+    plt.plot(df['freq'], df['ZigZag'], label='ZigZag')
+    plt.plot(df['freq'], df['2mm'], label='2mm')
+    plt.plot(df['freq'], df['8mm'], label='8mm')
+
+    np.save('bf_fitted', best_fits)
+
+    plt.plot(f_measured[::resolution]/10**9, best_fits, label='bf_difference')
+    plt.plot(f_measured/10**9, n_p-n_s, label='form birefringence')
+    plt.ylabel('Birefringence')
+    plt.xlim((70, 115))
+    plt.legend()
+    plt.show()
+
+    np.save('delta_fitted', best_fits_delta)
+
+    plt.plot(f_measured[::resolution]/10**9, best_fits_delta, label='best_fits_delta')
+    plt.plot(f_measured/10**9, delta_measured, label='measured')
     plt.legend()
     plt.show()

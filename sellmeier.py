@@ -7,7 +7,7 @@ import pandas
 from scipy import optimize
 
 
-def ref_ind_fit(wl, speed):
+def ref_ind_fit(wl, speed, return_all=False):
     THz = 10**12
     m_um = 10**6
     f_min, f_max = 0.2*THz, 2.5*THz
@@ -78,8 +78,10 @@ def ref_ind_fit(wl, speed):
         #return B1()+B2()*x**1+B3()*x**2+C1()**3+C2()**4+C3()**5
 
     data = ref_ind_data**2
+
     #from dataexport import save
     fit(sellmeier, [B1, B2, B3, C1, C2, C3], data, x=wls)
+    print(f'(B1, B2, B3, C1, C2, C3)={[param() for param in [B1, B2, B3, C1, C2, C3]]}')
     #print(np.sqrt(sellmeier(wls)))
     #plt.plot(wls, np.sqrt(data), '.')
     #plt.xlim((max(wls)*1.1, min(wls)*0.8))
@@ -90,4 +92,6 @@ def ref_ind_fit(wl, speed):
     #     name='sellmeier_quartz_fast')
 
     #plt.show()
+    if return_all:
+        return np.sqrt(sellmeier(wl)), ref_ind_data
     return np.sqrt(sellmeier(wl))

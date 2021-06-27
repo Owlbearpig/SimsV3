@@ -73,10 +73,11 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
 
 
-dn, L = 0.08, 1*10**-2
+dn, L = 0.08, 1.0125*10**-2
 single_wp_delta = 2*pi*dn*L*f/c0
 
-# export_csv({'freqs': f/10**9, 'a': a, 'b': b, 'delta': delta}, 'measurement_result.csv')
+
+#export_csv({'freqs': f/10**9, 'a': a, 'b': b, 'delta': delta, 'delta1wp': single_wp_delta}, 'measurement_result.csv')
 
 plt.plot()
 plt.plot(f / 10 ** 9, delta / pi, '.-', label='Messung')
@@ -87,7 +88,7 @@ plt.grid(True)
 plt.xlabel('$f$ in GHz')
 plt.ylabel(r"$\frac{\delta}{\pi}$")
 plt.xlim([75, 110])
-plt.ylim([0.3, 0.6])
+#plt.ylim([0.3, 0.6])
 plt.legend()
 plt.show()
 

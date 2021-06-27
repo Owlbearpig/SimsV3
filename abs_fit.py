@@ -12,7 +12,7 @@ f_min, f_max = 0.2*THz, 2.5*THz
 
 resolution = 1
 
-speed = 'slow' # 'slow' # 'fast'
+speed = 'fast' # 'slow' # 'fast'
 
 mat_path = Path('material_data/quartz_m_slow2.csv')
 
@@ -89,7 +89,8 @@ def func(x):
 # from dataexport import save
 #fit(func, [B1, B2, B3, C1, C2, C3], alpha, x=f)
 c = np.polynomial.chebyshev.chebfit(f, np.sqrt(alpha_data), deg=1)
-
+#c = np.polynomial.polynomial.Polynomial.fit(f/10**12, np.sqrt(alpha_data), deg=2)
+print(c)
 def poly(x):
     s = 0
     for i, coef in enumerate(c):
@@ -101,7 +102,7 @@ alpha = poly(f_full)**2
 
 wls = (c0/f_full)*m_um
 from sellmeier import ref_ind_fit
-ref_ind = ref_ind_fit(wls, speed)
+ref_ind, ref_ind_data = ref_ind_fit(wls, speed, return_all=True)
 kappa = alpha*c0/(4*pi*f_full)
 eps_i = 2*ref_ind*kappa*100 # units of alpha are 1/cm
 
@@ -110,9 +111,11 @@ plt.plot(f_full, alpha, label='fit')
 plt.scatter(f, alpha_data, label='data')
 
 from generate_plotdata import export_csv
-export_csv({'freq': f_full, 'alpha': alpha, 'ref_ind': ref_ind, 'epsilon_r': ref_ind**2, 'epsilon_i': eps_i},
-           f'material_data/abs_{speed}_grisch1990_fit.csv')
-
+"""
+export_csv({'freq': f_full, 'wls': wls,
+            'alpha_fit': alpha, 'ref_ind_fit': ref_ind, },
+           f'{speed}_grisch1990_fit.csv')
+"""
 plt.legend()
 plt.show()
 

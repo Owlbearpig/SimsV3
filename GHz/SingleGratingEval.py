@@ -4,8 +4,8 @@ import numpy as np
 from scipy.constants import c as c0
 import pandas
 import matplotlib.pyplot as plt
-from functions import material_values
-from functions import form_birefringence
+from functions import material_values, form_birefringence
+from generate_plotdata import export_csv
 
 um = 10**6
 THz = 10**12
@@ -30,7 +30,7 @@ def load_material_data(path):
 
 angles_ghz = np.deg2rad(np.array([45])) #+ 1*np.random.random(4) # 2*np.ones(4)#
 d_ghz = np.array([4000]) #+ 1000*np.random.random(4)
-stripes_ghz = np.array([750, 375])
+stripes_ghz = np.array([631, 460])
 x_sg = np.concatenate((angles_ghz, d_ghz, stripes_ghz))
 
 result_GHz = {
@@ -61,6 +61,16 @@ base = Path('ResultTeralyzerMinFreq')
 
 plt.plot(f.flatten()*10**-12, n_s, label='n_s, (VNA)')
 plt.plot(f.flatten()*10**-12, n_p, label='n_p, (VNA)')
+"""
+export_csv({'freqs': f.flatten(), 'n_s': n_s.flatten(), 'n_p': n_p.flatten(), 'bf':(n_p-n_s).flatten()}, 
+           'singlegratingSlim_birefringence_calc_highres.csv')
+"""
+plt.legend()
+plt.show()
+
+plt.plot(f.flatten()*10**-12, n_p-n_s, label='birefringence')
+plt.legend()
+plt.show()
 
 # find result files
 resultfiles = [os.path.join(root, name)
