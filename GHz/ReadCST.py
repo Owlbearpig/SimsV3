@@ -139,7 +139,7 @@ for i, res in enumerate(res_tuples):
 
 data_export['freqs'] = f
 
-export_csv(data_export, 'cst_bf_plot_data.csv')
+#export_csv(data_export, 'cst_bf_plot_data.csv')
 
 plt.legend()
 plt.show()
