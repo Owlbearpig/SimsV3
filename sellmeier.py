@@ -83,15 +83,15 @@ def ref_ind_fit(wl, speed, return_all=False):
     fit(sellmeier, [B1, B2, B3, C1, C2, C3], data, x=wls)
     print(f'(B1, B2, B3, C1, C2, C3)={[param() for param in [B1, B2, B3, C1, C2, C3]]}')
     #print(np.sqrt(sellmeier(wls)))
-    #plt.plot(wls, np.sqrt(data), '.')
+    plt.plot(wls, np.sqrt(data), '.')
     #plt.xlim((max(wls)*1.1, min(wls)*0.8))
-    #plt.plot(wls, np.sqrt(sellmeier(wls)), '-')
+    plt.plot(wls, np.sqrt(sellmeier(wls)), '-')
     ref_ind_fit = np.sqrt(sellmeier(wls))
 
     #save({'freq': f, 'ref_ind': ref_ind_fit, 'epsilon_r': ref_ind_fit**2, 'epsilon_i': np.zeros_like(ref_ind_fit)},
     #     name='sellmeier_quartz_fast')
 
-    #plt.show()
+    plt.show()
     if return_all:
         return np.sqrt(sellmeier(wl)), ref_ind_data
     return np.sqrt(sellmeier(wl))

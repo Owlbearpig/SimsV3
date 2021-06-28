@@ -12,7 +12,7 @@ data format: {'name_array1': array1, 'name_array2': array2, ...}
 """
 
 
-def export_csv(data, path):
+def export_csv(data, path, index=True):
     columns_same_length = True
 
     data_dict_keys = list(data.keys())
@@ -22,14 +22,14 @@ def export_csv(data, path):
 
     if columns_same_length:
         df = pd.DataFrame(data=data)
-        df.to_csv(path)
+        df.to_csv(path, index=index)
     else: # fill with NaNs
         pd_series_lst = []
         for key, column in data.items():
             pd_series_lst.append(pd.Series(column, name=key))
 
         df = pd.concat(pd_series_lst, axis=1)
-        df.to_csv(path)
+        df.to_csv(path, index=index)
 
 
 def pe_export(f, jones_vec, path, normalize):
