@@ -77,7 +77,8 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     y = np.concatenate((firstvals, y, lastvals))
     return np.convolve(m[::-1], y, mode='valid')
 
-path = r'E:\CURPROJECT\SimsV3\GHz\CST_SWP_HIPS_dSweep'
+#path = r'E:\CURPROJECT\SimsV3\GHz\CST_SWP_HIPS_dSweep'
+path = r'/home/alex/Desktop/Projects/SimsV3/GHz/CST_SWP_HIPS_dSweep'
 
 touchstoneFiles = [os.path.join(root, name)
                for root, dirs, files in os.walk(path)
@@ -126,20 +127,20 @@ datapoints_filtered = np.array(datapoints_filtered)
 res_tuples.sort(key=lambda x: x[0])
 res_tuples = np.array(res_tuples)
 indices = [0, 17, 33, 46, 59, 75, 93, 107, 124, 141, 158]
-data_export = {}
+data_export = {'freqs': f/10**9}
 for i, res in enumerate(res_tuples):
+    print(i, f[np.argmin(res[1])]/10**9)
     if i in indices:
         if int(round(res[0], 0)) > 24:
             continue
         if int(round(res[0], 0)) < 18:
             continue
         label = str(int(round(res[0], 0)))
+        #print(label, f[np.argmin(res[1])]/10**9, np.min(res[1]))
         plt.plot(f, res[1], label=label)
         data_export[label] = res[1]
 
-data_export['freqs'] = f
-
-#export_csv(data_export, 'cst_bf_plot_data.csv')
+#export_csv(data_export, 'cst_bf_plot_data.csv', index=False)
 
 plt.legend()
 plt.show()
