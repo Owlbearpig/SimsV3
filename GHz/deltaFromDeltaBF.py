@@ -135,7 +135,7 @@ if __name__ == '__main__':
     from generate_plotdata import export_csv
     #plt.plot(f_measured / 10 ** 9, delta_measured, label='Delta measured')
 
-    delta_bf_line = np.arange(0, 0.045, 0.005)
+    delta_bf_line = np.arange(0, 0.055, 0.0025)
     average_deviation = []
     for i, delta_bf in enumerate(delta_bf_line):
         print(delta_bf, i+1, len(delta_bf_line))
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     plt.plot(delta_bf_line, average_deviation)
     #plt.plot(f_measured[::resolution] / 10 ** 9, phase_shift, label=f'Form BF + {delta_bf}')
-
+    print(delta_bf_line, average_deviation)
     plt.xlabel('Form BF + x')
     plt.ylabel('0.5*pi/avg(phase shift)')
     plt.legend()
