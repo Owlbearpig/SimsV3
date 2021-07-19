@@ -25,11 +25,6 @@ einsum_str, einsum_path = get_einsum(m, n)
 
 wls = ((c0/f_measured)*um).reshape((m, 1))
 
-plt.plot(f_measured, delta_measured, label='delta measured (goal)')
-plt.legend()
-plt.show()
-
-
 def form_birefringence(delta_bf):
     """
     :return: array with length of frequency, frequency resolved [ns, np, ks, kp]
@@ -135,34 +130,32 @@ def calc_delta_measlike(delta_bf, idx):
     return delta
 
 if __name__ == '__main__':
-    bf_fitted = np.load('bf_fitted.npy')
-    delta_fitted = np.load('delta_fitted.npy')
-    f = f_measured[::10]
-    from generate_plotdata import export_csv
-
-    #export_csv({'freq': f, 'bf_fitted': bf_fitted, 'delta_fitted': delta_fitted}, 'fitted_bf_and_delta.csv')
-    #exit()
     resolution = 10
-    best_fits, best_fits_delta = [], []
-    for idx in range(m):
-        if idx % resolution:
-            continue
-        best_fit, min_deviation = None, 10
-        delta_bf_line = np.linspace(0, 0.04, 40)
-        for delta_bf in delta_bf_line:
+    f = f_measured[::resolution]
+    from generate_plotdata import export_csv
+    #plt.plot(f_measured / 10 ** 9, delta_measured, label='Delta measured')
+
+    delta_bf_line = np.arange(0, 0.055, 0.0025)
+    average_deviation = []
+    for i, delta_bf in enumerate(delta_bf_line):
+        print(delta_bf, i+1, len(delta_bf_line))
+        phase_shift = np.array([])
+        for idx in range(m):
+            if idx % resolution:
+                continue
             delta_calc = calc_delta_measlike(delta_bf, idx)
-            delta_meas = delta_measured[idx]
-            if abs(delta_meas-delta_calc) < min_deviation:
-                min_deviation = abs(delta_meas-delta_calc)
-                best_fit = delta_bf
-        best_fits.append(best_fit)
-        best_fits_delta.append(calc_delta_measlike(best_fit, idx))
+            phase_shift = np.append(phase_shift, delta_calc)
+        average_deviation.append(0.5*pi/np.mean(phase_shift))
 
-        print(idx, delta_measured[idx], best_fit, best_fits_delta[-1])
+    plt.plot(delta_bf_line, average_deviation)
+    #plt.plot(f_measured[::resolution] / 10 ** 9, phase_shift, label=f'Form BF + {delta_bf}')
+    print(delta_bf_line, average_deviation)
+    plt.xlabel('Form BF + x')
+    plt.ylabel('0.5*pi/avg(phase shift)')
+    plt.legend()
+    plt.show()
 
-    print(best_fits)
-    print(best_fits_delta)
-
+    """
     n_s, n_p, _, _ = form_birefringence(0)
 
     df = pandas.read_csv(r'E:\CURPROJECT\SimsV3\GHz\FullPlates_bf.csv')
@@ -171,8 +164,6 @@ if __name__ == '__main__':
     plt.plot(df['freq'], df['2mm'], label='2mm')
     plt.plot(df['freq'], df['8mm'], label='8mm')
 
-    np.save('bf_fitted', best_fits)
-
     plt.plot(f_measured[::resolution]/10**9, best_fits, label='bf_difference')
     plt.plot(f_measured/10**9, n_p-n_s, label='form birefringence')
     plt.ylabel('Birefringence')
@@ -180,9 +171,8 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    np.save('delta_fitted', best_fits_delta)
-
     plt.plot(f_measured[::resolution]/10**9, best_fits_delta, label='best_fits_delta')
     plt.plot(f_measured/10**9, delta_measured, label='measured')
     plt.legend()
     plt.show()
+    """
