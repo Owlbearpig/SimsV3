@@ -1,0 +1,18 @@
+;last command of "print"
+;BEFORE_LAYER_CHANGE
+G92 E0.0
+;z
+
+
+G1 F8640
+G1 cur_pos E-0.7600
+G1 E-0.04000 F2100.00000
+G1 Zh F10800.000
+;AFTER_LAYER_CHANGE
+;z
+M140 S110 ; set bed temperature
+G1 start_pos
+G1 Zz
+G1 E0.80000 F2100.00000
+G1 F3000
+;last command of "print"
