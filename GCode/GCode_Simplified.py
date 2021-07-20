@@ -61,21 +61,21 @@ with open(filename + '.gcode', 'a+', newline='') as file:
     header_content = open('header', 'r')
     file.write(header_content.read())
 
-    for layer_indx in range(layer_cnt):
-        z = round(0.200+(layer_indx+1)*0.200, 3) # first layer height 0.200 set in header -> z offset
+    for layer_idx in range(layer_cnt):
+        z = round(0.200+(layer_idx+1)*0.200, 3) # first layer height 0.200 set in header -> z offset
         prev_pos = p0
-        for i in range(segment_cnt-1):
-            dp = round(prev_pos + np.array([(i%2)*dx, sign(i)*dy]), 3)
+        for line_idx in range(segment_cnt-1):
+            dp = round(prev_pos + np.array([(line_idx%2)*dx, sign(line_idx)*dy]), 3)
             writeline(file, f'G1 X{dp[0]} Y{dp[1]} E{speed(prev_pos, dp)}')
 
             prev_pos = dp
 
-            prog = 100*((layer_indx*segment_cnt+(i+1))/total_segment_cnt)
+            prog = 100*((layer_idx*segment_cnt+(line_idx+1))/total_segment_cnt)
 
-            if (layer_indx*segment_cnt+i) % 385 == 0:
+            if (layer_idx*segment_cnt+line_idx) % 385 == 0:
                 writeline(file, f'M73 P{int(round(prog))}')
 
-        if layer_indx != layer_cnt-1:
+        if layer_idx != layer_cnt-1:
             layer_transition(file, z, dp, p0)
 
     # end
