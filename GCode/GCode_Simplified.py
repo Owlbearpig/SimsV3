@@ -3,6 +3,7 @@ from numpy import sqrt, round
 
 filename = "2mm_plate"
 
+# four axes. X,Y,Z,E; X,Y plane, Z height set at layer transmission, E filament position
 c = 0.028206675277192242 # extrusion speed: E'distance*c'
 
 def speed(p1, p2):
@@ -48,15 +49,15 @@ dy = 48.459 #dy = 48.609
 dx = 0.377
 center_width = 149.413-100.587
 horiz_segment_cnt = int(center_width / dx)
-segment_cnt = 2*horiz_segment_cnt # vertical line + horiz line moves one dx of total width.
+segment_cnt = 2*horiz_segment_cnt # vertical line + horiz line gives one dx of total width.
 
 total_segment_cnt = layer_cnt*segment_cnt
 
-# Start: G1 X100.973 Y129.300
+# origin, upper left of square
 p0 = np.array([100.973, 129.300])
 
 with open(filename + '.gcode', 'a+', newline='') as file:
-    # Header # constant
+    # Header/start
     header_content = open('header', 'r')
     file.write(header_content.read())
 
