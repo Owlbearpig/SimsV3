@@ -1,7 +1,8 @@
 import numpy as np
 from numpy import sqrt, round
 
-filename = "2mm_plate"
+thickness = 8
+filename = f'{thickness}mm_plate'
 
 # four axes. X,Y,Z,E; X,Y plane, Z height set at layer transmission, E filament position
 c = 0.028206675277192242 # extrusion speed: E'distance*c'
@@ -42,7 +43,6 @@ def end(open_file, z):
 
         open_file.write(line)
 
-thickness = 2
 layer_cnt = int(thickness / 0.200)
 
 dy = 48.459 #dy = 48.609
