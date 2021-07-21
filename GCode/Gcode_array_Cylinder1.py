@@ -14,18 +14,18 @@ import os.path
 import csv 
 now = datetime.datetime.now()
 date = now.strftime("%Y-%m-%d")
-filename2="square_Prause_01"
+filename2="square_Prause_03"
 z1=0.2
 E=0.8
 E1=0.02
 speed=1200
 # numepoint=100
 # theta = np.linspace(0, 2*np.pi, numepoint)
-radius1=25
-delt=0.32
+radius1=30
+# delt=0.38
 x=100
 y=80
-layerB =10
+layerB =40
 
 numberx=1
 numbery=1
@@ -65,7 +65,7 @@ for k in range(layerB):
     else:
         E1=0.028
         
-    delt=0.32
+    delt=0.36
     x1=x-wx/2#+(k)*(0.1) 
     x2=x+wx*numberx -wx/2
     y1=y+(wy*numbery)-wy/2 
@@ -194,11 +194,11 @@ for k in range(layerB):
 
     
     print(x1,x2,y1,y2)
-    delt2=0.30
-    x1=x1+delt/4
-    y1=y1-delt/4
-    x2=x2-delt/4
-    y2=y2+delt/4
+    delt2=0.37
+    x1=x1+delt/16
+    y1=y1-delt/16
+    x2=x2-delt/16
+    y2=y2+delt/16
     i=0
     
     lines=abs(int((y2-y1)/(delt2)))

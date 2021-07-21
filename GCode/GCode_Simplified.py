@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import sqrt, round
 
-thickness = 8
+thickness = 12
 filename = f'{thickness}mm_plate'
 
 # four axes. X,Y,Z,E; X,Y plane, Z height set at layer transmission, E filament position
