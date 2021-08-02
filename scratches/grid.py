@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-w, h = 10000, 10000
+w, h = 100, 100
 two_state_grid = np.zeros((w, h))
 
 image = np.array([[1,1,1], [0,1,0], [1,0,1]])
@@ -17,4 +17,4 @@ while True:
     im.set_data(two_state_grid)
 
     fig.canvas.draw_idle()
-    plt.pause(0.1)
+    plt.pause(0.01)

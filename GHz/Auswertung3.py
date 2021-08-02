@@ -73,8 +73,8 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
 
 
-dn, L = 0.08, 1.0125*10**-2
-single_wp_delta = 2*pi*dn*L*f/c0
+dn, L = 0.08, 30*10**-2 #0.08, 1.0125*10**-2
+single_wp_delta = 2*pi*dn*L*f/c0 % pi
 
 
 #export_csv({'freqs': f/10**9, 'a': a, 'b': b, 'delta': delta, 'delta1wp': single_wp_delta}, 'measurement_result.csv')

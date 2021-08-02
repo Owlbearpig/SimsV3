@@ -351,6 +351,9 @@ if __name__ == '__main__':
     #Jout[::3].draw_ellipse()
     #Jout.normalize()
     #print(Jout.parameters.delay())
+    plt.plot(Jout_l.parameters.delay()/pi)
+    plt.show()
+
     #print(Jout.parameters)
     #plt.show()
     Jout_l.draw_ellipse()
