@@ -32,9 +32,9 @@ if __name__ == '__main__':
         'mat_name': ('ceramic_fast', 'ceramic_slow')
     }
 
-    res = result_masson_full
-    #res = result_masson
-    res = result1
+    #res = result_masson_full # eps_i != 0
+    #res = result_masson # eps_i = 0
+    #res = result1
     res = result_GHz
 
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
@@ -49,12 +49,12 @@ if __name__ == '__main__':
     T = jones_matrix.create_Jones_matrices(res['name'])
     T.from_matrix(j)
 
-    print(np.round(f[700]*10**-9, 1), T[700])
+    #print(np.round(f[700]*10**-9, 1), T[700])
 
-    S = stokes.create_Stokes()
-    S.from_Jones(T[700]*Jin_l)
+    #S = stokes.create_Stokes()
+    #S.from_Jones(T[700]*Jin_l)
 
-    print(S)
+    #print(S)
 
     Jin_c = jones_vector.create_Jones_vectors('RCP')
     Jin_c.circular_light(kind='r')
@@ -239,8 +239,8 @@ if __name__ == '__main__':
 
     intensity = Jout.parameters.intensity()
 
-    plt.plot(f, -10*np.log10(intensity), label='intensity')
-    #plt.plot(f, intensity, label='intensity')
+    #plt.plot(f, -10*np.log10(intensity), label='intensity')
+    plt.plot(f, intensity, label='intensity')
     plt.legend()
     plt.show()
 
@@ -248,10 +248,10 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    plt.plot(f, alpha*rad, label='alpha')
+    #plt.plot(f, alpha*rad, label='alpha')
     plt.plot(f, delay*rad, label='delay')
-    plt.plot(f, azimuth*rad, label='azimuth')
-    plt.plot(f, ellipticity_angle*rad, label='ellipticity_angle')
+    #plt.plot(f, azimuth*rad, label='azimuth')
+    #plt.plot(f, ellipticity_angle*rad, label='ellipticity_angle')
     plt.legend()
     plt.show()
 
