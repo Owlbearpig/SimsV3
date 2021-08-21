@@ -220,8 +220,8 @@ n_s, n_p, k_s, k_p = form_birefringence(stripes, wls, eps_mat1, eps_mat2)
 
 plt.plot(f.flatten()/10**9, n_p-n_s, label='FormBF(Rytov)')
 
-yeh_te = np.load('yeh_te.npy')
-yeh_tm = np.load('yeh_tm.npy')
+yeh_te = np.load('TMM/yeh_te.npy')
+yeh_tm = np.load('TMM/yeh_tm.npy')
 
 plt.plot(f.flatten()/10**9, np.abs(yeh_tm-yeh_te), label=r'yeh bf')
 

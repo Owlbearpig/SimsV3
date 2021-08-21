@@ -16,11 +16,19 @@ if __name__ == '__main__':
 
     data = {}
     for i in range(50):
-        err = 10-20*np.random.random()*np.ones(4)
-        print(err[0])
+        #err = 10-20*np.random.random()*np.ones(1)
+        #print(err[0])
 
-        x_ghz_err = np.concatenate((angles_ghz + np.deg2rad(err), d_ghz, stripes_ghz))
-
+        #x_ghz_err = np.concatenate((angles_ghz + np.deg2rad(err), d_ghz, stripes_ghz))
+        d_ghz_err = d_ghz.copy()
+        #err_percent = (1+(0.05-0.1*np.random.random()))
+        # print(err_percent)
+        print(d_ghz[0])
+        err_abs = (2000-4000*np.random.random())
+        d_ghz_err[0] += err_abs
+        #d_ghz_err[0] = d_ghz[0]*err_percent
+        print(d_ghz_err[0])
+        x_ghz_err = np.concatenate((angles_ghz, d_ghz_err, stripes_ghz))
         res['x'] = x_ghz_err
 
         j, f, wls = setup(res, return_vals=True)
@@ -33,9 +41,11 @@ if __name__ == '__main__':
 
         J_out = T*Jin_l
 
-        data[f'delta_{i}_{round(err[0], 2)}'] = J_out.parameters.delay()
-        plt.plot(J_out.parameters.delay(), label=f'{i}')
+        data[f'delta_{i}_{round(err_abs, 3)}'] = J_out.parameters.delay()
+        plt.plot(f/10**9, J_out.parameters.delay()/pi, label=f'{i}_{round(err_abs, 3)}')
+    plt.ylabel('delta/pi')
+    plt.xlabel('freq (GHz)')
     plt.legend()
     plt.show()
     print(data)
-    export_csv(data, 'pm10deg_misalign.csv')
+    #export_csv(data, 'pm10deg_misalign.csv')

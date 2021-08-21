@@ -25,7 +25,7 @@ f, wls, eps_mat1, eps_mat2 = f.flatten(), wls.flatten()*10**-6, eps_mat1.flatten
 
 n1, n2 = 1.54, 1 # overwritten in loop
 #a, b = 200*um, 300*um
-a, b = 628*um, 517*um
+a, b = 734.55*um, 392.95*um
 omega = 2*pi*f
 
 def k(omega, beta):
@@ -101,8 +101,8 @@ for idx in range(len(omega)):
         res_min_tm.append(1)
     res_max_tm.append(res_tm[-1])
 
-np.save('HIPS_HHI_yeh_te.npy', res_max_te)
-np.save('HIPS_HHI_yeh_tm.npy', res_max_tm)
+np.save('HIPS_HHI_yeh_te_mes.npy', res_max_te)
+np.save('HIPS_HHI_yeh_tm_mes.npy', res_max_tm)
 
 #plt.plot(f_cut, ref_min)
 plt.plot(f_cut, res_max_te, label='te')
@@ -111,6 +111,13 @@ plt.plot(f_cut, res_max_tm, label='tm')
 plt.legend()
 plt.show()
 
+#plt.plot(f_cut, ref_min)
+bf = np.abs(np.array(res_max_te)-np.array(res_max_tm))
+plt.plot(f_cut, bf, label='bf')
+#plt.ylim((0, 1.5))
+plt.legend()
+plt.show()
+np.save('HIPS_HHI_yeh_BF_mes.npy', bf)
 
 """
 plt.plot(omega, beta_arr*c0/omega, label = r'$n_{eff}$')

@@ -104,8 +104,8 @@ n_s, n_p = fake_fb(freq, 2.437)
 #plt.plot(freq, n_s, label=r'$n_s,\ (\epsilon=2.437)$')
 #plt.plot(freq, n_p, label=r'$n_p,\ (\epsilon=2.437)$')
 
-yeh_te = np.load('yeh_te.npy')
-yeh_tm = np.load('yeh_tm.npy')
+yeh_te = np.load('TMM/yeh_te.npy')
+yeh_tm = np.load('TMM/yeh_tm.npy')
 
 #plt.plot(f.flatten(), yeh_te, label=r'$yeh \ te$')
 #plt.plot(f.flatten(), yeh_tm, label=r'$yeh \ tm$')
