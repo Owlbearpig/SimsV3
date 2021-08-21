@@ -31,7 +31,6 @@ if __name__ == '__main__':
         'bf': 'intrinsic',
         'mat_name': ('ceramic_fast', 'ceramic_slow')
     }
-
     #res = result_masson_full # eps_i != 0
     #res = result_masson # eps_i = 0
     #res = result1
@@ -49,6 +48,10 @@ if __name__ == '__main__':
     T = jones_matrix.create_Jones_matrices(res['name'])
     T.from_matrix(j)
 
+    J_out = T*Jin_l
+    plt.plot(J_out.parameters.delay()/pi)
+    plt.ylim((0.3, 0.7))
+    plt.show()
     #print(np.round(f[700]*10**-9, 1), T[700])
 
     #S = stokes.create_Stokes()

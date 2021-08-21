@@ -81,7 +81,7 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'HIPS_HHI_linePrnt': Path('material_data/2mmHIPS_D=2000_LinePrnt.csv'),
     }
 
-    df = pandas.read_csv(mat_paths[mat_name])
+    df = pandas.read_csv(ROOT_DIR / mat_paths[mat_name])
 
     freq_dict_key = [key for key in df.keys() if "freq" in key][0]
     eps_mat_r_key = [key for key in df.keys() if "epsilon_r" in key][0]
