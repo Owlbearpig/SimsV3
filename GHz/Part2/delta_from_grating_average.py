@@ -14,7 +14,7 @@ um = 10**6
 GHz = 10**9
 THz = 10**12
 
-stripes_ghz = np.array([750, 450.1])
+stripes_ghz = np.array([734.55, 392.95]) #np.array([750, 450.1])
 f_measured = np.load('f.npy')
 delta_measured = np.load('delta5.npy')
 
@@ -159,6 +159,9 @@ def main():
     # plt.ylim([0.3, 0.6])
     plt.legend()
     plt.show()
+
+    from generate_plotdata import export_csv
+    export_csv({'freq': f, 'delta_calc': delta_calc}, 'delta_7grating_bf.csv')
 
 
 if __name__ == '__main__':
