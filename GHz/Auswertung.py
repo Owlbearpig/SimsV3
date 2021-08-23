@@ -77,7 +77,7 @@ print(normalization)
 phi = np.array([])
 s21 = np.array([])
 s12 = np.array([])
-phi_offset = 9.64#9.64#14.84#10#9.64 # 4.5
+phi_offset = 4.7#9.64#9.64#14.84#10#9.64 # 4.5
 idx = 1400
 for angle in angles:
 
@@ -129,8 +129,8 @@ delta = np.array([])
 a, b = np.array([]), np.array([])
 p1_arr, p2_arr = np.array([]), np.array([])
 for idx in range(ntwk.f.size):
-    if idx%1 != 0:
-        continue
+    if idx % 50 != 0:
+        pass
     print(idx)
     #phi_offset = 4.725 + (14.84-4.725)*idx/1400
     phi = np.array([])
@@ -162,7 +162,7 @@ for idx in range(ntwk.f.size):
     b = np.append(b, popt[1])
     delta = np.append(delta, np.abs(popt[2]))
 
-#np.save('delta_phi0.npy', delta)
+np.save(f'delta_phi{phi_offset}.npy', delta)
 
 plt.plot(f, p1_arr, label='p1')
 plt.plot(f, p2_arr, label='p2')
@@ -174,7 +174,7 @@ plt.legend()
 plt.show()
 
 from generate_plotdata import export_csv
-export_csv({'freq': f, 'delta': delta}, 'delta_measured')
+#export_csv({'freq': f, 'delta': delta}, 'delta_measured')
 
 plt.plot(f/10**9, delta/np.pi, '.-',label = 'Messung')
 plt.plot(f/10**9, f*0+0.5*1.03, 'k--',label='+3%')

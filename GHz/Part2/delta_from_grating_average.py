@@ -16,7 +16,8 @@ THz = 10**12
 
 stripes_ghz = np.array([734.55, 392.95]) #np.array([750, 450.1])
 f_measured = np.load('f.npy')
-delta_measured = np.load('delta5.npy')
+phi = 4.5
+delta_measured = np.load(f'delta_phi{phi}.npy')
 
 m, n = len(f_measured), 4
 einsum_str, einsum_path = get_einsum(m, n)
@@ -95,7 +96,8 @@ def calc_delta(n_s, n_p, k_s, k_p, idx):
     return delta
 
 def load_7_grating_data():
-    csv_file_path = Path(r'E:\MEGA\AG\BFWaveplates\Data\GHz\Part II\part2gratingBF.csv')
+    #csv_file_path = Path(r'E:\MEGA\AG\BFWaveplates\Data\GHz\Part II\part2gratingBF.csv')
+    csv_file_path = Path(r'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/GHz/Part II/part2gratingBF.csv')
 
     df = pandas.read_csv(csv_file_path)
 
@@ -123,6 +125,9 @@ def main():
     delta_new = np.array([])
     f_new = np.array([])
     for idx, (n_s, n_p, k_s, k_p) in enumerate(zip(n_s_arr, n_p_arr, k_s_arr, k_p_arr)):
+        if f[idx] / GHz < 75:
+            continue
+
         if idx % 50 != 0:
             pass
         f_new = np.append(f_new, f[idx])
@@ -145,10 +150,10 @@ def main():
         print(idx)
         f = np.append(f, f_full[idx])
         delta_calc = np.append(delta_calc, calc_delta(n_s, n_p, k_s, k_p, idx))
-        delta_calc_measlike = np.append(delta_calc_measlike, calc_delta_measlike(n_s, n_p, k_s, k_p, idx))
+        #delta_calc_measlike = np.append(delta_calc_measlike, calc_delta_measlike(n_s, n_p, k_s, k_p, idx))
 
     plt.plot(f / GHz, delta_calc / pi, '.-', label='$\delta \ Expected (jones calc)$')
-    plt.plot(f / GHz, delta_calc_measlike / pi, '.-', label='$\delta \ Expected (meas like)$')
+    #plt.plot(f / GHz, delta_calc_measlike / pi, '.-', label='$\delta \ Expected (meas like)$')
     plt.plot(f_full / GHz, delta_measured / pi, '.', label=r'$\delta \ Measured$')
     plt.plot(f_full / GHz, f_full * 0 + 0.5 * 1.03, 'k--', label='+3%')
     plt.plot(f_full / GHz, f_full * 0 + 0.5 * 0.97, 'k--', label='-3%')
@@ -161,7 +166,7 @@ def main():
     plt.show()
 
     from generate_plotdata import export_csv
-    export_csv({'freq': f, 'delta_calc': delta_calc}, 'delta_7grating_bf.csv')
+    #export_csv({'freq': f_new, 'delta_7g': delta_new, f'delta_measured_phi{phi}': delta_measured}, 'delta_7grating_bf.csv')
 
 
 if __name__ == '__main__':
