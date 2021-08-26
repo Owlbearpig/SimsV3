@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
         if i == 0:
             plt.plot(f_measured / GHz, delta_calc/pi, label=f'expected phase shift DeltaBF={delta_bf}')
+            #np.save('delta_expected', delta_calc)
             plt.plot(f_measured / GHz, f_measured * 0 + 0.5 * 1.03, 'k--', label='+3%')
             plt.plot(f_measured / GHz, f_measured * 0 + 0.5 * 0.97, 'k--', label='-3%')
         if i != 0:

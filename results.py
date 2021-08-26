@@ -74,6 +74,12 @@ d_cl4 = array([2438.4, 3088.1, 1683.1, 1454.2, 2718.4])
 x_ceramic_l4 = np.concatenate((angles_cl4, d_cl4))
 """
 
+# PART 2
+p2_angles = np.deg2rad(array([246.54, 171.27, 38.65]))
+p2_d = array([14136.4, 13111.6, 6995.5])
+
+p2_x = np.concatenate((p2_angles, p2_d))
+
 ########################################################################################################################
 # example:
 """
@@ -159,4 +165,10 @@ result_GHz = {
         'mat_name': ('HIPS_MUT_1_1', '')
 }
 
-
+result_p2 = {
+        'name': 'result_p2',
+        'comments': '',
+        'x': p2_x,
+        'bf': 'intrinsic',
+        'mat_name': ('7g_f', '7g_s')
+}

@@ -99,36 +99,23 @@ def load_7_grating_data(id_ = 1, f_min=75, f_max=110):
 
 
 def main():
-    bfs = []
     for id_ in [*range(1, 8), 'mean']:
-        if id_ in ['mean']:
+        if id_ not in ['mean']:
             continue
         f, n_s, n_p, k_s, k_p = load_7_grating_data(id_, 75, 110)
 
-        bf = np.abs(n_p-n_s)
+    delta_ghz = np.load(r'/home/alex/Desktop/Projects/SimsV3/GHz/Part2/delta_expected_oldres.npy')
+    f_ghz = np.linspace(75, 110, len(delta_ghz))
 
-        bfs.append(bf)
+    plt.plot(f_ghz, delta_ghz/pi, label='delta old res')
 
-        #export_csv({'freq': f, 'bf': np.abs(n_p-n_s)}, f'bf_grating_{id_}.csv')
+    delta_res_p2 = np.load(r'/home/alex/Desktop/Projects/SimsV3/GHz/Part2/delta_resp2.npy')
+    f_res_p2 = np.linspace(75, 110, len(delta_res_p2))
+    plt.plot(f_res_p2, delta_res_p2/pi, label='delta new res')
 
-        delta_new = calc_delta(f, n_s, n_p, k_s, k_p)
+    plt.plot(f / GHz, f * 0 + 0.5 * 1.005, 'k--', label='+0.5%', color='red')
+    plt.plot(f / GHz, f * 0 + 0.5 * 0.995, 'k--', label='-0.5%', color='red')
 
-        plt.plot(f / GHz, bf, '.', label=f'$\Delta n \ 7Grating {id_}$')
-        #plt.plot(f / GHz, delta_new / pi, '.', label=f'$\delta \ 7Grating {id_}$')
-        #print(id_, np.sum(np.abs(delta_measured[:1225]-delta_new)))
-
-    avg = np.mean(bfs, axis=0)
-    std = np.std(bfs, axis=0)
-
-    export_csv({'freq':f[:1225], 'avg_bf': avg, 'avg_bf_std': std}, f'bf_grating_avg.csv')
-
-    plt.plot(f[:1225]/GHz, avg, 'k-', label='Average')
-    plt.fill_between(f[:1225]/GHz, avg - std, avg + std)
-    plt.legend()
-    plt.show()
-    exit()
-
-    plt.plot(f_measured / GHz, delta_measured / pi, '.', label=r'$\delta \ Measured$')
     plt.plot(f / GHz, f * 0 + 0.5 * 1.03, 'k--', label='+3%')
     plt.plot(f / GHz, f * 0 + 0.5 * 0.97, 'k--', label='-3%')
     plt.grid(True)
@@ -138,8 +125,6 @@ def main():
     #plt.ylim([0.2, 0.6])
     plt.legend()
     plt.show()
-
-    #export_csv({'freq': f, 'delta_7g': delta_new}, f'delta_g{phi}_bf.csv')
 
 
 if __name__ == '__main__':
