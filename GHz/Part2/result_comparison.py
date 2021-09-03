@@ -95,15 +95,32 @@ def load_7_grating_data(id_ = 1, f_min=75, f_max=110):
         sqrt(abs(eps_s) - eps_s.real) / sqrt(2)
     )
 
-    return f, n_s, n_p, k_s, k_p
-
+    #return f, n_s, n_p, k_s, k_p
+    return f, n_s, n_p, eps_imag_s, eps_imag_p
 
 def main():
+    k_s_arr, k_p_arr = [], []
     for id_ in [*range(1, 8), 'mean']:
-        if id_ not in ['mean']:
+        if id_ in ['mean']:
             continue
         f, n_s, n_p, k_s, k_p = load_7_grating_data(id_, 75, 110)
 
+        k_s_arr.append(k_s)
+        k_p_arr.append(k_p)
+
+    k_s_arr, k_p_arr = array(k_s_arr), array(k_p_arr)
+    k_s_mean, k_p_mean = np.mean(k_s_arr, axis=0), np.mean(k_p_arr, axis=0)
+
+    #k_s_err, k_p_err = np.std(k_s_arr, axis=0), np.std(k_p_arr, axis=0)
+
+    dichroism = (2*pi*f*np.abs(k_s_mean-k_p_mean)/c0)/100
+    #error = (2*pi*f*(k_s_err+k_p_err)/c0)/100
+
+    plt.plot(f, dichroism)
+    #plt.fill_between(f, dichroism - error, dichroism + error)
+    plt.show()
+
+    """
     delta_ghz = np.load(r'/home/alex/Desktop/Projects/SimsV3/GHz/Part2/delta_expected_oldres.npy')
     f_ghz = np.linspace(75, 110, len(delta_ghz))
 
@@ -125,7 +142,7 @@ def main():
     #plt.ylim([0.2, 0.6])
     plt.legend()
     plt.show()
-
+    """
 
 if __name__ == '__main__':
     main()
