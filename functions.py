@@ -79,6 +79,8 @@ def load_material_data(mat_name, f_min=0, f_max=np.inf, resolution=1):
         'quartz_full_fast': Path('material_data/abs_fast_grisch1990_fit.csv'),
         'HIPS_HHI': Path('material_data/2mmHIPS_D=2000.csv'),
         'HIPS_HHI_linePrnt': Path('material_data/2mmHIPS_D=2000_LinePrnt.csv'),
+        '7g_f': Path('material_data/7grating_fast_s.csv'),
+        '7g_s': Path('material_data/7grating_slow_p.csv'),
     }
 
     df = pandas.read_csv(ROOT_DIR / mat_paths[mat_name])
