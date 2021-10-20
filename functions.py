@@ -295,6 +295,17 @@ def loss(j):
 
     return L
 
+
+def interpol(dataset1, dataset2):
+    """
+    dataset1, dataset2: [x1, y1], [x2, y2] assuming x1[0] == x2[0] and x1[-1] == x2[-1]
+    """
+    if len(dataset1[0]) > len(dataset2[0]):
+        return np.interp(dataset1[0], dataset2[0], dataset2[1])
+    else: # len(dataset1[0]) < len(dataset2[0])
+        return np.interp(dataset2[0], dataset1[0], dataset1[1])
+
+
 def material_values(settings, return_vals=False, return_all=False):
     if return_vals or return_all:
         resolution = 1

@@ -18,8 +18,9 @@ def func(phi, a, b, delta):
                                         + (b * np.sin(phi) * np.sin(delta)) ** 2))
 
 
-#data_folder = Path('/home/alex/Desktop/Projects/SimsV3/GHz/Part2/measurement_data_david')
-data_folder = Path('E:\CURPROJECT\SimsV3\GHz\Part2\measurement_data_david')
+data_folder = Path('/home/alex/Desktop/Projects/SimsV3/GHz/Part2/measurement_data_david')
+#data_folder = Path('E:\CURPROJECT\SimsV3\GHz\Part2\measurement_data_david')
+
 plt.style.use('fast')
 
 angles = np.arange(0, 370, 10)
@@ -53,7 +54,7 @@ rel = np.array([])
 eta = np.array([])
 for idx in range(ntwk.f.size):
     if idx % 50 != 0:
-        continue
+        pass
     print(idx)
 
     phi = np.array([])
@@ -73,8 +74,9 @@ for idx in range(ntwk.f.size):
     eta = np.append(eta, (popt[0] ** 2 + popt[1] ** 2))
     delta = np.append(delta, np.abs(popt[2]))
 
-#np.save('delta_meas.npy', delta)
+np.save('delta_meas.npy', delta)
 np.save('f_meas.npy', f)
+
 plt.figure()
 plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')
 plt.plot(f / 10 ** 9, f * 0 + 0.5 * 1.1, 'k--', label='0,5+10%')
