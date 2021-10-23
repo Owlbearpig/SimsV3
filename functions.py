@@ -301,17 +301,12 @@ def interpol(dataset1, dataset2):
     interpolate two datasets of different lengths and resolutions ([x1,y1],[x2,y2])
     s.t. indexing compares matching x values without extrapolation. (Assuming non-empty intersection between datasets)
 
-    1. slice both axes s.t. x_axis1[0] == x_axis2[0] and x_axis1[-1] == x_axis2[-1]
+    1. slice both axes to nearest point of the intersection boundary
     2. set common x axis to be the one with highest number of points in the intersection
     3. interpolate y values of dataset with lowest number of points in the intersection
     """
 
     x_axis1, x_axis2, y_axis1, y_axis2 = dataset1[0], dataset2[0], dataset1[1], dataset2[1]
-
-    plt.plot(x_axis1, y_axis1, label='dataset_1')
-    plt.plot(x_axis2, y_axis2, label='dataset_2')
-    plt.legend()
-    plt.show()
 
     # intersection boundaries
     x0, xf = max(x_axis1[0], x_axis2[0]), min(x_axis1[-1], x_axis2[-1])
@@ -326,20 +321,11 @@ def interpol(dataset1, dataset2):
     x_axis1, x_axis2 = x_axis1[x0_idx_axis1:xf_idx_axis1], x_axis2[x0_idx_axis2:xf_idx_axis2]
     y_axis1, y_axis2 = y_axis1[x0_idx_axis1:xf_idx_axis1], y_axis2[x0_idx_axis2:xf_idx_axis2]
 
-    print(len(x_axis1), len(x_axis2))
-    print(min(x_axis1), max(x_axis1), min(x_axis2), max(x_axis2))
-
-    plt.plot(x_axis1, y_axis1, label='dataset_1')
-    plt.plot(x_axis2, y_axis2, label='dataset_2')
-    plt.legend()
-    plt.show()
-
-    """
-    if len(dataset1[0]) > len(dataset2[0]):
-        return np.interp(dataset1[0], dataset2[0], dataset2[1])
-    else: # len(dataset1[0]) < len(dataset2[0])
-        return np.interp(dataset2[0], dataset1[0], dataset1[1])
-    """
+    # interpolate dataset with lowest resolution in intersection.
+    if len(x_axis1) > len(x_axis2):
+        return (x_axis1, y_axis1), (x_axis1, np.interp(x_axis1, x_axis2, y_axis2))
+    else:
+        return (x_axis2, np.interp(x_axis2, x_axis1, y_axis1)), (x_axis2, y_axis2)
 
 
 def material_values(settings, return_vals=False, return_all=False):
@@ -419,7 +405,20 @@ def setup(settings, return_vals=False, measured_bf = False, return_all=False, re
 
 
 if __name__ == '__main__':
-    set1, set2 = (np.linspace(65*GHz, 110*GHz, 1401), np.random.random(1401)), \
-                 (np.linspace(70*GHz, 115*GHz, 2251), np.random.random(2251))
+    x_axis1, x_axis2 = np.linspace(70*GHz, 110*GHz, 20), np.linspace(70*GHz, 115*GHz, 26)
+    set1, set2 = (x_axis1, np.sin(x_axis1)), \
+                 (x_axis2, np.sin(x_axis2))
 
-    interpol(set1, set2)
+    print(set1[0].shape, set1[1].shape, set2[0].shape, set2[1].shape)
+
+    plt.plot(set1[0], set1[1], label='set 1')
+    plt.plot(set2[0], set2[1], label='set 2')
+
+    set1, set2 = interpol(set1, set2)
+
+    print(set1[0].shape, set1[1].shape, set2[0].shape, set2[1].shape)
+
+    plt.plot(set1[0], set1[1], label='set 1 interpolated')
+    plt.plot(set2[0], set2[1], label='set 2 interpolated')
+    plt.legend()
+    plt.show()

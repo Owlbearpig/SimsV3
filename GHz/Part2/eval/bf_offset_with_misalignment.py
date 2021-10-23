@@ -54,7 +54,11 @@ if __name__ == '__main__':
     Jin_l = jones_vector.create_Jones_vectors('Jin_l')
     Jin_l.linear_light()
 
-    x = np.concatenate((p2_angles, p2_d))
+    angle_misalignment = 5
+
+    angles_with_error = np.rad2deg(p2_angles) + angle_misalignment
+
+    x = np.concatenate((np.deg2rad(angles_with_error), p2_d))
 
     res = {
         'name': 'result_p2',
@@ -78,6 +82,7 @@ if __name__ == '__main__':
 
     bf = n_s - n_p
     bf_smooth = savgol_filter(bf.flatten(), 101, 2)
+    bf_smooth_interpolated = np.interp(f_meas, f_design, bf_smooth)
 
     plt.plot(f_design / GHz, bf, label='original')
     plt.plot(f_design / GHz, bf_smooth, label='smoothed')
@@ -114,7 +119,23 @@ if __name__ == '__main__':
     plt.xlim([75, 110])
     plt.ylabel('delta/pi')
     plt.xlabel('freq (GHz)')
-    plt.title('Design delay compared to measurement for different const. bf offsets.')
+    plt.title(f'Delay of design+{angle_misalignment} deg. angle misalignment and different const. bf offsets')
     plt.legend()
     plt.show()
 
+    delay_diff = design_delays - delay_meas
+
+    bf_fitted = []
+    for i in range(m_meas):
+        bf_fitted.append(bf_offsets[np.argmin(np.abs(delay_diff[:, i]))])
+
+    bf_corrected = bf_smooth_interpolated + np.array(bf_fitted)
+
+    plt.plot(f_meas / GHz, bf_smooth_interpolated, label='Bf original (7grating avg.)')
+    plt.plot(f_meas / GHz, bf_corrected, label='Bf original + bf offset')
+    plt.xlim([75, 110])
+    plt.ylabel('delta/pi')
+    plt.xlabel('freq (GHz)')
+    plt.title(f'BF original vs BF fitted...')
+    plt.legend()
+    plt.show()

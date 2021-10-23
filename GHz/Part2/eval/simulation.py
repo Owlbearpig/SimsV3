@@ -43,6 +43,6 @@ if __name__ == '__main__':
     plt.xlim([75, 110])
     plt.ylabel('delta/pi')
     plt.xlabel('freq (GHz)')
-    plt.title('Misalignment error. Same angle added to all plates.')
+    plt.title('Misalignment error. Design delay with same angle added to all plates.')
     plt.legend()
     plt.show()
