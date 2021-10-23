@@ -2,7 +2,7 @@ from numpy import sqrt
 from py_pol import jones_matrix
 from py_pol import jones_vector
 from consts import *
-from functions import j_stack, wp_cnt, get_einsum
+from functions import j_stack, wp_cnt, get_einsum, interpol
 import matplotlib.pyplot as plt
 from results import *
 import pandas
@@ -72,6 +72,9 @@ if __name__ == '__main__':
 
     print(f.shape, f[0], f[-1])
     print(f_meas.shape, f_meas[0], f_meas[-1])
+
+    print(np.argmin(np.abs(f[-1]-f_meas)))
+    print(f_meas[2000])
 
     einsum_str, einsum_path = get_einsum(m_design, n)
 

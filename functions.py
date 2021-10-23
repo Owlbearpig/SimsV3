@@ -298,12 +298,48 @@ def loss(j):
 
 def interpol(dataset1, dataset2):
     """
-    dataset1, dataset2: [x1, y1], [x2, y2] assuming x1[0] == x2[0] and x1[-1] == x2[-1]
+    interpolate two datasets of different lengths and resolutions ([x1,y1],[x2,y2])
+    s.t. indexing compares matching x values without extrapolation. (Assuming non-empty intersection between datasets)
+
+    1. slice both axes s.t. x_axis1[0] == x_axis2[0] and x_axis1[-1] == x_axis2[-1]
+    2. set common x axis to be the one with highest number of points in the intersection
+    3. interpolate y values of dataset with lowest number of points in the intersection
+    """
+
+    x_axis1, x_axis2, y_axis1, y_axis2 = dataset1[0], dataset2[0], dataset1[1], dataset2[1]
+
+    plt.plot(x_axis1, y_axis1, label='dataset_1')
+    plt.plot(x_axis2, y_axis2, label='dataset_2')
+    plt.legend()
+    plt.show()
+
+    # intersection boundaries
+    x0, xf = max(x_axis1[0], x_axis2[0]), min(x_axis1[-1], x_axis2[-1])
+
+    # indices where x_axis1, x_axis2 are closest to x0
+    x0_idx_axis1, x0_idx_axis2 = np.argmin(np.abs(x0 - x_axis1)), np.argmin(np.abs(x0 - x_axis2))
+
+    # indices where x_axis1, x_axis2 are closest to xf
+    xf_idx_axis1, xf_idx_axis2 = np.argmin(np.abs(xf - x_axis1)), np.argmin(np.abs(xf - x_axis2))
+
+    # trim/slice both datasets
+    x_axis1, x_axis2 = x_axis1[x0_idx_axis1:xf_idx_axis1], x_axis2[x0_idx_axis2:xf_idx_axis2]
+    y_axis1, y_axis2 = y_axis1[x0_idx_axis1:xf_idx_axis1], y_axis2[x0_idx_axis2:xf_idx_axis2]
+
+    print(len(x_axis1), len(x_axis2))
+    print(min(x_axis1), max(x_axis1), min(x_axis2), max(x_axis2))
+
+    plt.plot(x_axis1, y_axis1, label='dataset_1')
+    plt.plot(x_axis2, y_axis2, label='dataset_2')
+    plt.legend()
+    plt.show()
+
     """
     if len(dataset1[0]) > len(dataset2[0]):
         return np.interp(dataset1[0], dataset2[0], dataset2[1])
     else: # len(dataset1[0]) < len(dataset2[0])
         return np.interp(dataset2[0], dataset1[0], dataset1[1])
+    """
 
 
 def material_values(settings, return_vals=False, return_all=False):
@@ -381,3 +417,9 @@ def setup(settings, return_vals=False, measured_bf = False, return_all=False, re
     else:
         return erf
 
+
+if __name__ == '__main__':
+    set1, set2 = (np.linspace(65*GHz, 110*GHz, 1401), np.random.random(1401)), \
+                 (np.linspace(70*GHz, 115*GHz, 2251), np.random.random(2251))
+
+    interpol(set1, set2)
