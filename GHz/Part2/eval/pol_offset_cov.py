@@ -50,10 +50,11 @@ plt.xlabel('$\phi$ in deg.')
 plt.show()
 plt.close()
 
-polarizer_offsets = np.arange(-5, 5.5, 0.5)
+results = {}
+
+polarizer_offsets = np.arange(-4, 2.5, 0.125)
 
 for polarizer_offset in polarizer_offsets:
-    results = {}
     var1, var2, var3 = np.array([]), np.array([]), np.array([])
     f = np.array([])
     delta = np.array([])
@@ -61,7 +62,7 @@ for polarizer_offset in polarizer_offsets:
     eta = np.array([])
     for idx in range(ntwk.f.size):
         if idx % 50 != 0:
-            pass
+            continue
         print(idx)
 
         phi = np.array([])
@@ -84,7 +85,8 @@ for polarizer_offset in polarizer_offsets:
 
     results[f'{polarizer_offset}'] = [f, delta, rel, eta, var1, var2, var3]
 
-    pickle.dump(results, open(f'results_polOffset_{polarizer_offset}.p', "wb"))
+pickle.dump(results, open(f'polOffset_results_lowRes.p', 'wb'))
+
 exit()
 
 plt.figure()
