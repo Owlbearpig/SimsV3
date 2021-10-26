@@ -19,9 +19,11 @@ def func(phi, a, b, delta):
 
 
 data_folder = Path('/home/alex/Desktop/Projects/SimsV3/GHz/Part2/measurement_data_david')
-#data_folder = Path('E:\CURPROJECT\SimsV3\GHz\Part2\measurement_data_david')
+data_folder = Path('E:\Projects\SimsV3\GHz\Part2\measurement_data_david')
 
 plt.style.use('fast')
+
+pol_offset = -1.25
 
 angles = np.arange(0, 370, 10)
 
@@ -32,7 +34,7 @@ idx = 0
 for angle in angles:
     ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
     f = ntwk.f[idx]
-    phi = np.append(phi, angle - 90)
+    phi = np.append(phi, angle - 90 + pol_offset)
     s21 = np.append(s21, np.abs(ntwk.s[idx, 1, 0]))
     s12 = np.append(s12, np.abs(ntwk.s[idx, 0, 1]))
 
@@ -64,7 +66,7 @@ for idx in range(ntwk.f.size):
     f = np.append(f, ntwk.f[idx])
     for angle in angles:
         ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
-        phi = np.append(phi, angle - 90)
+        phi = np.append(phi, angle - 90 + pol_offset)
         s21 = np.append(s21, np.abs(ntwk.s[idx, 1, 0]))
         s12 = np.append(s12, np.abs(ntwk.s[idx, 0, 1]))
 
@@ -74,8 +76,8 @@ for idx in range(ntwk.f.size):
     eta = np.append(eta, (popt[0] ** 2 + popt[1] ** 2))
     delta = np.append(delta, np.abs(popt[2]))
 
-np.save('delta_meas.npy', delta)
-np.save('f_meas.npy', f)
+np.save('delta_meas_-1.25degPolOffset.npy', delta)
+np.save('f_meas_-1.25degPolOffset.npy', f)
 
 plt.figure()
 plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')

@@ -17,58 +17,29 @@ def func(phi, a, b, delta):
     return np.abs(np.cos(phi) * np.sqrt((a * np.cos(phi) + b * np.sin(phi) * np.cos(delta)) ** 2
                                         + (b * np.sin(phi) * np.sin(delta)) ** 2))
 
+
 data_folder = ROOT_DIR / Path('GHz') / Path('Part2') / Path('measurement_data_david')
 
 plt.style.use('fast')
 
 angles = np.arange(0, 370, 10)
 
-phi = np.array([])
-s21 = np.array([])
-s12 = np.array([])
-idx = 0
-for angle in angles:
-    ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
-    f = ntwk.f[idx]
-    phi = np.append(phi, angle - 90)
-    s21 = np.append(s21, np.abs(ntwk.s[idx, 1, 0]))
-    s12 = np.append(s12, np.abs(ntwk.s[idx, 0, 1]))
-
-plt.figure()
-phi = np.deg2rad(phi)
-popt, pcov = curve_fit(func, phi, s21)
-
-print(pcov[0,0], pcov[1,1], pcov[2,2])
-
-a = popt[0]
-b = popt[1]
-delta = popt[2]
-plt.polar(phi, s21, '.')
-phi = np.linspace(0, 2 * np.pi, 1000)
-plt.plot(phi, func(phi, a, b, delta))
-plt.xlabel('$\phi$ in deg.')
-plt.show()
-plt.close()
-
-results = {}
-
-polarizer_offsets = np.arange(-4, 2.5, 0.125)
-
-for polarizer_offset in polarizer_offsets:
+def meas_with_polOffset(polarizer_offset, rez=50):
+    ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (0)))
     var1, var2, var3 = np.array([]), np.array([]), np.array([])
     f = np.array([])
     delta = np.array([])
     rel = np.array([])
     eta = np.array([])
     for idx in range(ntwk.f.size):
-        if idx % 50 != 0:
+        if idx % rez != 0:
             continue
         print(idx)
 
         phi = np.array([])
         s21 = np.array([])
         s12 = np.array([])
-        ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
+        ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (0)))
         f = np.append(f, ntwk.f[idx])
         for angle in angles:
             ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
@@ -83,40 +54,76 @@ for polarizer_offset in polarizer_offsets:
         delta = np.append(delta, np.abs(popt[2]))
         var1, var2, var3 = np.append(var1, pcov[0, 0]), np.append(var1, pcov[1, 1]), np.append(var1, pcov[2, 2])
 
-    results[f'{polarizer_offset}'] = [f, delta, rel, eta, var1, var2, var3]
+    return f, delta, rel, eta, var1, var2, var3
 
-pickle.dump(results, open(f'polOffset_results_lowRes.p', 'wb'))
 
-exit()
+if __name__ == '__main__':
 
-plt.figure()
-plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')
-plt.plot(f / 10 ** 9, f * 0 + 0.5 * 1.1, 'k--', label='0,5+10%')
-plt.plot(f / 10 ** 9, f * 0 + 0.5 * 0.9, 'k--', label='0,5-10%')
-plt.grid(True)
-plt.xlabel('$f$ in GHz')
-plt.ylabel(r"$\frac{\delta}{\pi}$")
-plt.xlim([75, 110])
-plt.ylim([0.3, 0.6])
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.show()
+    phi = np.array([])
+    s21 = np.array([])
+    s12 = np.array([])
+    idx = 0
+    for angle in angles:
+        ntwk = rf.Network(data_folder / Path('Polarisator_%ddeg_time_gated_bp_c50ps_s500ps_d100ps.s2p' % (angle)))
+        f = ntwk.f[idx]
+        phi = np.append(phi, angle - 90)
+        s21 = np.append(s21, np.abs(ntwk.s[idx, 1, 0]))
+        s12 = np.append(s12, np.abs(ntwk.s[idx, 0, 1]))
 
-plt.figure()
-plt.plot(f / 10 ** 9, rel, '.-', label='measurement')
-plt.grid(True)
-plt.xlabel('$f$ in GHz')
-plt.ylabel(r"$\frac{a}{b}$")
-plt.xlim([75, 110])
-plt.ylim([0, 2])
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.show()
+    plt.figure()
+    phi = np.deg2rad(phi)
+    popt, pcov = curve_fit(func, phi, s21)
 
-plt.figure()
-plt.plot(f / 10 ** 9, eta, '.-', label='measurement')
-plt.grid(True)
-plt.xlabel('$f$ in GHz')
-plt.ylabel(r"$\eta$")
-plt.xlim([75, 110])
-plt.ylim([0, 1])
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.show()
+    print(pcov[0, 0], pcov[1, 1], pcov[2, 2])
+
+    a = popt[0]
+    b = popt[1]
+    delta = popt[2]
+    plt.polar(phi, s21, '.')
+    phi = np.linspace(0, 2 * np.pi, 1000)
+    plt.plot(phi, func(phi, a, b, delta))
+    plt.xlabel('$\phi$ in deg.')
+    plt.show()
+    plt.close()
+
+    polarizer_offsets = np.arange(-4, 4.5, 0.5)
+    polarizer_offsets = [-4.7]
+
+    results = {}
+    for polarizer_offset in polarizer_offsets:
+        f, delta, rel, eta, var1, var2, var3 = meas_with_polOffset(polarizer_offset)
+        results[f'{polarizer_offset}'] = [f, delta, rel, eta, var1, var2, var3]
+
+    #pickle.dump(results, open(f'polOffset_results_lowRes.p', 'wb'))
+
+    plt.figure()
+    plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')
+    plt.plot(f / 10 ** 9, f * 0 + 0.5 * 1.1, 'k--', label='0,5+10%')
+    plt.plot(f / 10 ** 9, f * 0 + 0.5 * 0.9, 'k--', label='0,5-10%')
+    plt.grid(True)
+    plt.xlabel('$f$ in GHz')
+    plt.ylabel(r"$\frac{\delta}{\pi}$")
+    plt.xlim([75, 110])
+    plt.ylim([0.3, 0.6])
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.show()
+
+    plt.figure()
+    plt.plot(f / 10 ** 9, rel, '.-', label='measurement')
+    plt.grid(True)
+    plt.xlabel('$f$ in GHz')
+    plt.ylabel(r"$\frac{a}{b}$")
+    plt.xlim([75, 110])
+    plt.ylim([0, 2])
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.show()
+
+    plt.figure()
+    plt.plot(f / 10 ** 9, eta, '.-', label='measurement')
+    plt.grid(True)
+    plt.xlabel('$f$ in GHz')
+    plt.ylabel(r"$\eta$")
+    plt.xlim([75, 110])
+    plt.ylim([0, 1])
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.show()

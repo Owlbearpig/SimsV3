@@ -1,4 +1,5 @@
 from numpy import pi
+from numpy import array
 from pathlib import Path
 import os
 from scipy.constants import c as c0
