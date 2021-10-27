@@ -32,7 +32,7 @@ def meas_with_polOffset(polarizer_offset, rez=50):
     rel = np.array([])
     eta = np.array([])
     for idx in range(ntwk.f.size):
-        if idx % rez != 0:
+        if idx % rez != 0 and not idx == ntwk.f.size-1:
             continue
         print(idx)
 
@@ -58,7 +58,6 @@ def meas_with_polOffset(polarizer_offset, rez=50):
 
 
 if __name__ == '__main__':
-
     phi = np.array([])
     s21 = np.array([])
     s12 = np.array([])
@@ -86,15 +85,7 @@ if __name__ == '__main__':
     plt.show()
     plt.close()
 
-    polarizer_offsets = np.arange(-4, 4.5, 0.5)
-    polarizer_offsets = [-4.7]
-
-    results = {}
-    for polarizer_offset in polarizer_offsets:
-        f, delta, rel, eta, var1, var2, var3 = meas_with_polOffset(polarizer_offset)
-        results[f'{polarizer_offset}'] = [f, delta, rel, eta, var1, var2, var3]
-
-    #pickle.dump(results, open(f'polOffset_results_lowRes.p', 'wb'))
+    f, delta, rel, eta, var1, var2, var3 = meas_with_polOffset(0)
 
     plt.figure()
     plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')
@@ -103,7 +94,7 @@ if __name__ == '__main__':
     plt.grid(True)
     plt.xlabel('$f$ in GHz')
     plt.ylabel(r"$\frac{\delta}{\pi}$")
-    plt.xlim([75, 110])
+    #plt.xlim([75, 110])
     plt.ylim([0.3, 0.6])
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.show()
