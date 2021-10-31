@@ -3,6 +3,7 @@ from consts import *
 from functions import find_files, parse_teralyzer_csv
 
 result_paths = find_files(file_extension='.csv', search_str='COC')
+print(result_paths)
 
 res_names, ref_inds, freq_axes = [], [], []
 for result_path in result_paths:
