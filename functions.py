@@ -22,12 +22,31 @@ def interpolate_ref_ind(ri_mes, freq_mes, freq_highres):
     return np.interp(freq_highres, freq_mes, ri_mes)
 
 
+def find_files(top_dir=ROOT_DIR, search_str='', file_extension=''):
+    results = [Path(os.path.join(root, name))
+               for root, dirs, files in os.walk(top_dir)
+               for name in files if name.endswith(file_extension) and search_str in str(name)]
+    return results
+
 def find_file(dir_path, file_name):
     for root, dirs, files in os.walk(dir_path):
         for name in files:
             if name.endswith('.csv') and str(file_name) in str(name):
                 return os.path.join(root, name)
 
+
+def parse_teralyzer_csv(file_path):
+    df = pandas.read_csv(file_path)
+
+    column_keys = ['freq', 'ref_ind', 'kappa', 'alpha', 'epsilon_r',
+                   'epsilon_i', 'delta_N', 'delta_A', 'thickness']
+
+    result_dict = {}
+    for column_key in column_keys:
+        property_key = [key for key in df.keys() if column_key in key][0]
+        result_dict[column_key] = np.array(df[property_key])
+
+    return result_dict
 
 # return measurement data of material_name interpolated on freq_axis
 def load_custom_material(material_name, freq_axis):
