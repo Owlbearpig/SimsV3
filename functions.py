@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import (power, outer, sqrt, exp, sin, cos, conj, dot, pi,
                    einsum, arctan, array, arccos, conjugate, flip, angle, tan, arctan2)
+from scipy.signal import windows
 import pandas
 from pathlib import Path, PureWindowsPath
 import scipy
@@ -421,6 +422,46 @@ def setup(settings, return_vals=False, measured_bf = False, return_all=False, re
         return j, f, wls
     else:
         return erf
+
+
+def fft(t, a, n = None):
+    freq = []
+    amp = []
+    ac = np.copy(a)
+    if len(t.shape) == 1: # only a single time vector
+        dt = np.mean(np.diff(t))
+        if len(ac.shape) == 1:
+            if n == None:
+                n = len(ac)
+            window = windows.tukey(len(ac), 0.05, sym=False)
+            ac *= window
+            amp.append(np.fft.fft(ac,n))
+            freq.append(np.fft.fftfreq(n)/dt)
+        else:
+            if n == None:
+                n = len(a[0])
+            i = 0
+            window = windows.tukey(len(ac[0]), 0.05, sym=False) # if there is only a single time vector, then all amplitude vector should be of same length
+            for temp in a:
+                ac[i] *= window
+                amp.append(np.fft.fft(ac[i],n))
+                i +=1
+            freq.append(np.fft.fftfreq(n)/dt) # only one time vector
+    else: # more time vectors
+        if len(ac.shape) == len(t.shape): # then the number of time vectors should equal amplitude vectors
+            i = 0
+            for temp1, temp2 in zip(t,ac):
+                if n == None:
+                    n = len(ac[i])
+                dt = np.mean(np.diff(temp1))
+                window = windows.tukey(len(temp2), 0.05, sym=False)
+                temp2 *= window
+                amp.append(np.fft.fft(temp2,n))
+                freq.append(np.fft.fftfreq(n)/dt )
+                i += 1
+        else:
+            print('Warning: number of time vectors does not match number of amplitude vectors by more than one time vector')
+    return np.asarray(freq), np.asarray(amp)
 
 
 if __name__ == '__main__':
