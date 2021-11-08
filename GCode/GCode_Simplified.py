@@ -1,8 +1,9 @@
 import numpy as np
 from numpy import sqrt, round
 
-thickness = 12
-filename = f'{thickness}mm_plate'
+material = 'COC'
+thickness = 2
+filename = f'{thickness}mm_{material}_plate'
 
 # four axes. X,Y,Z,E; X,Y plane, Z height set at layer transmission, E filament position
 c = 0.028206675277192242 # extrusion speed: E'distance*c'
@@ -58,7 +59,7 @@ p0 = np.array([100.973, 129.300])
 
 with open(filename + '.gcode', 'a+', newline='') as file:
     # Header/start
-    header_content = open('header', 'r')
+    header_content = open('header_COC', 'r')
     file.write(header_content.read())
 
     for layer_idx in range(layer_cnt):
