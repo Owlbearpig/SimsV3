@@ -23,7 +23,8 @@ data_folder = Path('E:\Projects\SimsV3\GHz\Part2\measurement_data_david')
 
 plt.style.use('fast')
 
-pol_offset = -1.25
+pol_offset = 1.25
+rez = 1
 
 angles = np.arange(0, 370, 10)
 
@@ -55,8 +56,8 @@ delta = np.array([])
 rel = np.array([])
 eta = np.array([])
 for idx in range(ntwk.f.size):
-    if idx % 50 != 0:
-        pass
+    if idx % rez != 0:
+        continue
     print(idx)
 
     phi = np.array([])
@@ -76,8 +77,9 @@ for idx in range(ntwk.f.size):
     eta = np.append(eta, (popt[0] ** 2 + popt[1] ** 2))
     delta = np.append(delta, np.abs(popt[2]))
 
-np.save('delta_meas_-1.25degPolOffset.npy', delta)
-np.save('f_meas_-1.25degPolOffset.npy', f)
+np.save(f'rel_meas_{pol_offset}degPolOffset.npy', rel)
+np.save(f'delta_meas_{pol_offset}degPolOffset.npy', delta)
+#np.save('f_meas_{pol_offset}degPolOffset.npy', f)
 
 plt.figure()
 plt.plot(f / 10 ** 9, delta / np.pi, '.-', label='measurement')

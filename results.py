@@ -80,6 +80,10 @@ p2_d = array([14136.4, 13111.6, 6995.5])
 
 p2_x = np.concatenate((p2_angles, p2_d))
 
+p2_thick_single_plate_angles = np.deg2rad(array([45]))
+p2_thick_single_plate_d = array([np.sum([14136.4, 13111.6, 6995.5])])
+
+p2_thick_single_plate_x = np.concatenate((p2_thick_single_plate_angles, p2_thick_single_plate_d))
 ########################################################################################################################
 # example:
 """
