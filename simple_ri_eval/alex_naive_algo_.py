@@ -7,7 +7,15 @@ from numpy import exp, angle
 import numpy.polynomial.polynomial as poly
 
 
+def discard_first_meas(file_list):
+    if len(file_list) > 1:
+        return file_list[1:]
+    else:
+        return file_list
+
 def avg_e_field(result_files):
+    #result_files = discard_first_meas(result_files)
+
     y_arrs = []
     for res_file in result_files:
         y_arrs.append(np.loadtxt(res_file))
@@ -61,21 +69,22 @@ def phase_linear_fit(phase, f, f_min, f_max, confused):
 
     if confused:
         plt.figure()
-        plt.plot(f, phase, label='|sam-ref| phase diff')
+        plt.plot(f, phase, label='original phase')
         plt.plot(f, phase_fit, label='linear fit full region')
         plt.plot(f_region, trusted_phase, label='trusted phase')
+        plt.xlim((-0.1, 0.9))
         plt.xlabel('frequency (THz)')
         plt.ylabel('phase (rad)')
         plt.legend()
         plt.show()
 
     print(f'fit y-intercept: {b}')
-    print(f'phase offset by {2*pi*round(b/(2*pi), 0)}\n')
+    print(f'phase offset by -2pi*{round(b/(2*pi), 0)}\n')
 
-    return phase-2*pi*round(b/(2*pi), 0)
+    return phase - 2*pi*round(b/(2*pi), 0)
 
 
-def algo(data_files_ref, data_files_sample, data_range, confused=True):
+def algo(data_files_ref, data_files_sample, data_range, confused=True, correct_phase_offset=True):
     t_ref, a_ref = avg_e_field(data_files_ref)
     t_s, a_s = avg_e_field(data_files_sample)
 
@@ -125,10 +134,12 @@ def algo(data_files_ref, data_files_sample, data_range, confused=True):
         plt.legend()
         plt.show()
 
-    delta_phi_star = np.abs(unwrapped_raw_phase_s - unwrapped_raw_phase_ref)  # why do both phases have negative slope?
+    if correct_phase_offset:
+        f_min, f_max = 0.05, 0.1
+        unwrapped_raw_phase_ref = phase_linear_fit(unwrapped_raw_phase_ref, f_ref, f_min, f_max, confused)
+        unwrapped_raw_phase_s = phase_linear_fit(unwrapped_raw_phase_s, f_ref, f_min, f_max, confused)
 
-    f_min, f_max = 0.09, 0.22
-    delta_phi0 = phase_linear_fit(delta_phi_star, f_ref, f_min, f_max, confused)
+    delta_phi0 = np.abs(unwrapped_raw_phase_s - unwrapped_raw_phase_ref)  # why do both phases have negative slope?
 
     if confused:
         plt.figure()
@@ -147,27 +158,28 @@ def calc_refractive_index(f, phase_diff, d):
 
 
 if __name__ == '__main__':
-    d = 4  # thickness mm
+    d = 16  # thickness mm
 
     data_dir = Path(fr'Y:\MEGA cloud\AG\BFWaveplates\Data\BowTie_v2\Data\HIPS gratings new setup adjustment - 11112021\{d}mm')
+    data_dir = Path(fr'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/BowTie_v2/Data/HIPS gratings new setup adjustment - 11112021/gratings/{d}mm')
 
     d = d * 10 ** -3
     angle1, angle2 = '0', '90'
-    data_range = (0.06, 0.8)
+    data_range = (0.06, 0.8) # THz
 
     confused = False  # True, should plot every step (verbose I guess...)
-    save_result = False
+    save_result = True
 
     data_files_1 = find_files(data_dir, file_extension='.txt', search_str=f'-{angle1}deg')
     data_files_2 = find_files(data_dir, file_extension='.txt', search_str=f'-{angle2}deg')
-    data_files_ref = find_files(data_dir, file_extension='.txt', search_str='-refEnd')
+    data_files_ref = find_files(data_dir, file_extension='.txt', search_str='-ref') # -refEnd for 4mm
 
     print('sam1. files:\n', data_files_1)
     print('sam2. files:\n', data_files_2)
     print('ref. files:\n', data_files_ref, '\n')
 
     f, phase_diff1 = algo(data_files_ref, data_files_1, data_range, confused)
-    _, phase_diff2 = algo(data_files_ref, data_files_2, data_range, confused)
+    _, phase_diff2 = algo(data_files_ref, data_files_2, data_range, confused, correct_phase_offset=True)
 
     n1 = calc_refractive_index(f, phase_diff1, d)
     n2 = calc_refractive_index(f, phase_diff2, d)
@@ -189,4 +201,4 @@ if __name__ == '__main__':
 
     if save_result:
         save_data = np.array([f*THz, n1, n2]).transpose()
-        np.savetxt(f'freq_n{angle1}deg_n{angle2}deg.txt', save_data)
+        np.savetxt(f'HIPS_grating_{d*10**3}mm_freq_n{angle1}deg_n{angle2}deg.txt', save_data)

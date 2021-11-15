@@ -30,12 +30,6 @@ if __name__ == '__main__':
 
     a, b = J_out.parameters.ellipse_axes()
 
-    plt.plot(f_meas / 10 ** 9, rel_meas, label=f'b/a meas')
-    plt.plot(f / 10 ** 9, b/a, label=f'b/a thick plate sim')
-    plt.title('ellipse axis ratio, measurement and thick plate (45deg, sum(d_design))')
-    plt.legend()
-    plt.show()
-
     plt.plot(f_meas / 10 ** 9, delta_meas / pi, '--', label=f'delta_measured')
     plt.plot(f/10**9, J_out.parameters.delay() / pi, label=f'p2_thick_single_plate_x')
     plt.title(f'Measurement compared to sim of single thick plate at 45 deg. \n {p2_thick_single_plate_d} $\mu m$')
@@ -43,5 +37,11 @@ if __name__ == '__main__':
     plt.ylim([0.4, 0.6])
     plt.ylabel('delta/pi')
     plt.xlabel('freq (GHz)')
+    plt.legend()
+    plt.show()
+
+    plt.plot(f_meas / 10 ** 9, rel_meas, label=f'b/a meas')
+    plt.plot(f / 10 ** 9, b/a, label=f'b/a thick plate sim')
+    plt.title('ellipse axis ratio, measurement and thick plate (45deg, sum(d_design))')
     plt.legend()
     plt.show()
