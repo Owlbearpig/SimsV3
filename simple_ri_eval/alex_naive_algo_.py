@@ -84,7 +84,8 @@ def phase_linear_fit(phase, f, f_min, f_max, confused):
     return phase - 2*pi*round(b/(2*pi), 0)
 
 
-def algo(data_files_ref, data_files_sample, data_range, confused=True, correct_phase_offset=True):
+def algo(data_files_ref, data_files_sample, settings, correct_phase_offset=True):
+    confused, data_range = settings['enable_plots'], settings['data_range']
     t_ref, a_ref = avg_e_field(data_files_ref)
     t_s, a_s = avg_e_field(data_files_sample)
 
@@ -135,7 +136,7 @@ def algo(data_files_ref, data_files_sample, data_range, confused=True, correct_p
         plt.show()
 
     if correct_phase_offset:
-        f_min, f_max = 0.05, 0.1
+        f_min, f_max = settings['trusted_region']
         unwrapped_raw_phase_ref = phase_linear_fit(unwrapped_raw_phase_ref, f_ref, f_min, f_max, confused)
         unwrapped_raw_phase_s = phase_linear_fit(unwrapped_raw_phase_s, f_ref, f_min, f_max, confused)
 
@@ -158,17 +159,21 @@ def calc_refractive_index(f, phase_diff, d):
 
 
 if __name__ == '__main__':
-    d = 16  # thickness mm
+    d = 8  # thickness mm
 
-    data_dir = Path(fr'Y:\MEGA cloud\AG\BFWaveplates\Data\BowTie_v2\Data\HIPS gratings new setup adjustment - 11112021\{d}mm')
-    data_dir = Path(fr'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/BowTie_v2/Data/HIPS gratings new setup adjustment - 11112021/gratings/{d}mm')
+    data_dir = Path(fr'Y:\MEGA cloud\AG\BFWaveplates\Data\BowTie_v2\Data\HIPS gratings new setup adjustment - 11112021\fullplates\{d}mm')
+    #data_dir = Path(fr'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/BowTie_v2/Data/HIPS gratings new setup adjustment - 11112021/gratings/{d}mm')
 
     d = d * 10 ** -3
     angle1, angle2 = '0', '90'
-    data_range = (0.06, 0.8) # THz
 
-    confused = False  # True, should plot every step (verbose I guess...)
     save_result = True
+
+    settings = {
+        'data_range': (0.06, 0.8), # THz,
+        'enable_plots': False,
+        'trusted_region': (0.07, 0.13), # THz,
+    }
 
     data_files_1 = find_files(data_dir, file_extension='.txt', search_str=f'-{angle1}deg')
     data_files_2 = find_files(data_dir, file_extension='.txt', search_str=f'-{angle2}deg')
@@ -178,8 +183,8 @@ if __name__ == '__main__':
     print('sam2. files:\n', data_files_2)
     print('ref. files:\n', data_files_ref, '\n')
 
-    f, phase_diff1 = algo(data_files_ref, data_files_1, data_range, confused)
-    _, phase_diff2 = algo(data_files_ref, data_files_2, data_range, confused, correct_phase_offset=True)
+    f, phase_diff1 = algo(data_files_ref, data_files_1, settings)
+    _, phase_diff2 = algo(data_files_ref, data_files_2, settings, correct_phase_offset=True)
 
     n1 = calc_refractive_index(f, phase_diff1, d)
     n2 = calc_refractive_index(f, phase_diff2, d)
