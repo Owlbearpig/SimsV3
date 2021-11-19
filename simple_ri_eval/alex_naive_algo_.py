@@ -1,3 +1,4 @@
+import os
 from consts import *
 from pathlib import Path
 from functions import find_files, fft
@@ -14,6 +15,10 @@ def discard_first_meas(file_list):
         return file_list
 
 def avg_e_field(result_files):
+    """
+    calc avg of multiple measurements
+    result_files : list of datafile paths
+    """
     #result_files = discard_first_meas(result_files)
 
     y_arrs = []
@@ -41,7 +46,7 @@ def calc_fft(t, a):
 
 
 def phase_unwrap(phase):
-    # "old" unwrap from jepsen paper, same result as np.unwrap, discont=pi
+    # "old" unwrap from jepsen paper, seems to be same result as np.unwrap, discont=pi
     """
     threshold = pi
     n = len(phase)
@@ -59,6 +64,9 @@ def phase_unwrap(phase):
 
 
 def phase_linear_fit(phase, f, f_min, f_max, confused):
+    """
+    ax+b fit to some freq. region. Subtracts b(offset in rad) from phase.
+    """
     f_mask = (f > f_min)*(f < f_max)
     f_region, trusted_phase = f[f_mask], phase[f_mask]
 
@@ -85,6 +93,9 @@ def phase_linear_fit(phase, f, f_min, f_max, confused):
 
 
 def algo(data_files_ref, data_files_sample, settings, correct_phase_offset=True):
+    """
+    load data -> calc. fft -> unwrap phase + rem. phase offset -> return f, abs(phase_sam - phase_ref)
+    """
     confused, data_range = settings['enable_plots'], settings['data_range']
     t_ref, a_ref = avg_e_field(data_files_ref)
     t_s, a_s = avg_e_field(data_files_sample)
@@ -159,20 +170,27 @@ def calc_refractive_index(f, phase_diff, d):
 
 
 if __name__ == '__main__':
-    d = 8  # thickness mm
+    d = 4  # thickness mm
 
-    data_dir = Path(fr'Y:\MEGA cloud\AG\BFWaveplates\Data\BowTie_v2\Data\HIPS gratings new setup adjustment - 11112021\fullplates\{d}mm')
-    #data_dir = Path(fr'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/BowTie_v2/Data/HIPS gratings new setup adjustment - 11112021/gratings/{d}mm')
+    if os.name == 'posix':
+        base_path = Path(fr'/media/alex/sda2/MDrive/AG/BFWaveplates/Data/BowTie_v2/Data/HIPS gratings new setup adjustment - 11112021')
+    else:
+        base_path = Path(fr'Y:\MEGA cloud\AG\BFWaveplates\Data\BowTie_v2\Data\HIPS gratings new setup adjustment - 11112021')
+
+    sam_type = 'grating'
+    material_type = 'PLA'
+
+    data_dir = base_path / f'{sam_type}s' / material_type / f'{d}mm' # fullplates / gratings
 
     d = d * 10 ** -3
     angle1, angle2 = '0', '90'
 
-    save_result = True
+    save_result = False
 
     settings = {
         'data_range': (0.06, 0.8), # THz,
         'enable_plots': False,
-        'trusted_region': (0.07, 0.13), # THz,
+        'trusted_region': (0.05, 0.1), # THz,
     }
 
     data_files_1 = find_files(data_dir, file_extension='.txt', search_str=f'-{angle1}deg')
@@ -191,7 +209,7 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.subplot(2,1,1)
-    plt.title(f'birefringence measurement: HIPS grating {d*10**3} mm')
+    plt.title(f'birefringence measurement: {material_type} {sam_type} {d*10**3} mm')
     plt.plot(f, n1, label=f'{angle1} deg')
     plt.plot(f, n2, label=f'{angle2} deg')
     plt.legend()
@@ -206,4 +224,4 @@ if __name__ == '__main__':
 
     if save_result:
         save_data = np.array([f*THz, n1, n2]).transpose()
-        np.savetxt(f'HIPS_grating_{d*10**3}mm_freq_n{angle1}deg_n{angle2}deg.txt', save_data)
+        np.savetxt(f'{material_type}_{sam_type}_{d*10**3}mm_freq_n{angle1}deg_n{angle2}deg.txt', save_data)
